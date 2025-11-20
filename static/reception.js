@@ -61,8 +61,16 @@ async function loadAllRooms() {
       const formatDateTime = (dateStr) => {
         if (!dateStr) return '--';
         try {
-          const date = new Date(dateStr);
+          let date;
+          if (dateStr.endsWith('Z')) {
+            date = new Date(dateStr);
+          } else if (dateStr.includes('T') && !dateStr.includes('+') && !dateStr.includes('-', 10)) {
+            date = new Date(dateStr + 'Z');
+          } else {
+            date = new Date(dateStr);
+          }
           return date.toLocaleString('zh-CN', { 
+            timeZone: 'Asia/Shanghai',
             year: 'numeric', 
             month: '2-digit', 
             day: '2-digit', 
@@ -192,7 +200,16 @@ function renderBills(bills = []) {
   const formatDate = (value) => {
     if (!value) return '--';
     try {
-      return new Date(value).toLocaleString('zh-CN', {
+      let date;
+      if (value.endsWith('Z')) {
+        date = new Date(value);
+      } else if (value.includes('T') && !value.includes('+') && !value.includes('-', 10)) {
+        date = new Date(value + 'Z');
+      } else {
+        date = new Date(value);
+      }
+      return date.toLocaleString('zh-CN', {
+        timeZone: 'Asia/Shanghai',
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
