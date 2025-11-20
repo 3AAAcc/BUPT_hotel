@@ -49,11 +49,30 @@ async function loadAllRooms() {
       const tr = document.createElement('tr');
       const statusClass = room.roomStatus === 'OCCUPIED' ? 'status-occupied' : 
                          room.roomStatus === 'MAINTENANCE' ? 'status-maintenance' : 'status-available';
+      
+      const formatDateTime = (dateStr) => {
+        if (!dateStr) return '--';
+        try {
+          const date = new Date(dateStr);
+          return date.toLocaleString('zh-CN', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          });
+        } catch {
+          return dateStr;
+        }
+      };
+      
       tr.innerHTML = `
         <td>${room.roomId}</td>
         <td><span class="status-badge ${statusClass}">${getStatusText(room.roomStatus)}</span></td>
         <td>${room.customerName || '--'}</td>
-        <td>${room.checkInTime || '--'}</td>
+        <td>${room.customerIdCard || '--'}</td>
+        <td>${room.customerPhone || '--'}</td>
+        <td>${formatDateTime(room.checkInTime)}</td>
         <td>
           ${room.roomStatus === 'OCCUPIED' ? 
             `<button class="btn btn-danger btn-sm" onclick="checkoutRoom(${room.roomId})">退房</button>` : 

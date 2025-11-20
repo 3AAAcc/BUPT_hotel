@@ -7,10 +7,14 @@ monitor_bp = Blueprint("monitor", __name__, url_prefix="/api/monitor")
 
 @monitor_bp.get("/roomstatus")
 def getRoomStatus():
+    from ..services import customer_service
+    
     rooms = room_service.getAllRooms()
     result = []
     for room in rooms:
         ac = ac_service.getACByRoomId(room.id)
+        customer = customer_service.getCustomerByRoomId(room.id) if room.status == "OCCUPIED" else None
+        
         status = {
             "roomId": room.id,
             "roomStatus": room.status,
@@ -20,6 +24,10 @@ def getRoomStatus():
             "fanSpeed": ac.fan_speed if ac else None,
             "mode": ac.ac_mode if ac else None,
             "acOn": ac.ac_on if ac else False,
+            "customerName": customer.name if customer else room.customer_name,
+            "customerIdCard": customer.id_card if customer else None,
+            "customerPhone": customer.phone_number if customer else None,
+            "checkInTime": customer.check_in_time.isoformat() if customer and customer.check_in_time else (room.check_in_time.isoformat() if room.check_in_time else None),
         }
         result.append(status)
     return jsonify(result)

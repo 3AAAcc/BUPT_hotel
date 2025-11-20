@@ -156,18 +156,25 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 15px;
+  font-size: 0.9rem;
 }
 
 th, td {
-  padding: 12px;
+  padding: 10px 8px;
   text-align: left;
   border-bottom: 1px solid #eee;
+  word-break: break-word;
 }
 
 th {
   background: #f8f9fa;
   font-weight: 600;
   color: #333;
+  white-space: nowrap;
+}
+
+td {
+  color: #555;
 }
 
 .status-badge {
