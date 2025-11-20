@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前台 - 入住退房管理</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='reception.css') }}">
+  </head>
+  <body>
+    <header>
+      <div class="header-content">
+        <h1>前台营业员工作台</h1>
+        <a href="/" class="btn-back">返回首页</a>
+      </div>
+    </header>
+
+    <main>
+      <div class="grid">
+        <section class="card">
+          <h2>办理入住</h2>
+          <form id="checkin-form" class="form">
+            <label>
+              房间号
+              <select id="checkin-room-id" required>
+                <option value="">请选择房间</option>
+              </select>
+            </label>
+            <label>
+              客户姓名 <span class="required">*</span>
+              <input type="text" id="checkin-name" required>
+            </label>
+            <label>
+              身份证号
+              <input type="text" id="checkin-id-card">
+            </label>
+            <label>
+              联系电话
+              <input type="text" id="checkin-phone">
+            </label>
+            <button type="submit" class="btn btn-primary">办理入住</button>
+          </form>
+          <div id="checkin-result" class="result"></div>
+        </section>
+
+        <section class="card">
+          <h2>办理退房</h2>
+          <form id="checkout-form" class="form">
+            <label>
+              房间号
+              <select id="checkout-room-id" required>
+                <option value="">请选择房间</option>
+              </select>
+            </label>
+            <button type="submit" class="btn btn-danger">办理退房</button>
+          </form>
+          <div id="checkout-result" class="result"></div>
+        </section>
+      </div>
+
+      <section class="card">
+        <div class="section-header">
+          <h2>房间状态</h2>
+          <button id="btn-refresh-rooms" class="btn">刷新</button>
+        </div>
+        <table id="rooms-table">
+          <thead>
+            <tr>
+              <th>房间号</th>
+              <th>状态</th>
+              <th>客户姓名</th>
+              <th>入住时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="rooms-body">
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <div id="toast"></div>
+    <script src="{{ url_for('static', filename='reception.js') }}" defer></script>
+  </body>
+</html>
+

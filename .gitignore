@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.swp
+*.swo
+
+# Env & IDE
+.env
+.venv/
+venv/
+.idea/
+.vscode/
+
+# OS junk
+Thumbs.db
+.DS_Store
+
+# Local data
+/instance/
+/migrations/
+/database/*.db
+/database/__pycache__/
+

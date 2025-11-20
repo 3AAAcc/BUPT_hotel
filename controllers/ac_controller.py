@@ -56,3 +56,17 @@ def getRoomACDetail(roomId: int):
     except Exception as exc:
         return jsonify({"error": str(exc)}), 400
 
+
+@ac_bp.get("/room/<int:roomId>/status")
+def getRoomACStatus(roomId: int):
+    try:
+        data = ac_schedule_service.getRoomACStatus(roomId)
+        return jsonify(data)
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 400
+
+
+@ac_bp.get("/schedule/status")
+def getScheduleStatus():
+    data = ac_schedule_service.getScheduleStatus()
+    return jsonify(data)

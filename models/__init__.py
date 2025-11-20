@@ -15,8 +15,6 @@ class TimestampMixin:
 
 
 class Room(db.Model, TimestampMixin):
-    """房间表，承载空调运行状态。"""
-
     __tablename__ = "rooms"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -68,12 +66,45 @@ class Bill(db.Model, TimestampMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     room_id = db.Column(db.Integer, nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey("customers.id"))
     check_in_time = db.Column(db.DateTime, nullable=False)
     check_out_time = db.Column(db.DateTime, nullable=False)
     stay_days = db.Column(db.Integer, nullable=False)
     room_fee = db.Column(db.Float, default=0.0)
     ac_total_fee = db.Column(db.Float, default=0.0)
     total_amount = db.Column(db.Float, default=0.0)
+    status = db.Column(db.String(20), nullable=False, default="UNPAID")
+    paid_time = db.Column(db.DateTime)
+    cancelled_time = db.Column(db.DateTime)
+    print_status = db.Column(db.String(20), nullable=False, default="NOT_PRINTED")
+    print_time = db.Column(db.DateTime)
+
+    customer = db.relationship("Customer", backref=db.backref("bills", lazy=True))
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "roomId": self.room_id,
+            "customerId": self.customer_id,
+            "checkInTime": self.check_in_time.isoformat() if self.check_in_time else None,
+            "checkOutTime": self.check_out_time.isoformat()
+            if self.check_out_time
+            else None,
+            "stayDays": self.stay_days,
+            "roomFee": self.room_fee,
+            "acFee": self.ac_total_fee,
+            "totalAmount": self.total_amount,
+            "status": self.status,
+            "paidTime": self.paid_time.isoformat() if self.paid_time else None,
+            "cancelledTime": self.cancelled_time.isoformat()
+            if self.cancelled_time
+            else None,
+            "printStatus": self.print_status,
+            "printTime": self.print_time.isoformat() if self.print_time else None,
+            "createdAt": self.create_time.isoformat() if self.create_time else None,
+            "updatedAt": self.update_time.isoformat() if self.update_time else None,
+        }
+
 
 
 class BillDetail(db.Model, TimestampMixin):
@@ -81,6 +112,7 @@ class BillDetail(db.Model, TimestampMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     room_id = db.Column(db.Integer, nullable=False)
+    customer_id = db.Column(db.Integer)
     ac_mode = db.Column(db.String(20))
     fan_speed = db.Column(db.String(20))
     request_time = db.Column(db.DateTime, nullable=False)
@@ -91,10 +123,26 @@ class BillDetail(db.Model, TimestampMixin):
     rate = db.Column(db.Float, nullable=False)
     detail_type = db.Column(db.String(50), default="AC")
 
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "roomId": self.room_id,
+            "customerId": self.customer_id,
+            "acMode": self.ac_mode,
+            "fanSpeed": self.fan_speed,
+            "requestTime": self.request_time.isoformat()
+            if self.request_time
+            else None,
+            "startTime": self.start_time.isoformat() if self.start_time else None,
+            "endTime": self.end_time.isoformat() if self.end_time else None,
+            "duration": self.duration,
+            "cost": self.cost,
+            "rate": self.rate,
+            "detailType": self.detail_type,
+        }
+
 
 class ACConfig(db.Model):
-    """保存制冷/制热模式配置，用于校验参数范围。"""
-
     __tablename__ = "ac_config"
 
     id = db.Column(db.Integer, primary_key=True)

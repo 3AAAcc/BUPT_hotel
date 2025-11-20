@@ -13,6 +13,7 @@ def getRoomStatus():
         ac = ac_service.getACByRoomId(room.id)
         status = {
             "roomId": room.id,
+            "roomStatus": room.status,
             "currentTemp": room.current_temp,
             "defaultTemp": room.default_temp,
             "targetTemp": ac.target_temp if ac else None,
@@ -26,11 +27,18 @@ def getRoomStatus():
 
 @monitor_bp.get("/queuestatus")
 def getQueueStatus():
+    from datetime import datetime
+
+    now = datetime.utcnow()
+
     serving = [
         {
             "roomId": req.roomId,
             "fanSpeed": req.fanSpeed,
             "servingTime": req.servingTime.isoformat() if req.servingTime else None,
+            "servingSeconds": (now - req.servingTime).total_seconds()
+            if req.servingTime
+            else 0,
         }
         for req in ac_schedule_service.getServingQueue()
     ]
@@ -39,6 +47,9 @@ def getQueueStatus():
             "roomId": req.roomId,
             "fanSpeed": req.fanSpeed,
             "waitingTime": req.waitingTime.isoformat() if req.waitingTime else None,
+            "waitingSeconds": (now - req.waitingTime).total_seconds()
+            if req.waitingTime
+            else 0,
         }
         for req in ac_schedule_service.getWaitingQueue()
     ]

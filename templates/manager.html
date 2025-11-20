@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>经理 - 经营报表</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='manager.css') }}">
+  </head>
+  <body>
+    <header>
+      <div class="header-content">
+        <h1>酒店经理报表中心</h1>
+        <a href="/" class="btn-back">返回首页</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>时间范围筛选</h2>
+        <form id="date-filter" class="form inline">
+          <label>
+            开始日期
+            <input type="date" id="start-date">
+          </label>
+          <label>
+            结束日期
+            <input type="date" id="end-date">
+          </label>
+          <button type="button" id="btn-apply-filter" class="btn">应用筛选</button>
+          <button type="button" id="btn-reset-filter" class="btn">重置</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="section-header">
+          <h2>运营概览</h2>
+          <button id="btn-refresh-overview" class="btn">刷新</button>
+        </div>
+        <div id="overview-content" class="overview-grid">
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-header">
+          <h2>空调使用统计</h2>
+          <button id="btn-refresh-usage" class="btn">刷新</button>
+        </div>
+        <div id="usage-content">
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-header">
+          <h2>每日营收趋势</h2>
+          <label>
+            天数
+            <select id="days-select">
+              <option value="7">最近7天</option>
+              <option value="14">最近14天</option>
+              <option value="30">最近30天</option>
+            </select>
+          </label>
+          <button id="btn-refresh-revenue" class="btn">刷新</button>
+        </div>
+        <div id="revenue-content">
+        </div>
+      </section>
+    </main>
+
+    <div id="toast"></div>
+    <script src="{{ url_for('static', filename='manager.js') }}" defer></script>
+  </body>
+</html>
+

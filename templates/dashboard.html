@@ -12,36 +12,100 @@
     </header>
 
     <main>
-      <section>
-        <h2>房间状态</h2>
-        <table>
+      <section id="rooms-section">
+        <div class="section-header">
+          <h2>房间状态与控制</h2>
+          <div class="section-actions">
+            <button id="btn-refresh-rooms" class="btn">刷新房态</button>
+          </div>
+        </div>
+        <table id="rooms-table">
           <thead>
             <tr>
               <th>房间ID</th>
-              <th>状态</th>
-              <th>当前温度</th>
-              <th>目标温度</th>
+              <th>房态</th>
+              <th>当前温度(℃)</th>
+              <th>目标温度(℃)</th>
               <th>风速</th>
-              <th>空调</th>
+              <th>空调状态</th>
+              <th>启停</th>
+              <th>调温</th>
+              <th>调速</th>
             </tr>
           </thead>
-          <tbody>
-            {% for room in rooms %}
-              <tr>
-                <td>{{ room.id }}</td>
-                <td>{{ room.status }}</td>
-                <td>{{ "%.1f"|format(room.current_temp or 0) }}</td>
-                <td>{{ room.target_temp or "--" }}</td>
-                <td>{{ room.fan_speed }}</td>
-                <td>{{ "开启" if room.ac_on else "关闭" }}</td>
-              </tr>
-            {% endfor %}
+          <tbody id="rooms-body">
           </tbody>
         </table>
       </section>
 
+      <section class="grid">
+        <div class="card">
+          <h3>办理入住</h3>
+          <form id="checkin-form" class="form">
+            <label>
+              房间号
+              <input type="number" name="roomId" min="1" required>
+            </label>
+            <label>
+              姓名
+              <input type="text" name="name" required>
+            </label>
+            <label>
+              身份证号
+              <input type="text" name="idCard">
+            </label>
+            <label>
+              电话
+              <input type="text" name="phoneNumber">
+            </label>
+            <button type="submit" class="btn primary">提交入住</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>办理退房</h3>
+          <form id="checkout-form" class="form">
+            <label>
+              房间号
+              <input type="number" name="roomId" min="1" required>
+            </label>
+            <button type="submit" class="btn danger">办理退房</button>
+          </form>
+          <pre id="checkout-result" class="result"></pre>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h3>房间维护</h3>
+          <form id="maintenance-form" class="form inline">
+            <label>
+              房间号
+              <input type="number" id="maintenance-room-id" min="1" required>
+            </label>
+            <div class="inline-actions">
+              <button type="button" data-action="offline" class="btn danger">标记维修</button>
+              <button type="button" data-action="online" class="btn">恢复可用</button>
+            </div>
+          </form>
+        </div>
+        <div class="card">
+          <h3>调度运维</h3>
+          <div class="inline-actions">
+            <button id="btn-force-rotation" class="btn">强制轮转</button>
+            <button id="btn-simulate-temp" class="btn">模拟温度</button>
+          </div>
+          <pre id="admin-result" class="result"></pre>
+        </div>
+      </section>
+
       <section id="queue-section">
-        <h2>调度队列</h2>
+        <div class="section-header">
+          <h2>调度队列</h2>
+          <div class="section-actions">
+            <button id="btn-refresh-queues" class="btn">刷新队列</button>
+          </div>
+        </div>
         <div class="queues">
           <div>
             <h3>服务队列</h3>
@@ -55,28 +119,9 @@
       </section>
     </main>
 
-    <script>
-      async function refreshQueues() {
-        const res = await fetch("/api/monitor/queuestatus");
-        const data = await res.json();
-        const serving = document.getElementById("serving-list");
-        const waiting = document.getElementById("waiting-list");
-        serving.innerHTML = "";
-        waiting.innerHTML = "";
-        data.servingQueue.forEach(item => {
-          const li = document.createElement("li");
-          li.textContent = `房间 ${item.roomId} · 风速 ${item.fanSpeed}`;
-          serving.appendChild(li);
-        });
-        data.waitingQueue.forEach(item => {
-          const li = document.createElement("li");
-          li.textContent = `房间 ${item.roomId} · 风速 ${item.fanSpeed}`;
-          waiting.appendChild(li);
-        });
-      }
-      refreshQueues();
-      setInterval(refreshQueues, 5000);
-    </script>
+    <div id="toast"></div>
+
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
   </body>
 </html>
 

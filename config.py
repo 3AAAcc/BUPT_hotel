@@ -2,8 +2,6 @@ import os
 
 
 class Config:
-    """应用基础配置，保持与原 Java 版本一致的业务常量。"""
-
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_URL",
         "mysql+pymysql://root:abc123456@localhost:3306/hotel_ac_db?charset=utf8mb4",

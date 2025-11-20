@@ -4,6 +4,8 @@ from .bill_detail_service import BillDetailService
 from .bill_service import BillService
 from .customer_service import CustomerService
 from .hotel_service import HotelService
+from .maintenance_service import MaintenanceService
+from .report_service import ReportService
 from .room_service import RoomService
 
 room_service = RoomService()
@@ -12,6 +14,8 @@ bill_detail_service = BillDetailService()
 bill_service = BillService()
 ac_schedule_service = ACScheduleService(room_service, bill_detail_service)
 ac_service = ACService(room_service)
+maintenance_service = MaintenanceService(room_service, ac_schedule_service)
+report_service = ReportService()
 hotel_service = HotelService(
     room_service=room_service,
     customer_service=customer_service,

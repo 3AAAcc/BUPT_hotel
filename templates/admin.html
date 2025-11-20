@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员 - 系统监控与维护</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+  </head>
+  <body>
+    <header>
+      <div class="header-content">
+        <h1>系统管理员控制台</h1>
+        <a href="/" class="btn-back">返回首页</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <div class="section-header">
+          <h2>房间状态监控</h2>
+          <button id="btn-refresh-rooms" class="btn">刷新</button>
+        </div>
+        <table id="rooms-table">
+          <thead>
+            <tr>
+              <th>房间ID</th>
+              <th>状态</th>
+              <th>当前温度</th>
+              <th>目标温度</th>
+              <th>风速</th>
+              <th>空调</th>
+              <th>队列状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="rooms-body">
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <div class="section-header">
+          <h2>调度队列</h2>
+          <button id="btn-refresh-queues" class="btn">刷新</button>
+        </div>
+        <div class="queues">
+          <div>
+            <h3>服务队列</h3>
+            <ul id="serving-list"></ul>
+          </div>
+          <div>
+            <h3>等待队列</h3>
+            <ul id="waiting-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>房间维护</h2>
+        <form id="maintenance-form" class="form inline">
+          <label>
+            房间号
+            <input type="number" id="maintenance-room-id" min="1" required>
+          </label>
+          <div class="button-group">
+            <button type="button" data-action="offline" class="btn btn-danger">标记维修</button>
+            <button type="button" data-action="online" class="btn btn-primary">恢复可用</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>系统运维</h2>
+        <div class="button-group">
+          <button id="btn-force-rotation" class="btn">强制轮转</button>
+          <button id="btn-simulate-temp" class="btn">模拟温度更新</button>
+        </div>
+        <div id="admin-result" class="result"></div>
+      </section>
+    </main>
+
+    <div id="toast"></div>
+    <script src="{{ url_for('static', filename='admin.js') }}" defer></script>
+  </body>
+</html>
+

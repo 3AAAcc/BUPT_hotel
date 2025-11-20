@@ -5,8 +5,6 @@ from ..models import Room
 
 
 class RoomService:
-    """房间业务逻辑，方法命名保持与原 Java 版本一致。"""
-
     def getAllRooms(self) -> List[Room]:
         return Room.query.order_by(Room.id).all()
 
@@ -22,7 +20,6 @@ class RoomService:
         return [room.id for room in self.getAllRooms() if room.status == "AVAILABLE"]
 
     def ensureRoomsInitialized(self, total_count: int, default_temp: float) -> None:
-        """初始化房间表数据，避免空表导致的接口异常。"""
         existing = {room.id for room in self.getAllRooms()}
         need_create = [idx for idx in range(1, total_count + 1) if idx not in existing]
         if not need_create:

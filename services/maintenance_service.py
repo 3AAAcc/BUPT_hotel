@@ -1,0 +1,51 @@
+from __future__ import annotations
+
+from datetime import datetime
+
+from ..models import Room
+from .room_service import RoomService
+from .ac_schedule_service import ACScheduleService
+
+
+class MaintenanceService:
+    def __init__(
+        self, room_service: RoomService, ac_schedule_service: ACScheduleService
+    ):
+        self.room_service = room_service
+        self.ac_schedule_service = ac_schedule_service
+
+    def mark_room_offline(self, room_id: int) -> Room:
+        room = self.room_service.getRoomById(room_id)
+        if room is None:
+            raise ValueError("房间不存在")
+        if room.ac_on:
+            self.ac_schedule_service.stopAC(room_id)
+        room.status = "MAINTENANCE"
+        room.customer_name = None
+        room.current_temp = room.default_temp
+        room.ac_session_start = None
+        room.waiting_start_time = None
+        room.serving_start_time = None
+        return self.room_service.updateRoom(room)
+
+    def mark_room_online(self, room_id: int) -> Room:
+        room = self.room_service.getRoomById(room_id)
+        if room is None:
+            raise ValueError("房间不存在")
+        if room.status != "MAINTENANCE":
+            return room
+        room.status = "AVAILABLE"
+        room.customer_name = None
+        room.ac_on = False
+        room.ac_session_start = None
+        room.waiting_start_time = None
+        room.serving_start_time = None
+        room.update_time = datetime.utcnow()
+        return self.room_service.updateRoom(room)
+
+    def force_rebalance(self) -> dict:
+        return self.ac_schedule_service.forceTimeSliceCheck()
+
+    def simulate_temperature(self) -> dict:
+        return self.ac_schedule_service.simulateTemperatureUpdate()
+

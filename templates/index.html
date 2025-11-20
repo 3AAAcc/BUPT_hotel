@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>波普特酒店空调管理系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>波普特酒店空调管理系统</h1>
+        <p class="subtitle">Python + Flask · MySQL</p>
+      </header>
+
+      <main class="role-selection">
+        <h2>请选择您的身份</h2>
+        <div class="role-cards">
+          <a href="/customer" class="role-card">
+            <div class="role-icon">👤</div>
+            <h3>客户</h3>
+            <p>使用客房空调服务</p>
+          </a>
+
+          <a href="/reception" class="role-card">
+            <div class="role-icon">🏨</div>
+            <h3>前台营业员</h3>
+            <p>办理入住、退房业务</p>
+          </a>
+
+          <a href="/admin" class="role-card">
+            <div class="role-icon">⚙️</div>
+            <h3>系统管理员</h3>
+            <p>监控系统、维护设备</p>
+          </a>
+
+          <a href="/manager" class="role-card">
+            <div class="role-icon">📊</div>
+            <h3>酒店经理</h3>
+            <p>查看经营报表</p>
+          </a>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
+
