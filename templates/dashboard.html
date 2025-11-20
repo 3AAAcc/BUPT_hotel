@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8">
+    <title>酒店空调调度监控</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <header>
+      <h1>酒店空调管理面板</h1>
+      <p>后端：Python + Flask · 前端：HTML + Jinja2 · 数据库：MySQL</p>
+    </header>
+
+    <main>
+      <section>
+        <h2>房间状态</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>房间ID</th>
+              <th>状态</th>
+              <th>当前温度</th>
+              <th>目标温度</th>
+              <th>风速</th>
+              <th>空调</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for room in rooms %}
+              <tr>
+                <td>{{ room.id }}</td>
+                <td>{{ room.status }}</td>
+                <td>{{ "%.1f"|format(room.current_temp or 0) }}</td>
+                <td>{{ room.target_temp or "--" }}</td>
+                <td>{{ room.fan_speed }}</td>
+                <td>{{ "开启" if room.ac_on else "关闭" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+
+      <section id="queue-section">
+        <h2>调度队列</h2>
+        <div class="queues">
+          <div>
+            <h3>服务队列</h3>
+            <ul id="serving-list"></ul>
+          </div>
+          <div>
+            <h3>等待队列</h3>
+            <ul id="waiting-list"></ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      async function refreshQueues() {
+        const res = await fetch("/api/monitor/queuestatus");
+        const data = await res.json();
+        const serving = document.getElementById("serving-list");
+        const waiting = document.getElementById("waiting-list");
+        serving.innerHTML = "";
+        waiting.innerHTML = "";
+        data.servingQueue.forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = `房间 ${item.roomId} · 风速 ${item.fanSpeed}`;
+          serving.appendChild(li);
+        });
+        data.waitingQueue.forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = `房间 ${item.roomId} · 风速 ${item.fanSpeed}`;
+          waiting.appendChild(li);
+        });
+      }
+      refreshQueues();
+      setInterval(refreshQueues, 5000);
+    </script>
+  </body>
+</html>
+

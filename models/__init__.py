@@ -1,0 +1,121 @@
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Optional
+
+from ..extensions import db
+
+
+class TimestampMixin:
+    create_time = db.Column(db.DateTime, default=datetime.utcnow)
+    update_time = db.Column(
+        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+
+class Room(db.Model, TimestampMixin):
+    """房间表，承载空调运行状态。"""
+
+    __tablename__ = "rooms"
+
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.String(20), default="AVAILABLE", nullable=False)
+    current_temp = db.Column(db.Float, default=32.0)
+    target_temp = db.Column(db.Float)
+    ac_on = db.Column(db.Boolean, default=False)
+    ac_mode = db.Column(db.String(20), default="COOLING")
+    fan_speed = db.Column(db.String(20), default="LOW")
+    default_temp = db.Column(db.Float, default=25.0)
+    check_in_time = db.Column(db.DateTime)
+    ac_session_start = db.Column(db.DateTime)
+    assigned_ac_number = db.Column(db.Integer)
+    customer_name = db.Column(db.String(50))
+    waiting_start_time = db.Column(db.DateTime)
+    serving_start_time = db.Column(db.DateTime)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "status": self.status,
+            "currentTemp": self.current_temp,
+            "targetTemp": self.target_temp,
+            "acOn": self.ac_on,
+            "acMode": self.ac_mode,
+            "fanSpeed": self.fan_speed,
+            "defaultTemp": self.default_temp,
+        }
+
+
+class Customer(db.Model, TimestampMixin):
+    __tablename__ = "customers"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    id_card = db.Column(db.String(20))
+    phone_number = db.Column(db.String(20))
+    current_room_id = db.Column(db.Integer, db.ForeignKey("rooms.id"))
+    check_in_time = db.Column(db.DateTime)
+    check_out_time = db.Column(db.DateTime)
+    check_in_days = db.Column(db.Integer)
+    status = db.Column(db.String(20), default="CHECKED_IN")
+
+    room = db.relationship("Room", backref=db.backref("customers", lazy=True))
+
+
+class Bill(db.Model, TimestampMixin):
+    __tablename__ = "bills"
+
+    id = db.Column(db.Integer, primary_key=True)
+    room_id = db.Column(db.Integer, nullable=False)
+    check_in_time = db.Column(db.DateTime, nullable=False)
+    check_out_time = db.Column(db.DateTime, nullable=False)
+    stay_days = db.Column(db.Integer, nullable=False)
+    room_fee = db.Column(db.Float, default=0.0)
+    ac_total_fee = db.Column(db.Float, default=0.0)
+    total_amount = db.Column(db.Float, default=0.0)
+
+
+class BillDetail(db.Model, TimestampMixin):
+    __tablename__ = "bill_details"
+
+    id = db.Column(db.Integer, primary_key=True)
+    room_id = db.Column(db.Integer, nullable=False)
+    ac_mode = db.Column(db.String(20))
+    fan_speed = db.Column(db.String(20))
+    request_time = db.Column(db.DateTime, nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=False)
+    duration = db.Column(db.Integer, nullable=False)
+    cost = db.Column(db.Float, nullable=False)
+    rate = db.Column(db.Float, nullable=False)
+    detail_type = db.Column(db.String(50), default="AC")
+
+
+class ACConfig(db.Model):
+    """保存制冷/制热模式配置，用于校验参数范围。"""
+
+    __tablename__ = "ac_config"
+
+    id = db.Column(db.Integer, primary_key=True)
+    mode = db.Column(db.String(20), nullable=False)
+    min_temp = db.Column(db.Float, nullable=False)
+    max_temp = db.Column(db.Float, nullable=False)
+    default_temp = db.Column(db.Float, nullable=False)
+    rate = db.Column(db.Float, nullable=False)
+    low_speed_rate = db.Column(db.Float, nullable=False)
+    mid_speed_rate = db.Column(db.Float, nullable=False)
+    high_speed_rate = db.Column(db.Float, nullable=False)
+    default_speed = db.Column(db.String(2), nullable=False)
+
+
+@dataclass
+class RoomRequest:
+    roomId: int
+    fanSpeed: str
+    mode: str = "COOLING"
+    targetTemp: Optional[float] = None
+    servingTime: Optional[datetime] = None
+    waitingTime: Optional[datetime] = None
+    requestTime: datetime = field(default_factory=datetime.utcnow)
+
