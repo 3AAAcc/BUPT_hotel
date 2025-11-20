@@ -24,10 +24,10 @@ def getRoomStatus():
             "fanSpeed": ac.fan_speed if ac else None,
             "mode": ac.ac_mode if ac else None,
             "acOn": ac.ac_on if ac else False,
-            "customerName": customer.name if customer else room.customer_name,
+            "customerName": customer.name if customer else (room.customer_name if room.status == "OCCUPIED" else None),
             "customerIdCard": customer.id_card if customer else None,
             "customerPhone": customer.phone_number if customer else None,
-            "checkInTime": customer.check_in_time.isoformat() if customer and customer.check_in_time else (room.check_in_time.isoformat() if room.check_in_time else None),
+            "checkInTime": customer.check_in_time.isoformat() if customer and customer.check_in_time else None,
         }
         result.append(status)
     return jsonify(result)

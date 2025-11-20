@@ -177,6 +177,17 @@ td {
   color: #555;
 }
 
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 10px;
+}
+
+.result p {
+  margin: 0;
+  color: #555;
+}
+
 .status-badge {
   display: inline-block;
   padding: 4px 8px;

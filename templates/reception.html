@@ -59,6 +59,23 @@
 
       <section class="card">
         <div class="section-header">
+          <h2>账单查询</h2>
+          <button id="btn-fetch-all-bills" class="btn">查看全部账单</button>
+        </div>
+        <form id="bill-room-form" class="form inline">
+          <label>
+            房间号
+            <select id="bill-room-id">
+              <option value="">请选择房间</option>
+            </select>
+          </label>
+          <button type="submit" class="btn btn-primary">查询该房间账单</button>
+        </form>
+        <div id="bills-result" class="result"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-header">
           <h2>房间状态</h2>
           <button id="btn-refresh-rooms" class="btn">刷新</button>
         </div>

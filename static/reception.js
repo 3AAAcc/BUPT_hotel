@@ -9,6 +9,8 @@ async function showToast(message, type = 'info') {
   }, 3000);
 }
 
+const billRoomSelect = document.getElementById('bill-room-id');
+
 async function loadAvailableRooms() {
   try {
     const res = await fetch(`${API_BASE}/hotel/rooms/available`);
@@ -36,13 +38,19 @@ async function loadAllRooms() {
     const tbody = document.getElementById('rooms-body');
     
     checkoutSelect.innerHTML = '<option value="">请选择房间</option>';
+    billRoomSelect.innerHTML = '<option value="">请选择房间</option>';
     tbody.innerHTML = '';
     
     rooms.forEach(room => {
-      const option = document.createElement('option');
-      option.value = room.roomId;
-      option.textContent = `房间 ${room.roomId}`;
+      const optionAll = document.createElement('option');
+      optionAll.value = room.roomId;
+      optionAll.textContent = `房间 ${room.roomId}`;
+      billRoomSelect.appendChild(optionAll);
+
       if (room.roomStatus === 'OCCUPIED') {
+        const option = document.createElement('option');
+        option.value = room.roomId;
+        option.textContent = `房间 ${room.roomId}`;
         checkoutSelect.appendChild(option);
       }
       
@@ -172,6 +180,104 @@ window.quickCheckin = function(roomId) {
   document.getElementById('checkin-room-id').value = roomId;
   document.getElementById('checkin-name').focus();
 };
+
+function renderBills(bills = []) {
+  const container = document.getElementById('bills-result');
+  if (!bills || bills.length === 0) {
+    container.className = 'result show';
+    container.innerHTML = '<p>未查询到账单数据。</p>';
+    return;
+  }
+
+  const formatDate = (value) => {
+    if (!value) return '--';
+    try {
+      return new Date(value).toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return value;
+    }
+  };
+
+  const rows = bills
+    .map(
+      (bill) => `
+        <tr>
+          <td>${bill.id}</td>
+          <td>${bill.roomId}</td>
+          <td>${formatDate(bill.checkInTime)}</td>
+          <td>${formatDate(bill.checkOutTime)}</td>
+          <td>¥${(bill.roomFee || 0).toFixed(2)}</td>
+          <td>¥${(bill.acFee || 0).toFixed(2)}</td>
+          <td>¥${(bill.totalAmount || 0).toFixed(2)}</td>
+          <td>${bill.status}</td>
+        </tr>
+      `
+    )
+    .join('');
+
+  container.className = 'result show';
+  container.innerHTML = `
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>账单ID</th>
+            <th>房间号</th>
+            <th>入住</th>
+            <th>退房</th>
+            <th>房费</th>
+            <th>空调费</th>
+            <th>总额</th>
+            <th>状态</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+document.getElementById('bill-room-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const roomId = parseInt(billRoomSelect.value);
+  if (!roomId) {
+    showToast('请选择房间', 'error');
+    return;
+  }
+  try {
+    const res = await fetch(`${API_BASE}/bills/room-id/${roomId}`);
+    const data = await res.json();
+    if (res.ok) {
+      renderBills(data);
+      showToast(`已展示房间 ${roomId} 的账单`, 'success');
+    } else {
+      showToast(data.error || '查询失败', 'error');
+    }
+  } catch (error) {
+    showToast('查询房间账单失败', 'error');
+  }
+});
+
+document.getElementById('btn-fetch-all-bills').addEventListener('click', async () => {
+  try {
+    const res = await fetch(`${API_BASE}/bills`);
+    const data = await res.json();
+    if (res.ok) {
+      renderBills(data);
+      showToast('已加载所有账单', 'success');
+    } else {
+      showToast(data.error || '查询失败', 'error');
+    }
+  } catch (error) {
+    showToast('查询全部账单失败', 'error');
+  }
+});
 
 loadAvailableRooms();
 loadAllRooms();
