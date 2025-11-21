@@ -36,6 +36,19 @@ class HotelService:
             raise ValueError("房间不存在")
         if room.status != "AVAILABLE":
             raise ValueError("房间当前不可用")
+        # 如果房间空调已开启（可能是管理员开启的），先关闭空调并清理入住前的账单详情
+        if room.ac_on:
+            from ..services import ac_schedule_service
+            # 关闭空调（会生成customer_id为None的账单详情）
+            ac_schedule_service.stopAC(room_id)
+            # 清理入住前产生的账单详情（customer_id为None的）
+            from ..models import BillDetail
+            from ..extensions import db
+            BillDetail.query.filter(
+                BillDetail.room_id == room_id,
+                BillDetail.customer_id.is_(None)
+            ).delete()
+            db.session.commit()
 
         customer = Customer(
             name=payload.get("name"),
@@ -55,7 +68,21 @@ class HotelService:
     def checkOut(self, room_id: int) -> CheckoutResponse:
         customer = self.customer_service.getCustomerByRoomId(room_id)
         if customer is None:
-            raise ValueError("房间没有入住记录")
+            # 如果没有入住记录，检查房间状态
+            room = self.room_service.getRoomById(room_id)
+            if room and room.ac_on:
+                # 如果空调开启但没有入住记录，可能是管理员开启的，关闭空调并清理状态
+                from ..services import ac_schedule_service
+                try:
+                    ac_schedule_service.stopAC(room_id)
+                except:
+                    pass
+                room.status = "AVAILABLE"
+                room.customer_name = None
+                room.ac_on = False
+                room.ac_session_start = None
+                self.room_service.updateRoom(room)
+            raise ValueError("房间没有入住记录，无法办理退房")
 
         check_out_time = datetime.utcnow()
         customer.check_out_time = check_out_time
@@ -74,6 +101,7 @@ class HotelService:
             room_id=room_id,
             start=customer.check_in_time,
             end=check_out_time,
+            customer_id=customer.id,  # 只计算该客户的账单详情，排除管理员开启的空调产生的账单
         )
         bill = self.bill_service.createAndSettleBill(details, customer, room)
 

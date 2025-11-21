@@ -214,7 +214,8 @@ class ACScheduleService:
         # 初始化温度更新时间
         room.last_temp_update = now
         room.target_temp = room.target_temp or current_app.config["HOTEL_DEFAULT_TEMP"]
-        room.status = "OCCUPIED" if room.status == "AVAILABLE" else room.status
+        # 不要自动改变房间状态，只有办理入住时才改为OCCUPIED
+        # room.status = "OCCUPIED" if room.status == "AVAILABLE" else room.status
 
         request = RoomRequest(
             roomId=room.id,
@@ -253,6 +254,14 @@ class ACScheduleService:
         rate = self._rate_by_fan_speed(room.fan_speed)
         cost = rate * duration_minutes
 
+        # 如果房间已入住，获取customer_id；否则为None（管理员开启的空调）
+        customer_id = None
+        if room.status == "OCCUPIED":
+            from ..services import customer_service
+            customer = customer_service.getCustomerByRoomId(room_id)
+            if customer:
+                customer_id = customer.id
+
         self.bill_detail_service.createBillDetail(
             room_id=room.id,
             ac_mode=room.ac_mode,
@@ -261,6 +270,7 @@ class ACScheduleService:
             end_time=now,
             rate=rate,
             cost=cost,
+            customer_id=customer_id,
         )
 
         room.ac_on = False

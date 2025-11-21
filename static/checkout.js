@@ -1,11 +1,11 @@
 const API_BASE = '/api';
 
-async function showToast(message, type = 'info') {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.className = `show ${type}`;
+function showToast(message, type = 'info') {
+  const $toast = $('#toast');
+  $toast.text(message);
+  $toast.attr('class', `show ${type}`);
   setTimeout(() => {
-    toast.classList.remove('show');
+    $toast.removeClass('show');
   }, 3000);
 }
 
@@ -31,133 +31,63 @@ function showAlert(message, type = 'success', data = null) {
   alert(alertMessage);
 }
 
-async function loadOccupiedRooms() {
-  try {
-    const res = await fetch(`${API_BASE}/monitor/roomstatus`);
-    const rooms = await res.json();
-    const checkoutSelect = document.getElementById('checkout-room-id');
-    const tbody = document.getElementById('rooms-body');
-    
-    checkoutSelect.innerHTML = '<option value="">请选择房间</option>';
-    tbody.innerHTML = '';
-    
-    const formatDateTime = (dateStr) => {
-      if (!dateStr) return '--';
-      try {
-        let date;
-        if (dateStr.endsWith('Z')) {
-          date = new Date(dateStr);
-        } else if (dateStr.includes('T') && !dateStr.includes('+') && !dateStr.includes('-', 10)) {
-          date = new Date(dateStr + 'Z');
-        } else {
-          date = new Date(dateStr);
+function loadOccupiedRooms() {
+  $.ajax({
+    url: `${API_BASE}/monitor/roomstatus`,
+    method: 'GET',
+    success: function(rooms) {
+      const $checkoutSelect = $('#checkout-room-id');
+      const $tbody = $('#rooms-body');
+      
+      $checkoutSelect.html('<option value="">请选择房间</option>');
+      $tbody.empty();
+      
+      function formatDateTime(dateStr) {
+        if (!dateStr) return '--';
+        try {
+          let date;
+          if (dateStr.endsWith('Z')) {
+            date = new Date(dateStr);
+          } else if (dateStr.includes('T') && !dateStr.includes('+') && !dateStr.includes('-', 10)) {
+            date = new Date(dateStr + 'Z');
+          } else {
+            date = new Date(dateStr);
+          }
+          return date.toLocaleString('zh-CN', { 
+            timeZone: 'Asia/Shanghai',
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          });
+        } catch {
+          return dateStr;
         }
-        return date.toLocaleString('zh-CN', { 
-          timeZone: 'Asia/Shanghai',
-          year: 'numeric', 
-          month: '2-digit', 
-          day: '2-digit', 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        });
-      } catch {
-        return dateStr;
       }
-    };
-    
-    rooms.forEach(room => {
-      if (room.roomStatus === 'OCCUPIED') {
-        const option = document.createElement('option');
-        option.value = room.roomId;
-        option.textContent = `房间 ${room.roomId}`;
-        checkoutSelect.appendChild(option);
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${room.roomId}</td>
-          <td>${room.customerName || '--'}</td>
-          <td>${room.customerIdCard || '--'}</td>
-          <td>${room.customerPhone || '--'}</td>
-          <td>${formatDateTime(room.checkInTime)}</td>
-          <td>
-            <button class="btn btn-danger btn-sm" onclick="checkoutRoom(${room.roomId})">退房</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      }
-    });
-  } catch (error) {
-    showToast('加载已入住房间失败', 'error');
-  }
-}
-
-document.getElementById('checkout-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const roomId = parseInt(document.getElementById('checkout-room-id').value);
-  if (!roomId) {
-    showToast('请选择房间', 'error');
-    showAlert('请选择要退房的房间', 'error');
-    return;
-  }
-  
-  // 确认对话框，防止误触
-  const confirmMessage = `确认要办理房间 ${roomId} 的退房手续吗？\n\n退房后将：\n- 生成账单\n- 清空房间状态\n- 房间恢复为空闲状态`;
-  if (!confirm(confirmMessage)) {
-    return; // 用户取消
-  }
-  
-  try {
-    const res = await fetch(`${API_BASE}/hotel/checkout/${roomId}`, {
-      method: 'POST'
-    });
-    const data = await res.json();
-    if (res.ok) {
-      const resultDiv = document.getElementById('checkout-result');
-      resultDiv.className = 'result show';
-      resultDiv.innerHTML = renderCheckoutResult(data, roomId);
       
-      const message = '退房成功';
-      showToast(message, 'success');
-      
-      // 显示alert
-      showAlert(`房间 ${roomId} 退房成功`, 'success', data);
-      
-      document.getElementById('checkout-form').reset();
-      loadOccupiedRooms();
-    } else {
-      const errorMsg = data.error || '退房失败';
-      showToast(errorMsg, 'error');
-      showAlert(errorMsg, 'error');
+      $.each(rooms, function(index, room) {
+        if (room.roomStatus === 'OCCUPIED') {
+          $checkoutSelect.append($('<option>').val(room.roomId).text(`房间 ${room.roomId}`));
+          
+          const $tr = $('<tr>').html(`
+            <td>${room.roomId}</td>
+            <td>${room.customerName || '--'}</td>
+            <td>${room.customerIdCard || '--'}</td>
+            <td>${room.customerPhone || '--'}</td>
+            <td>${formatDateTime(room.checkInTime)}</td>
+            <td>
+              <button class="btn btn-danger btn-sm" onclick="checkoutRoom(${room.roomId})">退房</button>
+            </td>
+          `);
+          $tbody.append($tr);
+        }
+      });
+    },
+    error: function() {
+      showToast('加载已入住房间失败', 'error');
     }
-  } catch (error) {
-    const errorMsg = '办理退房失败：' + error.message;
-    showToast(errorMsg, 'error');
-    showAlert(errorMsg, 'error');
-  }
-});
-
-document.getElementById('btn-refresh-rooms').addEventListener('click', () => {
-  loadOccupiedRooms();
-});
-
-window.checkoutRoom = async function(roomId) {
-  // 确认对话框，防止误触
-  const confirmMessage = `确认要办理房间 ${roomId} 的退房手续吗？\n\n退房后将：\n- 生成账单\n- 清空房间状态\n- 房间恢复为空闲状态`;
-  if (!confirm(confirmMessage)) {
-    return; // 用户取消
-  }
-  
-  document.getElementById('checkout-room-id').value = roomId;
-  document.getElementById('checkout-form').dispatchEvent(new Event('submit'));
-};
-
-// 从URL参数中获取房间号
-function initFromUrl() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const roomId = urlParams.get('roomId');
-  if (roomId) {
-    document.getElementById('checkout-room-id').value = roomId;
-  }
+  });
 }
 
 function formatDateTime(dateStr) {
@@ -193,7 +123,7 @@ function formatDate(dateStr) {
       timeZone: 'Asia/Shanghai',
       year: 'numeric', 
       month: '2-digit', 
-      day: '2-digit'
+      day: '2-digit' 
     });
   } catch {
     return dateStr;
@@ -293,7 +223,7 @@ function renderCheckoutResult(data, roomId) {
             <tbody>
     `;
     
-    detailBills.forEach(detail => {
+    $.each(detailBills, function(index, detail) {
       html += `
         <tr>
           <td>${formatDateTime(detail.startTime)}</td>
@@ -318,6 +248,65 @@ function renderCheckoutResult(data, roomId) {
   return html;
 }
 
-loadOccupiedRooms();
-initFromUrl();
-
+$(document).ready(function() {
+  $('#checkout-form').on('submit', function(e) {
+    e.preventDefault();
+    const roomId = parseInt($('#checkout-room-id').val());
+    if (!roomId) {
+      showToast('请选择房间', 'error');
+      showAlert('请选择要退房的房间', 'error');
+      return;
+    }
+    
+    const confirmMessage = `确认要办理房间 ${roomId} 的退房手续吗？\n\n退房后将：\n- 生成账单\n- 清空房间状态\n- 房间恢复为空闲状态`;
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+    
+    $.ajax({
+      url: `${API_BASE}/hotel/checkout/${roomId}`,
+      method: 'POST',
+      success: function(data) {
+        const $resultDiv = $('#checkout-result');
+        $resultDiv.addClass('show');
+        $resultDiv.html(renderCheckoutResult(data, roomId));
+        
+        const message = '退房成功';
+        showToast(message, 'success');
+        showAlert(`房间 ${roomId} 退房成功`, 'success', data);
+        
+        $('#checkout-form')[0].reset();
+        loadOccupiedRooms();
+      },
+      error: function(xhr) {
+        const data = xhr.responseJSON || {};
+        const errorMsg = data.error || '退房失败';
+        showToast(errorMsg, 'error');
+        showAlert(errorMsg, 'error');
+      }
+    });
+  });
+  
+  $('#btn-refresh-rooms').on('click', loadOccupiedRooms);
+  
+  window.checkoutRoom = function(roomId) {
+    const confirmMessage = `确认要办理房间 ${roomId} 的退房手续吗？\n\n退房后将：\n- 生成账单\n- 清空房间状态\n- 房间恢复为空闲状态`;
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+    
+    $('#checkout-room-id').val(roomId);
+    $('#checkout-form').trigger('submit');
+  };
+  
+  function initFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomId = urlParams.get('roomId');
+    if (roomId) {
+      $('#checkout-room-id').val(roomId);
+    }
+  }
+  
+  loadOccupiedRooms();
+  initFromUrl();
+});

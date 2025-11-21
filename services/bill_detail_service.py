@@ -15,9 +15,11 @@ class BillDetailService:
         end_time: datetime,
         rate: float,
         cost: float,
+        customer_id: int | None = None,
     ) -> BillDetail:
         detail = BillDetail(
             room_id=room_id,
+            customer_id=customer_id,
             ac_mode=ac_mode,
             fan_speed=fan_speed,
             request_time=start_time,
@@ -32,15 +34,15 @@ class BillDetailService:
         return detail
 
     def getBillDetailsByRoomIdAndTimeRange(
-        self, room_id: int, start: datetime, end: datetime
+        self, room_id: int, start: datetime, end: datetime, customer_id: int | None = None
     ) -> List[BillDetail]:
-        return (
-            BillDetail.query.filter(
-                BillDetail.room_id == room_id,
-                BillDetail.start_time >= start,
-                BillDetail.end_time <= end,
-            )
-            .order_by(BillDetail.start_time)
-            .all()
+        query = BillDetail.query.filter(
+            BillDetail.room_id == room_id,
+            BillDetail.start_time >= start,
+            BillDetail.end_time <= end,
         )
+        # 如果提供了customer_id，只返回该客户的账单详情（排除管理员开启的空调产生的账单）
+        if customer_id is not None:
+            query = query.filter(BillDetail.customer_id == customer_id)
+        return query.order_by(BillDetail.start_time).all()
 

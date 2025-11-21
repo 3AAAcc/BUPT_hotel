@@ -2,151 +2,142 @@ const API_BASE = '/api';
 
 let refreshInterval = null;
 
-async function showToast(message, type = 'info') {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.className = `show ${type}`;
+function showToast(message, type = 'info') {
+  const $toast = $('#toast');
+  $toast.text(message);
+  $toast.attr('class', `show ${type}`);
   setTimeout(() => {
-    toast.classList.remove('show');
+    $toast.removeClass('show');
   }, 3000);
 }
 
-async function loadRooms() {
-  try {
-    const res = await fetch(`${API_BASE}/monitor/roomstatus`);
-    const rooms = await res.json();
-    const tbody = document.getElementById('rooms-body');
-    tbody.innerHTML = '';
-    
-    rooms.forEach(room => {
-      const tr = document.createElement('tr');
-      const statusClass = room.roomStatus === 'OCCUPIED' ? 'status-occupied' : 
-                         room.roomStatus === 'MAINTENANCE' ? 'status-maintenance' : 'status-available';
-      const queueClass = room.queueState === 'SERVING' ? 'queue-serving' : 
-                        room.queueState === 'WAITING' ? 'queue-waiting' : '';
+function loadRooms() {
+  $.ajax({
+    url: `${API_BASE}/monitor/roomstatus`,
+    method: 'GET',
+    success: function(rooms) {
+      const $tbody = $('#rooms-body');
+      $tbody.empty();
       
-      // 操作按钮（维修相关）
-      let actionButtons = '';
-      if (room.roomStatus === 'AVAILABLE') {
-        actionButtons = `<button class="btn btn-danger btn-sm" onclick="takeRoomOffline(${room.roomId})">标记维修</button>`;
-      } else if (room.roomStatus === 'MAINTENANCE') {
-        actionButtons = `<button class="btn btn-primary btn-sm" onclick="bringRoomOnline(${room.roomId})">恢复可用</button>`;
-      } else if (room.roomStatus === 'OCCUPIED') {
-        // 已入住房间不能标记为维修，必须先退房
-        actionButtons = '<span style="color: #999;" title="已入住房间不能标记为维修，请先办理退房">--</span>';
-      } else {
-        actionButtons = '<span style="color: #999;">--</span>';
-      }
-      
-      // 空调控制按钮（已入住或空闲房间都可以操作）
-      let acControls = '';
-      if (room.roomStatus === 'OCCUPIED' || room.roomStatus === 'AVAILABLE') {
-        if (room.acOn) {
-          acControls = `
-            <div class="ac-controls">
-              <button class="btn btn-danger btn-sm" onclick="powerOff(${room.roomId})" title="关机">关机</button>
-              <button class="btn btn-primary btn-sm" onclick="changeTemp(${room.roomId})" title="改温度">改温度</button>
-              <button class="btn btn-primary btn-sm" onclick="changeSpeed(${room.roomId})" title="改风速">改风速</button>
-            </div>
-          `;
+      $.each(rooms, function(index, room) {
+        const statusClass = room.roomStatus === 'OCCUPIED' ? 'status-occupied' : 
+                           room.roomStatus === 'MAINTENANCE' ? 'status-maintenance' : 'status-available';
+        const queueClass = room.queueState === 'SERVING' ? 'queue-serving' : 
+                          room.queueState === 'WAITING' ? 'queue-waiting' : '';
+        
+        // 操作按钮（维修相关）
+        let actionButtons = '';
+        if (room.roomStatus === 'AVAILABLE') {
+          actionButtons = `<button class="btn btn-danger btn-sm" onclick="takeRoomOffline(${room.roomId})">标记维修</button>`;
+        } else if (room.roomStatus === 'MAINTENANCE') {
+          actionButtons = `<button class="btn btn-primary btn-sm" onclick="bringRoomOnline(${room.roomId})">恢复可用</button>`;
+        } else if (room.roomStatus === 'OCCUPIED') {
+          actionButtons = '<span style="color: #999;" title="已入住房间不能标记为维修，请先办理退房">--</span>';
         } else {
-          acControls = `
-            <div class="ac-controls">
-              <button class="btn btn-primary btn-sm" onclick="powerOn(${room.roomId})" title="开机">开机</button>
-            </div>
-          `;
+          actionButtons = '<span style="color: #999;">--</span>';
         }
-      } else {
-        acControls = '<span style="color: #999;">--</span>';
-      }
-      
-      tr.innerHTML = `
-        <td>${room.roomId}</td>
-        <td><span class="status-badge ${statusClass}">${getStatusText(room.roomStatus)}</span></td>
-        <td>${room.currentTemp?.toFixed(1) || '--'}°C</td>
-        <td>${room.targetTemp || '--'}°C</td>
-        <td>${getFanSpeedText(room.fanSpeed)}</td>
-        <td>${room.acOn ? '开启' : '关闭'}</td>
-        <td class="${queueClass}">${getQueueStateText(room.queueState || 'IDLE')}</td>
-        <td>${actionButtons}</td>
-        <td>${acControls}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  } catch (error) {
-    showToast('加载房间状态失败', 'error');
-  }
+        
+        // 空调控制按钮（已入住或空闲房间都可以操作）
+        let acControls = '';
+        if (room.roomStatus === 'OCCUPIED' || room.roomStatus === 'AVAILABLE') {
+          if (room.acOn) {
+            acControls = `
+              <div class="ac-controls">
+                <button class="btn btn-danger btn-sm" onclick="powerOff(${room.roomId})" title="关机">关机</button>
+                <button class="btn btn-primary btn-sm" onclick="changeTemp(${room.roomId})" title="改温度">改温度</button>
+                <button class="btn btn-primary btn-sm" onclick="changeSpeed(${room.roomId})" title="改风速">改风速</button>
+              </div>
+            `;
+          } else {
+            acControls = `
+              <div class="ac-controls">
+                <button class="btn btn-primary btn-sm" onclick="powerOn(${room.roomId})" title="开机">开机</button>
+              </div>
+            `;
+          }
+        } else {
+          acControls = '<span style="color: #999;">--</span>';
+        }
+        
+        const $tr = $('<tr>').html(`
+          <td>${room.roomId}</td>
+          <td><span class="status-badge ${statusClass}">${getStatusText(room.roomStatus)}</span></td>
+          <td>${room.currentTemp?.toFixed(1) || '--'}°C</td>
+          <td>${room.targetTemp || '--'}°C</td>
+          <td>${getFanSpeedText(room.fanSpeed)}</td>
+          <td>${room.acOn ? '开启' : '关闭'}</td>
+          <td class="${queueClass}">${getQueueStateText(room.queueState || 'IDLE')}</td>
+          <td>${actionButtons}</td>
+          <td>${acControls}</td>
+        `);
+        $tbody.append($tr);
+      });
+    },
+    error: function() {
+      showToast('加载房间状态失败', 'error');
+    }
+  });
 }
 
-async function loadQueues() {
-  try {
-    const res = await fetch(`${API_BASE}/ac/schedule/status`);
-    const data = await res.json();
-    
-    const servingList = document.getElementById('serving-list');
-    const waitingList = document.getElementById('waiting-list');
-    const servingCount = document.getElementById('serving-count');
-    const waitingCount = document.getElementById('waiting-count');
-    const capacityInfo = document.getElementById('queue-capacity-info');
-    
-    servingList.innerHTML = '';
-    waitingList.innerHTML = '';
-    
-    const capacity = data.capacity || 0;
-    const timeSlice = data.timeSlice || 120;
-    const servingCountNum = data.servingQueue?.length || 0;
-    const waitingCountNum = data.waitingQueue?.length || 0;
-    
-    capacityInfo.textContent = `容量：${servingCountNum}/${capacity}`;
-    servingCount.textContent = `(${servingCountNum})`;
-    waitingCount.textContent = `(${waitingCountNum})`;
-    
-    // 更新调度策略说明中的动态数值
-    const strategyCapacityElements = document.querySelectorAll('#strategy-capacity, #strategy-capacity-2');
-    strategyCapacityElements.forEach(el => {
-      if (el) el.textContent = capacity;
-    });
-    const strategyTimeSliceElement = document.getElementById('strategy-time-slice');
-    if (strategyTimeSliceElement) {
-      strategyTimeSliceElement.textContent = timeSlice;
+function loadQueues() {
+  $.ajax({
+    url: `${API_BASE}/ac/schedule/status`,
+    method: 'GET',
+    success: function(data) {
+      const $servingList = $('#serving-list');
+      const $waitingList = $('#waiting-list');
+      const $servingCount = $('#serving-count');
+      const $waitingCount = $('#waiting-count');
+      const $capacityInfo = $('#queue-capacity-info');
+      
+      $servingList.empty();
+      $waitingList.empty();
+      
+      const capacity = data.capacity || 0;
+      const timeSlice = data.timeSlice || 120;
+      const servingCountNum = data.servingQueue?.length || 0;
+      const waitingCountNum = data.waitingQueue?.length || 0;
+      
+      $capacityInfo.text(`容量：${servingCountNum}/${capacity}`);
+      $servingCount.text(`(${servingCountNum})`);
+      $waitingCount.text(`(${waitingCountNum})`);
+      
+      // 更新调度策略说明中的动态数值
+      $('#strategy-capacity, #strategy-capacity-2').text(capacity);
+      $('#strategy-time-slice').text(timeSlice);
+      
+      if (data.servingQueue && data.servingQueue.length > 0) {
+        $.each(data.servingQueue, function(index, item) {
+          const $li = $('<li>').html(`
+            <span>房间 ${item.roomId}</span>
+            <span style="margin: 0 10px;">风速：${getFanSpeedText(item.fanSpeed)}</span>
+            <span style="color: #666; font-size: 0.85rem;">目标温度：${item.targetTemp || '--'}°C</span>
+          `);
+          $servingList.append($li);
+        });
+      } else {
+        const $li = $('<li>').text('暂无房间').css('color', '#999');
+        $servingList.append($li);
+      }
+      
+      if (data.waitingQueue && data.waitingQueue.length > 0) {
+        $.each(data.waitingQueue, function(index, item) {
+          const $li = $('<li>').html(`
+            <span>房间 ${item.roomId}</span>
+            <span style="margin: 0 10px;">风速：${getFanSpeedText(item.fanSpeed)}</span>
+            <span style="color: #666; font-size: 0.85rem;">等待中...</span>
+          `);
+          $waitingList.append($li);
+        });
+      } else {
+        const $li = $('<li>').text('暂无房间').css('color', '#999');
+        $waitingList.append($li);
+      }
+    },
+    error: function() {
+      showToast('加载队列状态失败', 'error');
     }
-    
-    if (data.servingQueue && data.servingQueue.length > 0) {
-      data.servingQueue.forEach(item => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <span>房间 ${item.roomId}</span>
-          <span style="margin: 0 10px;">风速：${getFanSpeedText(item.fanSpeed)}</span>
-          <span style="color: #666; font-size: 0.85rem;">目标温度：${item.targetTemp || '--'}°C</span>
-        `;
-        servingList.appendChild(li);
-      });
-    } else {
-      const li = document.createElement('li');
-      li.textContent = '暂无房间';
-      li.style.color = '#999';
-      servingList.appendChild(li);
-    }
-    
-    if (data.waitingQueue && data.waitingQueue.length > 0) {
-      data.waitingQueue.forEach(item => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <span>房间 ${item.roomId}</span>
-          <span style="margin: 0 10px;">风速：${getFanSpeedText(item.fanSpeed)}</span>
-          <span style="color: #666; font-size: 0.85rem;">等待中...</span>
-        `;
-        waitingList.appendChild(li);
-      });
-    } else {
-      const li = document.createElement('li');
-      li.textContent = '暂无房间';
-      li.style.color = '#999';
-      waitingList.appendChild(li);
-    }
-  } catch (error) {
-    showToast('加载队列状态失败', 'error');
-  }
+  });
 }
 
 function getStatusText(status) {
@@ -191,161 +182,161 @@ function startAutoRefresh() {
   }, 5000);
 }
 
-document.getElementById('btn-refresh-rooms').addEventListener('click', loadRooms);
-document.getElementById('btn-refresh-queues').addEventListener('click', loadQueues);
-
-document.querySelectorAll('[data-action]').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const roomId = parseInt(document.getElementById('maintenance-room-id').value);
+$(document).ready(function() {
+  $('#btn-refresh-rooms').on('click', loadRooms);
+  $('#btn-refresh-queues').on('click', loadQueues);
+  
+  $('[data-action]').on('click', function() {
+    const roomId = parseInt($('#maintenance-room-id').val());
     if (!roomId) {
       showToast('请输入房间号', 'error');
       return;
     }
-    const action = btn.dataset.action;
-    try {
-      const endpoint = action === 'offline' ? 'offline' : 'online';
-      const res = await fetch(`${API_BASE}/admin/rooms/${roomId}/${endpoint}`, {
-        method: 'POST'
-      });
-      const data = await res.json();
-      if (res.ok) {
+    const action = $(this).data('action');
+    const endpoint = action === 'offline' ? 'offline' : 'online';
+    
+    $.ajax({
+      url: `${API_BASE}/admin/rooms/${roomId}/${endpoint}`,
+      method: 'POST',
+      success: function(data) {
         showToast(data.message || '操作成功', 'success');
         loadRooms();
-      } else {
+      },
+      error: function(xhr) {
+        const data = xhr.responseJSON || {};
         showToast(data.error || '操作失败', 'error');
       }
-    } catch (error) {
-      showToast('操作失败', 'error');
-    }
+    });
   });
+  
+  $('#btn-force-rotation').on('click', function() {
+    $.ajax({
+      url: `${API_BASE}/admin/maintenance/force-rotation`,
+      method: 'POST',
+      success: function(data) {
+        const $resultDiv = $('#admin-result');
+        $resultDiv.addClass('show');
+        $resultDiv.html(`<pre>${JSON.stringify(data, null, 2)}</pre>`);
+        showToast('强制轮转完成', 'success');
+        loadQueues();
+      },
+      error: function() {
+        showToast('强制轮转失败', 'error');
+      }
+    });
+  });
+  
+  $('#btn-simulate-temp').on('click', function() {
+    $.ajax({
+      url: `${API_BASE}/admin/maintenance/simulate-temperature`,
+      method: 'POST',
+      success: function(data) {
+        const $resultDiv = $('#admin-result');
+        $resultDiv.addClass('show');
+        $resultDiv.html(`<pre>${JSON.stringify(data, null, 2)}</pre>`);
+        showToast('温度模拟完成', 'success');
+        loadRooms();
+      },
+      error: function() {
+        showToast('温度模拟失败', 'error');
+      }
+    });
+  });
+  
+  loadRooms();
+  loadQueues();
+  startAutoRefresh();
 });
 
-document.getElementById('btn-force-rotation').addEventListener('click', async () => {
-  try {
-    const res = await fetch(`${API_BASE}/admin/maintenance/force-rotation`, {
-      method: 'POST'
-    });
-    const data = await res.json();
-    const resultDiv = document.getElementById('admin-result');
-    resultDiv.className = 'result show';
-    resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-    showToast('强制轮转完成', 'success');
-    loadQueues();
-  } catch (error) {
-    showToast('强制轮转失败', 'error');
-  }
-});
-
-document.getElementById('btn-simulate-temp').addEventListener('click', async () => {
-  try {
-    const res = await fetch(`${API_BASE}/admin/maintenance/simulate-temperature`, {
-      method: 'POST'
-    });
-    const data = await res.json();
-    const resultDiv = document.getElementById('admin-result');
-    resultDiv.className = 'result show';
-    resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-    showToast('温度模拟完成', 'success');
-    loadRooms();
-  } catch (error) {
-    showToast('温度模拟失败', 'error');
-  }
-});
-
-window.takeRoomOffline = async function(roomId) {
-  try {
-    const res = await fetch(`${API_BASE}/admin/rooms/${roomId}/offline`, {
-      method: 'POST'
-    });
-    const data = await res.json();
-    if (res.ok) {
+window.takeRoomOffline = function(roomId) {
+  $.ajax({
+    url: `${API_BASE}/admin/rooms/${roomId}/offline`,
+    method: 'POST',
+    success: function(data) {
       showToast(data.message || '房间已标记为维修', 'success');
       loadRooms();
-    } else {
+    },
+    error: function(xhr) {
+      const data = xhr.responseJSON || {};
       showToast(data.error || '操作失败', 'error');
     }
-  } catch (error) {
-    showToast('操作失败', 'error');
-  }
+  });
 };
 
-window.bringRoomOnline = async function(roomId) {
-  try {
-    const res = await fetch(`${API_BASE}/admin/rooms/${roomId}/online`, {
-      method: 'POST'
-    });
-    const data = await res.json();
-    if (res.ok) {
+window.bringRoomOnline = function(roomId) {
+  $.ajax({
+    url: `${API_BASE}/admin/rooms/${roomId}/online`,
+    method: 'POST',
+    success: function(data) {
       showToast(data.message || '房间已恢复可用', 'success');
       loadRooms();
-    } else {
+    },
+    error: function(xhr) {
+      const data = xhr.responseJSON || {};
       showToast(data.error || '操作失败', 'error');
     }
-  } catch (error) {
-    showToast('操作失败', 'error');
-  }
+  });
 };
 
-// 开机功能
-window.powerOn = async function(roomId) {
-  try {
-    // 先获取当前房间状态，使用实际的当前温度
-    let currentTemp = null;
-    try {
-      const statusRes = await fetch(`${API_BASE}/ac/room/${roomId}/status`);
-      if (statusRes.ok) {
-        const statusData = await statusRes.json();
-        currentTemp = statusData.currentTemp;
-      }
-    } catch (error) {
-      currentTemp = 32;
+window.powerOn = function(roomId) {
+  $.ajax({
+    url: `${API_BASE}/ac/room/${roomId}/status`,
+    method: 'GET',
+    success: function(statusData) {
+      const currentTemp = statusData.currentTemp || 32;
+      $.ajax({
+        url: `${API_BASE}/ac/room/${roomId}/start?currentTemp=${currentTemp}`,
+        method: 'POST',
+        success: function(data) {
+          showToast(data.message || '空调已开启', 'success');
+          loadRooms();
+          loadQueues();
+        },
+        error: function(xhr) {
+          const data = xhr.responseJSON || {};
+          showToast(data.error || '开机失败', 'error');
+        }
+      });
+    },
+    error: function() {
+      const currentTemp = 32;
+      $.ajax({
+        url: `${API_BASE}/ac/room/${roomId}/start?currentTemp=${currentTemp}`,
+        method: 'POST',
+        success: function(data) {
+          showToast(data.message || '空调已开启', 'success');
+          loadRooms();
+          loadQueues();
+        },
+        error: function(xhr) {
+          const data = xhr.responseJSON || {};
+          showToast(data.error || '开机失败', 'error');
+        }
+      });
     }
-    
-    if (currentTemp === null || currentTemp === undefined) {
-      currentTemp = 32;
-    }
-    
-    const res = await fetch(`${API_BASE}/ac/room/${roomId}/start?currentTemp=${currentTemp}`, {
-      method: 'POST'
-    });
-    const data = await res.json();
-    if (res.ok) {
-      showToast(data.message || '空调已开启', 'success');
-      loadRooms();
-      loadQueues();
-    } else {
-      showToast(data.error || '开机失败', 'error');
-    }
-  } catch (error) {
-    showToast('开机失败：' + error.message, 'error');
-  }
+  });
 };
 
-// 关机功能
-window.powerOff = async function(roomId) {
-  try {
-    const res = await fetch(`${API_BASE}/ac/room/${roomId}/stop`, {
-      method: 'POST'
-    });
-    const data = await res.json();
-    if (res.ok) {
+window.powerOff = function(roomId) {
+  $.ajax({
+    url: `${API_BASE}/ac/room/${roomId}/stop`,
+    method: 'POST',
+    success: function(data) {
       showToast(data.message || '空调已关闭', 'success');
-      // 关机后自动刷新队列（后端会自动补位）
       loadRooms();
       loadQueues();
-    } else {
+    },
+    error: function(xhr) {
+      const data = xhr.responseJSON || {};
       showToast(data.error || '关机失败', 'error');
     }
-  } catch (error) {
-    showToast('关机失败：' + error.message, 'error');
-  }
+  });
 };
 
-// 改温度功能
-window.changeTemp = async function(roomId) {
+window.changeTemp = function(roomId) {
   const currentTemp = prompt('请输入新的目标温度（18-30°C）：');
   if (currentTemp === null) {
-    return; // 用户取消
+    return;
   }
   
   const temp = parseFloat(currentTemp);
@@ -354,53 +345,44 @@ window.changeTemp = async function(roomId) {
     return;
   }
   
-  try {
-    const res = await fetch(`${API_BASE}/ac/room/${roomId}/temp?targetTemp=${temp}`, {
-      method: 'PUT'
-    });
-    const data = await res.json();
-    if (res.ok) {
+  $.ajax({
+    url: `${API_BASE}/ac/room/${roomId}/temp?targetTemp=${temp}`,
+    method: 'PUT',
+    success: function(data) {
       showToast(data.message || '温度已设置', 'success');
       loadRooms();
-    } else {
+    },
+    error: function(xhr) {
+      const data = xhr.responseJSON || {};
       showToast(data.error || '设置失败', 'error');
     }
-  } catch (error) {
-    showToast('设置温度失败：' + error.message, 'error');
-  }
+  });
 };
 
-// 改风速功能（循环切换：低→中→高）
-window.changeSpeed = async function(roomId) {
-  try {
-    // 先获取当前风速
-    const statusRes = await fetch(`${API_BASE}/ac/room/${roomId}/status`);
-    if (!statusRes.ok) {
+window.changeSpeed = function(roomId) {
+  $.ajax({
+    url: `${API_BASE}/ac/room/${roomId}/status`,
+    method: 'GET',
+    success: function(statusData) {
+      const currentSpeed = statusData.fanSpeed || 'LOW';
+      const nextSpeed = getNextFanSpeed(currentSpeed);
+      
+      $.ajax({
+        url: `${API_BASE}/ac/room/${roomId}/speed?fanSpeed=${nextSpeed}`,
+        method: 'PUT',
+        success: function(data) {
+          showToast(data.message || `风速已切换为${getFanSpeedText(nextSpeed)}`, 'success');
+          loadRooms();
+          loadQueues();
+        },
+        error: function(xhr) {
+          const data = xhr.responseJSON || {};
+          showToast(data.error || '设置失败', 'error');
+        }
+      });
+    },
+    error: function() {
       showToast('获取当前风速失败', 'error');
-      return;
     }
-    
-    const statusData = await statusRes.json();
-    const currentSpeed = statusData.fanSpeed || 'LOW';
-    const nextSpeed = getNextFanSpeed(currentSpeed);
-    
-    const res = await fetch(`${API_BASE}/ac/room/${roomId}/speed?fanSpeed=${nextSpeed}`, {
-      method: 'PUT'
-    });
-    const data = await res.json();
-    if (res.ok) {
-      showToast(data.message || `风速已切换为${getFanSpeedText(nextSpeed)}`, 'success');
-      loadRooms();
-      loadQueues();
-    } else {
-      showToast(data.error || '设置失败', 'error');
-    }
-  } catch (error) {
-    showToast('设置风速失败：' + error.message, 'error');
-  }
+  });
 };
-
-loadRooms();
-loadQueues();
-startAutoRefresh();
-
