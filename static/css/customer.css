@@ -1,0 +1,304 @@
+:root {
+    --primary-color: #4facfe;
+    --secondary-color: #00f2fe;
+    --accent-red: #fa709a;
+    --text-dark: #2c3e50;
+    --text-light: #95a5a6;
+    --bg-gradient: linear-gradient(135deg, #eef2f5 0%, #e6e9f0 100%);
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    /* background: var(--bg-gradient); 注释掉，使用粒子背景 */
+    background: transparent;
+    color: var(--text-dark);
+    margin: 0;
+    min-height: 100vh;
+}
+
+.app-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* 顶部导航 */
+.navbar-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    margin-bottom: 20px;
+}
+
+.room-badge {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    background: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.room-badge i {
+    color: var(--primary-color);
+    margin-right: 8px;
+}
+
+.status-indicator {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* 温控器卡片 */
+.thermostat-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.thermostat-card {
+    background: white;
+    width: 100%;
+    border-radius: 30px;
+    padding: 30px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 顶部装饰条 */
+.thermostat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+}
+
+/* 温度显示圈 */
+.temp-display-section {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.temp-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: #f8f9fa;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.05), 
+                0 10px 20px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 5px solid white;
+    position: relative;
+}
+
+.current-temp-wrapper {
+    text-align: center;
+}
+
+.current-temp-wrapper .label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.current-temp-wrapper .temp-value {
+    font-size: 4rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--text-dark);
+    position: relative;
+}
+
+.current-temp-wrapper .unit {
+    font-size: 1.5rem;
+    vertical-align: top;
+    color: var(--text-light);
+}
+
+/* 目标温度控制 */
+.control-section {
+    text-align: center;
+}
+
+.control-label {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.value-tag {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.temp-adjust-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 20px;
+}
+
+.target-display {
+    font-size: 1.8rem;
+    font-weight: 600;
+    width: 80px;
+    text-align: center;
+}
+
+.btn-circle {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    color: var(--text-dark);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-circle:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 功能网格 */
+.control-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.control-item.full-width {
+    grid-column: span 2;
+}
+
+.btn-group-custom {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-rect {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.power-on {
+    background: rgba(46, 204, 113, 0.1);
+    color: #2ecc71;
+}
+.power-on:hover { background: #2ecc71; color: white; }
+
+.power-off {
+    background: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+}
+.power-off:hover { background: #e74c3c; color: white; }
+
+.btn-icon {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    background: #f8f9fa;
+    color: var(--text-light);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-icon.cool:hover { color: var(--primary-color); background: rgba(79, 172, 254, 0.1); }
+.btn-icon.heat:hover { color: var(--accent-red); background: rgba(250, 112, 154, 0.1); }
+
+/* 分段控制器 (风速) */
+.segment-control {
+    display: flex;
+    background: #f8f9fa;
+    padding: 5px;
+    border-radius: 12px;
+}
+
+.segment-control button {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px;
+    border-radius: 8px;
+    color: var(--text-light);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.segment-control button:hover {
+    background: white;
+    color: var(--text-dark);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* 底部费用 */
+.cost-panel {
+    background: var(--text-dark);
+    color: white;
+    padding: 20px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.cost-item {
+    text-align: center;
+}
+
+.cost-item .label {
+    display: block;
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-bottom: 5px;
+}
+
+.cost-item .value {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.cost-divider {
+    width: 1px;
+    height: 30px;
+    background: rgba(255,255,255,0.2);
+}

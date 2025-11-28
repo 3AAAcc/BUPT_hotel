@@ -15,9 +15,13 @@ class Config:
     HOTEL_TIME_SLICE = int(os.getenv("HOTEL_TIME_SLICE", 120))
 
     BILLING_ROOM_RATE = float(os.getenv("BILLING_ROOM_RATE", 100.0))
-    BILLING_AC_RATE_LOW = float(os.getenv("BILLING_AC_RATE_LOW", 0.5))
-    BILLING_AC_RATE_MEDIUM = float(os.getenv("BILLING_AC_RATE_MEDIUM", 1.0))
-    BILLING_AC_RATE_HIGH = float(os.getenv("BILLING_AC_RATE_HIGH", 1.5))
+    # 修改后：符合 1元/1℃ 的计费逻辑
+    # 高风：1分钟降1度，收1元
+    BILLING_AC_RATE_HIGH = float(os.getenv("BILLING_AC_RATE_HIGH", 1.0))
+    # 中风：1分钟降0.5度，收0.5元
+    BILLING_AC_RATE_MEDIUM = float(os.getenv("BILLING_AC_RATE_MEDIUM", 0.5))
+    # 低风：1分钟降1/3度，收1/3元 (约0.333333)
+    BILLING_AC_RATE_LOW = float(os.getenv("BILLING_AC_RATE_LOW", 0.3333333333))
 
     # 打开注释启用：每次空调完整开启+关闭记为一天房费
     ENABLE_AC_CYCLE_DAILY_FEE = bool(int(os.getenv("ENABLE_AC_CYCLE_DAILY_FEE", 0)))

@@ -1,71 +1,83 @@
-<!doctype html>
-<html lang="zh">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>前台 - 办理入住</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='reception.css') }}">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  </head>
-  <body>
-    <header>
-      <div class="header-content">
-        <h1>办理入住</h1>
-        <div>
-          <a href="/reception" class="btn-back">返回工作台</a>
-          <a href="/" class="btn-back" style="margin-left: 10px;">返回首页</a>
-        </div>
-      </div>
-    </header>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>办理入住 - 前台系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reception.css') }}"> <link rel="stylesheet" href="{{ url_for('static', filename='css/checkin.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo"><i class="fa-solid fa-hotel"></i> <span>Hotel OS</span></div>
+            <nav class="nav-menu">
+                <a href="/" class="nav-item"><i class="fa-solid fa-house"></i> 首页</a>
+                <a href="/reception" class="nav-item"><i class="fa-solid fa-desktop"></i> 前台大厅</a>
+                <a href="/reception/checkin" class="nav-item active"><i class="fa-solid fa-user-plus"></i> 办理入住</a>
+                <a href="/reception/checkout" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i> 办理退房</a>
+            </nav>
+        </aside>
 
-    <main>
-      <section class="card">
-        <h2>办理入住</h2>
-        <form id="checkin-form" class="form">
-          <label>
-            房间号
-            <select id="checkin-room-id" required>
-              <option value="">请选择房间</option>
-            </select>
-          </label>
-          <label>
-            客户姓名 <span class="required">*</span>
-            <input type="text" id="checkin-name" required placeholder="请输入客户姓名">
-          </label>
-          <label>
-            身份证号
-            <input type="text" id="checkin-id-card" placeholder="请输入身份证号">
-          </label>
-          <label>
-            联系电话
-            <input type="text" id="checkin-phone" placeholder="请输入联系电话">
-          </label>
-          <button type="submit" class="btn btn-primary">办理入住</button>
-        </form>
-        <div id="checkin-result" class="result"></div>
-      </section>
+        <main class="main-content center-layout">
+            <div class="form-card animate-up">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-key"></i> 办理入住</h2>
+                    <p>请填写客户信息并绑定房间</p>
+                </div>
+                
+                <form id="checkin-form">
+                    <div class="form-group">
+                        <label>房间号</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-door-closed icon"></i>
+                            <input type="number" id="roomId" name="roomId" class="form-control" placeholder="例如: 1" required>
+                        </div>
+                    </div>
 
-      <section class="card">
-        <div class="section-header">
-          <h2>可用房间列表</h2>
-          <button id="btn-refresh-rooms" class="btn">刷新</button>
-        </div>
-        <table id="rooms-table">
-          <thead>
-            <tr>
-              <th>房间号</th>
-              <th>状态</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="rooms-body">
-          </tbody>
-        </table>
-      </section>
-    </main>
+                    <div class="form-group">
+                        <label>身份证号</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-id-card icon"></i>
+                            <input type="text" id="idCard" name="idCard" class="form-control" placeholder="输入身份证号" required>
+                        </div>
+                    </div>
 
-    <div id="toast"></div>
-    <script src="{{ url_for('static', filename='checkin.js') }}" defer></script>
-  </body>
+                    <div class="form-group">
+                        <label>客户姓名</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-user icon"></i>
+                            <input type="text" id="name" name="name" class="form-control" placeholder="输入客户姓名" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>联系电话</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-phone icon"></i>
+                            <input type="text" id="phoneNumber" name="phoneNumber" class="form-control" placeholder="输入手机号" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        确认办理 <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="{{ url_for('static', filename='js/checkin.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script src="{{ url_for('static', filename='js/bg-particles.js') }}"></script>
+<script>
+        // 自动填充 URL 中的 roomId
+        const params = new URLSearchParams(window.location.search);
+        const rid = params.get('roomId');
+        if(rid) document.getElementById('roomId').value = rid;
+    </script>
+</body>
 </html>
-

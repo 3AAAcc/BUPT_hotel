@@ -1,135 +1,156 @@
-<!doctype html>
-<html lang="zh">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理员 - 系统监控与维护</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  </head>
-  <body>
-    <header>
-      <div class="header-content">
-        <h1>系统管理员控制台</h1>
-        <a href="/" class="btn-back">返回首页</a>
-      </div>
-    </header>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>报表中心 - 经理端</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reception.css') }}"> <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo"><i class="fa-solid fa-chart-line"></i> <span>Hotel BI</span></div>
+            <nav class="nav-menu">
+                <a href="/" class="nav-item"><i class="fa-solid fa-house"></i> 首页</a>
+                <a href="/manager" class="nav-item"><i class="fa-solid fa-gamepad"></i> 全能指挥舱</a>
+                <a href="/manager/report" class="nav-item active"><i class="fa-solid fa-table"></i> 报表中心</a>
+            </nav>
+        </aside>
 
-    <main>
-      <section class="card">
-        <div class="section-header">
-          <h2>房间状态监控</h2>
-          <button id="btn-refresh-rooms" class="btn">刷新</button>
-        </div>
-        <table id="rooms-table">
-          <thead>
-            <tr>
-              <th>房间ID</th>
-              <th>状态</th>
-              <th>当前温度</th>
-              <th>目标温度</th>
-              <th>风速</th>
-              <th>空调</th>
-              <th>队列状态</th>
-              <th>时间片进度</th>
-              <th>实时房费</th>
-              <th>空调控制</th>
-            </tr>
-          </thead>
-          <tbody id="rooms-body">
-          </tbody>
-        </table>
-      </section>
+        <main class="main-content">
+            <header class="page-header-simple">
+                <h2>经营数据报表</h2>
+                <p>查看房间明细、每日及每周营收统计</p>
+            </header>
 
-      <section class="card">
-        <div class="section-header">
-          <h2>调度队列</h2>
-          <div>
-            <span id="queue-capacity-info" style="margin-right: 15px; color: #666; font-size: 0.9rem;"></span>
-            <button id="btn-refresh-queues" class="btn">刷新</button>
-          </div>
-        </div>
-        
-        <div class="schedule-strategy">
-          <details>
-            <summary>调度策略说明</summary>
-            <div class="strategy-content">
-              <h4>核心机制</h4>
-              <ul>
-                <li><strong>容量限制：</strong>系统最多同时运行 <span id="strategy-capacity">3</span> 台空调，超出部分自动进入等待队列</li>
-                <li><strong>优先级调度：</strong>根据风速设置优先级，高风 > 中风 > 低风</li>
-                <li><strong>时间片轮转：</strong>每 <span id="strategy-time-slice">120</span> 秒自动轮转一次，确保公平调度</li>
-              </ul>
-              
-              <h4>队列管理</h4>
-              <ul>
-                <li><strong>服务队列：</strong>正在运行的空调，最多 <span id="strategy-capacity-2">3</span> 台</li>
-                <li><strong>等待队列：</strong>等待运行的空调，按优先级排序</li>
-                <li><strong>自动补位：</strong>当服务队列有空位时，自动从等待队列中按优先级补充</li>
-                <li><strong>容量强制：</strong>如果服务队列超过容量，自动将低优先级房间移至等待队列</li>
-              </ul>
-              
-              <h4>温度变化规则</h4>
-              <ul>
-                <li><strong>高风速：</strong>1度/1分钟</li>
-                <li><strong>中风速：</strong>1度/2分钟</li>
-                <li><strong>低风速：</strong>1度/3分钟</li>
-                <li><strong>空调关闭：</strong>温度自然回归到默认温度，变化速度为开启时的50%</li>
-              </ul>
-              
-              <h4>操作行为</h4>
-              <ul>
-                <li><strong>开机：</strong>服务队列有空位 → 直接进入服务队列；无空位 → 进入等待队列</li>
-                <li><strong>关机：</strong>从队列中移除，自动检查等待队列并补充</li>
-                <li><strong>改风速：</strong>重新计算优先级，可能触发队列重新排序</li>
-                <li><strong>改温度：</strong>不影响队列状态，仅更新目标温度</li>
-              </ul>
+            <div class="report-control-card">
+                <ul class="nav nav-tabs" id="reportTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="room-tab" data-bs-toggle="tab" data-bs-target="#room-panel" type="button">
+                            <i class="fa-solid fa-door-open"></i> 房间详单
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="daily-tab" data-bs-toggle="tab" data-bs-target="#daily-panel" type="button">
+                            <i class="fa-solid fa-calendar-day"></i> 日报表
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="weekly-tab" data-bs-toggle="tab" data-bs-target="#weekly-panel" type="button">
+                            <i class="fa-solid fa-calendar-week"></i> 周报表
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="reportTabContent">
+                    
+                    <div class="tab-pane fade show active" id="room-panel" role="tabpanel">
+                        <div class="filter-bar">
+                            <div class="input-group">
+                                <span class="input-group-text">房间号</span>
+                                <input type="number" id="roomReportId" class="form-control" placeholder="输入 ID (例如: 1)">
+                                <button class="btn btn-primary" onclick="queryRoomReport()">
+                                    <i class="fa-solid fa-search"></i> 查询
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>房间号</th>
+                                        <th>开始时间</th>
+                                        <th>结束时间</th>
+                                        <th>时长(分)</th>
+                                        <th>风速</th>
+                                        <th>费率</th>
+                                        <th>费用(元)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="room-tbody">
+                                    <tr><td colspan="7" class="text-center text-muted">请输入房间号查询</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="daily-panel" role="tabpanel">
+                        <div class="filter-bar">
+                            <div class="input-group">
+                                <span class="input-group-text">日期</span>
+                                <input type="date" id="dailyDate" class="form-control">
+                                <button class="btn btn-primary" onclick="queryDailyReport()">
+                                    <i class="fa-solid fa-search"></i> 生成日报
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>房间号</th>
+                                        <th>空调开启次数</th>
+                                        <th>总时长(分)</th>
+                                        <th>总费用(元)</th>
+                                        <th>调度次数</th>
+                                        <th>详单数</th>
+                                        <th>平均温差</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="daily-tbody">
+                                    <tr><td colspan="7" class="text-center text-muted">请选择日期查询</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="weekly-panel" role="tabpanel">
+                        <div class="filter-bar">
+                            <div class="input-group">
+                                <span class="input-group-text">开始日期</span>
+                                <input type="date" id="weeklyDate" class="form-control">
+                                <button class="btn btn-primary" onclick="queryWeeklyReport()">
+                                    <i class="fa-solid fa-search"></i> 生成周报
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>房间号</th>
+                                        <th>空调开启次数</th>
+                                        <th>总时长(分)</th>
+                                        <th>总费用(元)</th>
+                                        <th>调度次数</th>
+                                        <th>详单数</th>
+                                        <th>平均温差</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="weekly-tbody">
+                                    <tr><td colspan="7" class="text-center text-muted">请选择开始日期查询</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-          </details>
-        </div>
-        
-        <div class="queues">
-          <div>
-            <h3>服务队列 <span id="serving-count" class="queue-count"></span></h3>
-            <ul id="serving-list"></ul>
-          </div>
-          <div>
-            <h3>等待队列 <span id="waiting-count" class="queue-count"></span></h3>
-            <ul id="waiting-list"></ul>
-          </div>
-        </div>
-      </section>
+        </main>
+    </div>
 
-      <section class="card">
-        <h2>房间维护</h2>
-        <form id="maintenance-form" class="form inline">
-          <label>
-            房间号
-            <input type="number" id="maintenance-room-id" min="1" required>
-          </label>
-          <div class="button-group">
-            <button type="button" data-action="offline" class="btn btn-danger">标记维修</button>
-            <button type="button" data-action="online" class="btn btn-primary">恢复可用</button>
-          </div>
-        </form>
-      </section>
-
-      <section class="card">
-        <h2>生成详单</h2>
-        <form id="detail-export-form" class="form inline">
-          <label>
-            房间号（可选，留空则导出所有房间）
-            <input type="number" id="detail-room-id" min="1" placeholder="留空导出所有房间">
-          </label>
-          <div class="button-group">
-            <button type="button" id="btn-export-details" class="btn btn-primary">生成并下载详单（CSV）</button>
-          </div>
-        </form>
-      </section>
-    </main>
-
-    <div id="toast"></div>
-    <script src="{{ url_for('static', filename='admin.js') }}" defer></script>
-  </body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="{{ url_for('static', filename='js/bg-particles.js') }}"></script>
+    <script>
+        // 设置默认日期为今天
+        document.getElementById('dailyDate').valueAsDate = new Date();
+        document.getElementById('weeklyDate').valueAsDate = new Date();
+    </script>
+</body>
 </html>
-

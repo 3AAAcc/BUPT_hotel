@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import csv
+import os
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Optional
 
 from flask import current_app
@@ -137,9 +140,26 @@ class FrontDesk:
         customer.current_room_id = None
         self.customer_service.updateCustomer(customer)
 
+        # === 新增代码开始: 强制通过调度器关机 ===
+        room = self.room_service.getRoomById(room_id)
+        if room.ac_on:
+            from ..services import scheduler
+            try:
+                # 这会触发结算，生成 "POWER_OFF_CYCLE" 记录，并清理内存队列
+                scheduler.PowerOff(room_id)
+            except Exception as e:
+                # 防止调度器错误阻碍退房，但记录日志
+                print(f"Error powering off AC during checkout: {e}")
+                import traceback
+                traceback.print_exc()
+        # === 新增代码结束 ===
+        
+        # 重新获取房间对象（因为 PowerOff 可能已经更新了状态）
         room = self.room_service.getRoomById(room_id)
         room.status = "AVAILABLE"
         room.customer_name = None
+        # 注意：ac_on 等状态已经在 PowerOff 中处理了，这里只需要确保状态正确
+        # 但为了保险，还是设置一下
         room.ac_on = False
         room.ac_session_start = None
         room.waiting_start_time = None
@@ -203,8 +223,58 @@ class FrontDesk:
             roomFee=bill.room_fee,
             acFee=bill.ac_total_fee,
         )
+        
+        # === 自动保存详单到本地 csv 文件夹 ===
+        try:
+            self._save_details_to_csv(room_id, details, check_out_time)
+        except Exception as e:
+            # 保存失败不影响退房流程，只记录日志
+            print(f"保存详单到 CSV 失败: {e}")
+            import traceback
+            traceback.print_exc()
+        
         return checkout_response
 
     def checkOut(self, room_id: int) -> CheckoutResponse:
         return self.Process_CheckOut(room_id)
+    
+    def _save_details_to_csv(self, room_id: int, details: List, checkout_time: datetime) -> None:
+        """保存房间详单到本地 csv 文件夹"""
+        # 确保 csv 文件夹存在
+        csv_dir = Path("csv")
+        csv_dir.mkdir(exist_ok=True)
+        
+        # 生成文件名：room_{room_id}_details_{timestamp}.csv
+        timestamp = checkout_time.strftime("%Y%m%d_%H%M%S")
+        filename = csv_dir / f"room_{room_id}_details_{timestamp}.csv"
+        
+        # 写入 CSV 文件
+        with open(filename, 'w', newline='', encoding='utf-8-sig') as f:
+            writer = csv.writer(f)
+            # 写入表头
+            writer.writerow(["房间号", "客户ID", "开始时间", "结束时间", "时长(分钟)", "风速", "模式", "费率", "费用", "类型"])
+            
+            # 写入详单数据
+            for detail in details:
+                # 处理客户ID显示
+                customer_id_str = str(detail.customer_id) if detail.customer_id else "管理员"
+                
+                # 处理记录类型显示
+                d_type = getattr(detail, 'detail_type', 'AC')
+                type_str = "关机结算(房费周期)" if d_type == 'POWER_OFF_CYCLE' else "空调运行"
+                
+                writer.writerow([
+                    detail.room_id,
+                    customer_id_str,
+                    detail.start_time.strftime("%Y-%m-%dT%H:%M:%S") if detail.start_time else "",
+                    detail.end_time.strftime("%Y-%m-%dT%H:%M:%S") if detail.end_time else "",
+                    detail.duration,
+                    detail.fan_speed or "",
+                    detail.ac_mode or "",
+                    detail.rate,
+                    detail.cost,
+                    type_str
+                ])
+        
+        print(f"详单已保存到: {filename}")
 

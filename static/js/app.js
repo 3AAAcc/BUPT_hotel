@@ -86,7 +86,7 @@ const renderRooms = (rooms) => {
 
 const refreshRooms = async () => {
   try {
-    const rooms = await requestJson("/api/monitor/roomstatus");
+    const rooms = await requestJson("/monitor/status");
     renderRooms(rooms);
   } catch (err) {
     showToast(err.message, "error");
@@ -115,7 +115,7 @@ const renderQueues = (data) => {
 
 const refreshQueues = async () => {
   try {
-    const data = await requestJson("/api/monitor/queuestatus");
+    const data = await requestJson("/monitor/status");
     renderQueues(data);
   } catch (err) {
     showToast(err.message, "error");
@@ -132,10 +132,16 @@ roomsTable?.addEventListener("click", async (event) => {
   const roomId = row.dataset.roomId;
   try {
     if (target.classList.contains("btn-start")) {
-      await requestJson(`/api/ac/room/${roomId}/start`, { method: "POST" });
+      await requestJson(`/ac/power`, { 
+        method: "POST",
+        body: JSON.stringify({ roomId: parseInt(roomId) })
+      });
       showToast(`房间 ${roomId} 空调已开启`, "success");
     } else if (target.classList.contains("btn-stop")) {
-      await requestJson(`/api/ac/room/${roomId}/stop`, { method: "POST" });
+      await requestJson(`/ac/power/off`, { 
+        method: "POST",
+        body: JSON.stringify({ roomId: parseInt(roomId) })
+      });
       showToast(`房间 ${roomId} 空调已关闭`, "success");
     } else if (target.classList.contains("btn-temp")) {
       const input = row.querySelector(".input-temp");
@@ -144,16 +150,20 @@ roomsTable?.addEventListener("click", async (event) => {
         showToast("请输入目标温度", "error");
         return;
       }
-      await requestJson(`/api/ac/room/${roomId}/temp?targetTemp=${targetTemp}`, {
-        method: "PUT",
+      await requestJson(`/ac/temp`, {
+        method: "POST",
+        body: JSON.stringify({ roomId: parseInt(roomId), targetTemp: parseFloat(targetTemp) })
       });
       showToast(`房间 ${roomId} 温度已更新`, "success");
     } else if (target.classList.contains("btn-speed")) {
       const select = row.querySelector(".select-speed");
       const fanSpeed = select?.value;
       await requestJson(
-        `/api/ac/room/${roomId}/speed?fanSpeed=${encodeURIComponent(fanSpeed)}`,
-        { method: "PUT" }
+        `/ac/speed`,
+        { 
+          method: "POST",
+          body: JSON.stringify({ roomId: parseInt(roomId), fanSpeed: fanSpeed })
+        }
       );
       showToast(`房间 ${roomId} 风速已调整为 ${fanSpeed}`, "success");
     } else {
@@ -176,7 +186,7 @@ checkinForm?.addEventListener("submit", async (event) => {
   const payload = Object.fromEntries(formData.entries());
   payload.roomId = Number(payload.roomId);
   try {
-    const res = await requestJson("/api/hotel/checkin", {
+    const res = await requestJson("/hotel/checkin", {
       method: "POST",
       body: JSON.stringify(payload),
     });
@@ -194,7 +204,7 @@ checkoutForm?.addEventListener("submit", async (event) => {
   const formData = new FormData(checkoutForm);
   const roomId = formData.get("roomId");
   try {
-    const res = await requestJson(`/api/hotel/checkout/${roomId}`, {
+    const res = await requestJson(`/hotel/checkout/${roomId}`, {
       method: "POST",
     });
     showToast("退房完成，账单已生成", "success");
@@ -221,7 +231,8 @@ maintenanceForm?.addEventListener("click", async (event) => {
   const action = target.dataset.action;
   const endpoint = action === "offline" ? "offline" : "online";
   try {
-    const res = await requestJson(`/api/admin/rooms/${roomId}/${endpoint}`, {
+    // 注意：后端可能没有这个路由，需要检查
+    const res = await requestJson(`/admin/rooms/${roomId}/${endpoint}`, {
       method: "POST",
     });
     showToast(res.message || "操作成功", "success");
@@ -234,7 +245,8 @@ maintenanceForm?.addEventListener("click", async (event) => {
 
 document.getElementById("btn-force-rotation")?.addEventListener("click", async () => {
   try {
-    const res = await requestJson("/api/admin/maintenance/force-rotation", {
+    // 注意：后端可能没有这个路由，需要检查
+    const res = await requestJson("/admin/maintenance/force-rotation", {
       method: "POST",
     });
     adminResult.textContent = JSON.stringify(res.schedule, null, 2);
@@ -247,7 +259,8 @@ document.getElementById("btn-force-rotation")?.addEventListener("click", async (
 
 document.getElementById("btn-simulate-temp")?.addEventListener("click", async () => {
   try {
-    const res = await requestJson("/api/admin/maintenance/simulate-temperature", {
+    // 注意：后端可能没有这个路由，需要检查
+    const res = await requestJson("/admin/maintenance/simulate-temperature", {
       method: "POST",
     });
     adminResult.textContent = JSON.stringify(res, null, 2);

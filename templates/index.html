@@ -1,47 +1,157 @@
-<!doctype html>
-<html lang="zh">
-  <head>
-    <meta charset="utf-8">
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>波普特酒店空调管理系统</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
-  </head>
-  <body>
-    <div class="container">
-      <header>
-        <h1>波普特酒店空调管理系统</h1>
-        <p class="subtitle">Python + Flask · MySQL</p>
-      </header>
+    <title>分布式温控系统 - 首页</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    
+    <style>
+        /* 覆盖 index.css 中的 body 背景，让 particles 容器显示出来 */
+        body {
+            background: transparent; /* 重要：让 body 透明 */
+        }
+        
+        /* 粒子背景容器 */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1; /* 最底层 */
+            background-color: #f0f2f5; /* 经典的浅灰底色 */
+            background-image: url(''); 
+            background-size: cover;
+            background-position: 50% 50%;
+            background-repeat: no-repeat;
+        }
+    </style>
+</head>
+<body>
 
-      <main class="role-selection">
-        <h2>请选择您的身份</h2>
-        <div class="role-cards">
-          <a href="/customer" class="role-card">
-            <div class="role-icon">👤</div>
-            <h3>客户</h3>
-            <p>使用客房空调服务</p>
-          </a>
+    <div id="particles-js"></div>
 
-          <a href="/reception" class="role-card">
-            <div class="role-icon">🏨</div>
-            <h3>前台营业员</h3>
-            <p>办理入住、退房业务</p>
-          </a>
+    <div class="hero-container">
+        <header class="hero-header animate-down">
+            <div class="logo">
+                <i class="fa-solid fa-snowflake"></i>
+                <span>HOTEL <span class="highlight">OS</span></span>
+            </div>
+            <h1>分布式智能温控系统</h1>
+            <p>Distributed Temperature Control & Management System</p>
+        </header>
 
-          <a href="/admin" class="role-card">
-            <div class="role-icon">⚙️</div>
-            <h3>系统管理员</h3>
-            <p>监控系统、维护设备</p>
-          </a>
+        <div class="card-grid animate-up">
+            
+            <div class="role-card card-customer">
+                <div class="icon-circle"><i class="fa-solid fa-user"></i></div>
+                <h2>我是住客</h2>
+                <p>Guest Access</p>
+                <div class="input-group">
+                    <input type="number" id="quickRoomId" placeholder="输入房间号..." onkeypress="handleEnter(event)">
+                    <button onclick="gotoCustomer()"><i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+                <div class="hint">调节温度 / 查看账单</div>
+            </div>
 
-          <a href="/manager" class="role-card">
-            <div class="role-icon">📊</div>
-            <h3>酒店经理</h3>
-            <p>查看经营报表</p>
-          </a>
+            <a href="/reception" class="role-card card-staff">
+                <div class="icon-circle"><i class="fa-solid fa-desktop"></i></div>
+                <h2>前台大厅</h2>
+                <p>Reception</p>
+                <div class="action-btn">进入系统</div>
+                <div class="hint">办理入住 / 退房结算</div>
+            </a>
+
+            <a href="/manager" class="role-card card-admin">
+                <div class="icon-circle"><i class="fa-solid fa-chart-pie"></i></div>
+                <h2>管理控制台</h2>
+                <p>Manager & Admin</p>
+                <div class="action-btn">进入指挥舱</div>
+                <div class="hint">调度监控 / 报表查询</div>
+            </a>
         </div>
-      </main>
-    </div>
-  </body>
-</html>
 
+        <footer class="footer animate-up">
+            <p>© 2025 Hotel Intelligent Systems. All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+    <script>
+        // 跳转逻辑
+        function gotoCustomer() {
+            const roomId = document.getElementById('quickRoomId').value;
+            if (roomId) window.location.href = `/customer?roomId=${roomId}`;
+            else {
+                const input = document.getElementById('quickRoomId');
+                input.style.borderColor = '#e74c3c';
+                input.placeholder = "请先填房间号!";
+                setTimeout(() => { 
+                    input.style.borderColor = 'rgba(0,0,0,0.1)'; 
+                    input.placeholder = "输入房间号...";
+                }, 1000);
+            }
+        }
+        function handleEnter(e) { if (e.key === 'Enter') gotoCustomer(); }
+
+        // === Particles.js 配置 (Layui 绿风格) ===
+        particlesJS("particles-js", {
+            "particles": {
+                "number": {
+                    "value": 80, // 粒子数量
+                    "density": { "enable": true, "value_area": 800 }
+                },
+                "color": { "value": "#009688" }, // Layui 经典墨绿
+                "shape": {
+                    "type": "circle",
+                    "stroke": { "width": 0, "color": "#000000" }
+                },
+                "opacity": {
+                    "value": 0.5,
+                    "random": false,
+                    "anim": { "enable": false }
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                    "anim": { "enable": false }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#009688", // 连线颜色
+                    "opacity": 0.4,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 2, // 移动速度
+                    "direction": "none",
+                    "random": false,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": { "enable": false, "rotateX": 600, "rotateY": 1200 }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": { "enable": true, "mode": "grab" }, // 鼠标悬停吸附
+                    "onclick": { "enable": true, "mode": "push" }, // 点击增加粒子
+                    "resize": true
+                },
+                "modes": {
+                    "grab": { "distance": 140, "line_linked": { "opacity": 1 } },
+                    "push": { "particles_nb": 4 }
+                }
+            },
+            "retina_detect": true
+        });
+    </script>
+</body>
+</html>

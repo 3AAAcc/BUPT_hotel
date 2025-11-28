@@ -1,126 +1,108 @@
-import io
-import os
-from datetime import datetime
-from pathlib import Path
+from flask import Blueprint, jsonify, request, current_app
+from ..services import maintenance_service, scheduler, room_service
+from ..extensions import db
+from ..models import AccommodationFeeBill, Customer, DetailRecord, Room, ACConfig
+from ..database import execute_schema_sql, seed_default_ac_config
 
-from flask import Blueprint, current_app, jsonify, request
+# 修正前缀
+admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
-from ..services import bill_detail_service, maintenance_service, room_service
-
-admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
-
-
-@admin_bp.post("/rooms/<int:roomId>/offline")
-def take_room_offline(roomId: int):
+@admin_bp.get("/rooms/status")
+def get_all_rooms_status():
+    """获取所有房间的详细状态（上帝视角）"""
     try:
-        room = maintenance_service.mark_room_offline(roomId)
-    except ValueError as exc:
-        return jsonify({"error": str(exc)}), 400
-    return jsonify({"message": "房间已标记为维修", "room": room.to_dict()})
-
-
-@admin_bp.post("/rooms/<int:roomId>/online")
-def bring_room_online(roomId: int):
-    try:
-        room = maintenance_service.mark_room_online(roomId)
-    except ValueError as exc:
-        return jsonify({"error": str(exc)}), 400
-    return jsonify({"message": "房间已重新可用", "room": room.to_dict()})
-
-
-@admin_bp.post("/maintenance/force-rotation")
-def force_rotation():
-    payload = maintenance_service.force_rebalance()
-    return jsonify({"message": "调度队列已强制轮转", "schedule": payload})
-
-
-@admin_bp.post("/maintenance/simulate-temperature")
-def simulate_temperature():
-    payload = maintenance_service.simulate_temperature()
-    return jsonify(payload)
-
-
-@admin_bp.post("/details/export")
-def export_details():
-    """生成详单并保存到本地csv文件夹，每个房间生成一张详单"""
-    import csv
-    
-    data = request.get_json() or {}
-    specified_room_id = data.get("roomId")
-    if specified_room_id:
-        specified_room_id = int(specified_room_id)
-    
-    # 查询所有详单（不限制时间范围）
-    start_time = datetime.min
-    end_time = datetime.utcnow()
-    
-    # 确定要生成详单的房间列表
-    if specified_room_id:
-        # 如果指定了房间号，只生成该房间的详单
-        room_ids = [specified_room_id]
-    else:
-        # 如果没有指定房间，获取所有房间
+        # 1. 强制触发全量温度计算
+        scheduler.simulateTemperatureUpdate()
+        
+        # 2. 获取所有房间
         rooms = room_service.getAllRooms()
-        room_ids = [room.id for room in rooms]
-    
-    # 确保csv文件夹存在
-    csv_dir = Path(current_app.root_path) / "csv"
-    csv_dir.mkdir(exist_ok=True)
-    
-    timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
-    saved_files = []
-    total_count = 0
-    
-    # 为每个房间生成一张详单
-    for room_id in room_ids:
-        # 查询该房间的详单
-        details = bill_detail_service.getBillDetailsByRoomIdAndTimeRange(
-            room_id=room_id,
-            start=start_time,
-            end=end_time,
-            customer_id=None,  # 包含所有详单（包括管理员开启的）
+        
+        # 3. 逐个调用 RequestState 获取详细信息（含费用、队列状态）
+        data = []
+        for room in rooms:
+            # 复用 scheduler 里写好的逻辑，保证数据字段一致
+            state = scheduler.RequestState(room.id)
+            data.append(state)
+            
+        return jsonify(data)
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 400
+
+# -------------------------------------------------------
+# 以下是管理员控制接口 (复用 AC 接口逻辑，但通过 admin 路由透传)
+# -------------------------------------------------------
+
+@admin_bp.post("/control/power")
+def admin_power():
+    payload = request.get_json() or {}
+    room_id = payload.get("roomId")
+    action = payload.get("action") # 'on' or 'off'
+    try:
+        if action == 'on':
+            from ..services import ac
+            # 获取房间当前温度（如果为 None 则让 PowerOn 使用房间的现有温度）
+            room = room_service.getRoomById(room_id)
+            current_temp = room.current_temp if room else None
+            msg = ac.PowerOn(room_id, current_temp)
+        else:
+            msg = scheduler.PowerOff(room_id)
+        return jsonify({"message": msg})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@admin_bp.post("/control/temp")
+def admin_temp():
+    payload = request.get_json() or {}
+    try:
+        from ..services import ac
+        msg = ac.ChangeTemp(payload.get("roomId"), payload.get("targetTemp"))
+        return jsonify({"message": msg})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@admin_bp.post("/control/speed")
+def admin_speed():
+    payload = request.get_json() or {}
+    try:
+        from ..services import ac
+        msg = ac.ChangeSpeed(payload.get("roomId"), payload.get("fanSpeed"))
+        return jsonify({"message": msg})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@admin_bp.post("/reset-database")
+def reset_database():
+    """重置数据库并重新初始化所有数据（调试用）"""
+    try:
+        # 1. 清空调度器队列
+        scheduler.serving_queue.clear()
+        scheduler.waiting_queue.clear()
+        
+        # 2. 删除所有表数据
+        db.session.query(DetailRecord).delete()
+        db.session.query(AccommodationFeeBill).delete()
+        db.session.query(Customer).delete()
+        db.session.query(Room).delete()
+        db.session.query(ACConfig).delete()
+        db.session.commit()
+        
+        # 3. 删除所有表并重新创建
+        db.drop_all()
+        db.create_all()
+        
+        # 4. 执行 schema.sql
+        execute_schema_sql()
+        
+        # 5. 初始化 AC 配置
+        seed_default_ac_config()
+        
+        # 6. 初始化房间数据
+        room_service.ensureRoomsInitialized(
+            total_count=current_app.config["HOTEL_ROOM_COUNT"],
+            default_temp=current_app.config["HOTEL_DEFAULT_TEMP"],
         )
         
-        # 生成CSV内容
-        buffer = io.StringIO()
-        writer = csv.writer(buffer)
-        writer.writerow(["房间号", "客户ID", "开始时间", "结束时间", "时长(分钟)", "风速", "模式", "费率", "费用"])
-        for detail in details:
-            writer.writerow(
-                [
-                    detail.room_id,
-                    detail.customer_id if detail.customer_id else "管理员",
-                    detail.start_time.isoformat() if detail.start_time else "",
-                    detail.end_time.isoformat() if detail.end_time else "",
-                    detail.duration,
-                    detail.fan_speed,
-                    detail.ac_mode,
-                    detail.rate,
-                    detail.cost,
-                ]
-            )
-        csv_content = buffer.getvalue()
-        buffer.close()
-        
-        # 生成文件名
-        filename = f"room_{room_id}_details_{timestamp}.csv"
-        
-        # 保存文件到csv文件夹
-        file_path = csv_dir / filename
-        # 添加BOM以支持Excel正确显示中文
-        csv_content_with_bom = "\ufeff" + csv_content
-        file_path.write_text(csv_content_with_bom, encoding="utf-8-sig")
-        
-        saved_files.append({
-            "roomId": room_id,
-            "filename": filename,
-            "count": len(details)
-        })
-        total_count += len(details)
-    
-    return jsonify({
-        "message": f"已为 {len(room_ids)} 个房间生成详单",
-        "files": saved_files,
-        "totalCount": total_count
-    })
-
+        return jsonify({"message": "数据库已重置并重新初始化"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500

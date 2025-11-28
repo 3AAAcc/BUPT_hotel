@@ -29,9 +29,10 @@ def seed_default_ac_config() -> None:
             max_temp=28.0,
             default_temp=25.0,
             rate=1.0,
-            low_speed_rate=0.5,
-            mid_speed_rate=1.0,
-            high_speed_rate=1.5,
+            # 修改后：符合 1元/1℃ 的计费逻辑，与物理降温速度一致
+            low_speed_rate=0.333333,  # 对应 Low: 1分钟降1/3度，收1/3元
+            mid_speed_rate=0.5,       # 对应 Medium: 1分钟降0.5度，收0.5元
+            high_speed_rate=1.0,      # 对应 High: 1分钟降1度，收1元
             default_speed="M",
         ),
         ACConfig(
@@ -40,10 +41,11 @@ def seed_default_ac_config() -> None:
             min_temp=20.0,
             max_temp=30.0,
             default_temp=26.0,
-            rate=1.2,
-            low_speed_rate=0.6,
-            mid_speed_rate=1.1,
-            high_speed_rate=1.6,
+            rate=1.0,
+            # 制热模式也使用相同的费率逻辑（与物理升温速度一致）
+            low_speed_rate=0.333333,  # 对应 Low: 1分钟升1/3度，收1/3元
+            mid_speed_rate=0.5,       # 对应 Medium: 1分钟升0.5度，收0.5元
+            high_speed_rate=1.0,      # 对应 High: 1分钟升1度，收1元
             default_speed="M",
         ),
     ]

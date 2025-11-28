@@ -1,0 +1,84 @@
+/* 页面标题 */
+.page-header-simple {
+  margin-bottom: 30px;
+}
+.page-header-simple h2 {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+.page-header-simple p {
+  color: #95a5a6;
+  font-size: 0.9rem;
+}
+
+/* 报表容器卡片 */
+.report-control-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+  padding: 20px;
+  min-height: 500px;
+}
+
+/* 标签页样式优化 */
+.nav-tabs {
+  border-bottom: 2px solid #f1f2f6;
+  margin-bottom: 20px;
+}
+
+.nav-tabs .nav-link {
+  border: none;
+  color: #95a5a6;
+  font-weight: 500;
+  padding: 12px 20px;
+  transition: all 0.3s;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #3498db;
+  border: none;
+  background: transparent;
+}
+
+.nav-tabs .nav-link.active {
+  color: #3498db;
+  border-bottom: 2px solid #3498db;
+  background: transparent;
+}
+
+.nav-tabs .nav-link i {
+  margin-right: 5px;
+}
+
+/* 筛选条 */
+.filter-bar {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 15px;
+}
+
+.input-group {
+  max-width: 400px;
+}
+
+/* 表格优化 */
+.table th {
+  font-weight: 600;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  border-bottom: 2px solid #ecf0f1 !important;
+}
+
+.table td {
+  font-size: 0.95rem;
+  color: #2c3e50;
+  padding: 12px 10px;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(52, 152, 219, 0.05);
+}

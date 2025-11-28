@@ -18,6 +18,7 @@ class BillDetailService:
         rate: float,
         cost: float,
         customer_id: int | None = None,
+        detail_type: str = "AC",
     ) -> DetailRecord:
         factor = current_app.config.get("TIME_ACCELERATION_FACTOR", 1.0)
         try:
@@ -41,6 +42,7 @@ class BillDetailService:
             duration=scaled_duration,
             rate=rate,
             cost=cost,
+            detail_type=detail_type,
         )
         db.session.add(detail)
         db.session.commit()

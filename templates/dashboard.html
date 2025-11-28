@@ -1,127 +1,68 @@
-<!doctype html>
-<html lang="zh">
-  <head>
-    <meta charset="utf-8">
-    <title>酒店空调调度监控</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-  </head>
-  <body>
-    <header>
-      <h1>酒店空调管理面板</h1>
-      <p>后端：Python + Flask · 前端：HTML + Jinja2 · 数据库：MySQL</p>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>调度监控中心 - Hotel OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+    
+    <header class="monitor-header">
+        <div class="brand">
+            <i class="fa-solid fa-microchip"></i> 调度算法监控核心
+        </div>
+        <div class="system-metrics">
+            <div class="metric-item">
+                <span class="label">服务容量</span>
+                <span class="val" id="sys-capacity">--</span>
+            </div>
+            <div class="metric-item">
+                <span class="label">时间片设置</span>
+                <span class="val" id="sys-timeslice">--</span> 秒
+            </div>
+            <div class="metric-item status-ok">
+                <span class="dot"></span> 系统运行中
+            </div>
+        </div>
+        <div class="actions">
+            <a href="/" class="btn-exit">退出监控</a>
+        </div>
     </header>
 
-    <main>
-      <section id="rooms-section">
-        <div class="section-header">
-          <h2>房间状态与控制</h2>
-          <div class="section-actions">
-            <button id="btn-refresh-rooms" class="btn">刷新房态</button>
-          </div>
-        </div>
-        <table id="rooms-table">
-          <thead>
-            <tr>
-              <th>房间ID</th>
-              <th>房态</th>
-              <th>当前温度(℃)</th>
-              <th>目标温度(℃)</th>
-              <th>风速</th>
-              <th>空调状态</th>
-              <th>启停</th>
-              <th>调温</th>
-              <th>调速</th>
-            </tr>
-          </thead>
-          <tbody id="rooms-body">
-          </tbody>
-        </table>
-      </section>
-
-      <section class="grid">
-        <div class="card">
-          <h3>办理入住</h3>
-          <form id="checkin-form" class="form">
-            <label>
-              房间号
-              <input type="number" name="roomId" min="1" required>
-            </label>
-            <label>
-              姓名
-              <input type="text" name="name" required>
-            </label>
-            <label>
-              身份证号
-              <input type="text" name="idCard">
-            </label>
-            <label>
-              电话
-              <input type="text" name="phoneNumber">
-            </label>
-            <button type="submit" class="btn primary">提交入住</button>
-          </form>
-        </div>
-
-        <div class="card">
-          <h3>办理退房</h3>
-          <form id="checkout-form" class="form">
-            <label>
-              房间号
-              <input type="number" name="roomId" min="1" required>
-            </label>
-            <button type="submit" class="btn danger">办理退房</button>
-          </form>
-          <pre id="checkout-result" class="result"></pre>
-        </div>
-      </section>
-
-      <section class="grid">
-        <div class="card">
-          <h3>房间维护</h3>
-          <form id="maintenance-form" class="form inline">
-            <label>
-              房间号
-              <input type="number" id="maintenance-room-id" min="1" required>
-            </label>
-            <div class="inline-actions">
-              <button type="button" data-action="offline" class="btn danger">标记维修</button>
-              <button type="button" data-action="online" class="btn">恢复可用</button>
+    <main class="monitor-container">
+        
+        <section class="queue-section serving-section">
+            <div class="section-header">
+                <h3><i class="fa-solid fa-fan fa-spin"></i> 服务队列 (Running)</h3>
+                <span class="badge-count" id="serving-count">0</span>
             </div>
-          </form>
-        </div>
-        <div class="card">
-          <h3>调度运维</h3>
-          <div class="inline-actions">
-            <button id="btn-force-rotation" class="btn">强制轮转</button>
-            <button id="btn-simulate-temp" class="btn">模拟温度</button>
-          </div>
-          <pre id="admin-result" class="result"></pre>
-        </div>
-      </section>
+            <div class="queue-grid" id="serving-list">
+                </div>
+        </section>
 
-      <section id="queue-section">
-        <div class="section-header">
-          <h2>调度队列</h2>
-          <div class="section-actions">
-            <button id="btn-refresh-queues" class="btn">刷新队列</button>
-          </div>
+        <div class="flow-arrow">
+            <i class="fa-solid fa-arrow-right-arrow-left"></i>
+            <span>调度轮转</span>
         </div>
-        <div class="queues">
-          <div>
-            <h3>服务队列</h3>
-            <ul id="serving-list"></ul>
-          </div>
-          <div>
-            <h3>等待队列</h3>
-            <ul id="waiting-list"></ul>
-          </div>
-        </div>
-      </section>
+
+        <section class="queue-section waiting-section">
+            <div class="section-header">
+                <h3><i class="fa-solid fa-clock"></i> 等待队列 (Pending)</h3>
+                <span class="badge-count" id="waiting-count">0</span>
+            </div>
+            <div class="queue-list" id="waiting-list">
+                </div>
+        </section>
+
     </main>
 
-    <div id="toast"></div>
-
-    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
-  </body>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="{{ url_for('static', filename='js/bg-particles.js') }}"></script>
+</body>
 </html>
-

@@ -1,32 +1,33 @@
 from flask import Blueprint, jsonify, request
-
 from ..services import report_service
 
-report_bp = Blueprint("reports", __name__, url_prefix="/api/reports")
+# 修正路径前缀
+report_bp = Blueprint("report", __name__, url_prefix="/report")
 
-
-@report_bp.get("/overview")
-def get_overview():
-    start = request.args.get("start")
-    end = request.args.get("end")
-    data = report_service.get_overview(start, end)
-    return jsonify(data)
-
-
-@report_bp.get("/ac-usage")
-def get_ac_usage():
-    start = request.args.get("start")
-    end = request.args.get("end")
-    data = report_service.get_ac_usage_summary(start, end)
-    return jsonify(data)
-
-
-@report_bp.get("/daily-revenue")
-def get_daily_revenue():
-    days = request.args.get("days", default=7, type=int)
+@report_bp.get("/room")
+def get_room_report():
+    room_id = request.args.get("roomId", type=int)
     try:
-        data = report_service.get_daily_revenue(days)
-    except ValueError as exc:
+        report = report_service.generateRoomReport(room_id)
+        # report_service 返回的可能已经是 list[dict]，直接 jsonify
+        return jsonify(report)
+    except Exception as exc:
         return jsonify({"error": str(exc)}), 400
-    return jsonify(data)
 
+@report_bp.get("/daily")
+def get_daily_report():
+    date_str = request.args.get("date")  # YYYY-MM-DD
+    try:
+        report = report_service.generateDailyReport(date_str)
+        return jsonify(report)
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 400
+
+@report_bp.get("/weekly")
+def get_weekly_report():
+    start_date = request.args.get("startDate")
+    try:
+        report = report_service.generateWeeklyReport(start_date)
+        return jsonify(report)
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 400

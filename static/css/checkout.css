@@ -1,0 +1,296 @@
+/* 复位主内容区 padding */
+.main-content.no-padding {
+    padding: 0;
+    overflow-y: auto;
+    /* background: #f4f6f9; 注释掉，使用粒子背景 */
+    background: transparent;
+}
+
+/* 1. Hero Header 区域 */
+.page-header {
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    color: white;
+    padding: 60px 20px 100px; /* 底部留空间给悬浮框 */
+    text-align: center;
+    position: relative;
+}
+
+.page-header h1 {
+    font-weight: 700;
+    margin-bottom: 5px;
+    font-size: 2rem;
+}
+
+.page-header p {
+    opacity: 0.8;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* 2. 悬浮搜索框 */
+.search-box-floating {
+    position: absolute;
+    bottom: -30px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    padding: 0 20px;
+}
+
+.search-inner {
+    background: white;
+    padding: 10px;
+    border-radius: 50px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+}
+
+.search-icon {
+    color: #bdc3c7;
+    margin-left: 20px;
+    font-size: 1.2rem;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    padding: 15px;
+    font-size: 1.1rem;
+    outline: none;
+    color: #2c3e50;
+}
+
+.btn-search {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 12px 35px;
+    border-radius: 40px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+}
+
+.btn-search:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+}
+
+/* 3. 账单纸张容器 */
+.invoice-wrapper {
+    margin-top: 60px; /* 让出头部空间 */
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 80px;
+}
+
+.invoice-paper {
+    background: white;
+    width: 100%;
+    max-width: 850px;
+    padding: 0; /* 内部布局自己管 */
+    border-radius: 12px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 顶部装饰条 */
+.paper-top-strip {
+    height: 8px;
+    background: repeating-linear-gradient(
+        45deg,
+        #3498db,
+        #3498db 20px,
+        #e74c3c 20px,
+        #e74c3c 40px
+    );
+}
+
+/* 结算印章 */
+.paid-stamp {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    border: 3px solid #e74c3c;
+    color: #e74c3c;
+    font-size: 2rem;
+    font-weight: 700;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    border-radius: 10px;
+    transform: rotate(-15deg);
+    opacity: 0.2; /* 默认淡一点，或者 JS 可以控制 */
+    mask-image: url('data:image/svg+xml;utf8,<svg ...>'); /* 可选：做旧效果 */
+    pointer-events: none;
+    animation: stampIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes stampIn {
+    from { opacity: 0; transform: rotate(-15deg) scale(1.5); }
+    to { opacity: 0.8; transform: rotate(-15deg) scale(1); }
+}
+
+.invoice-header {
+    padding: 40px 40px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px dashed #ecf0f1;
+}
+
+.hotel-brand {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: #2c3e50;
+}
+
+.hotel-brand i { font-size: 2.5rem; color: #3498db; }
+.hotel-brand .name { font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+.hotel-brand .sub { font-size: 0.8rem; color: #95a5a6; letter-spacing: 1px; }
+
+.invoice-meta { text-align: right; }
+.meta-item { margin-bottom: 5px; }
+.meta-item .label { font-size: 0.8rem; color: #bdc3c7; display: block; }
+.meta-item .value { font-weight: 600; color: #2c3e50; }
+.meta-item .code { font-family: monospace; letter-spacing: 1px; font-size: 1.1rem; }
+
+/* 客户信息 */
+.customer-section { padding: 20px 40px; }
+.section-title { font-size: 0.85rem; color: #95a5a6; text-transform: uppercase; margin-bottom: 15px; font-weight: 600; }
+.customer-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+}
+.c-item strong { display: block; font-size: 0.8rem; color: #bdc3c7; margin-bottom: 3px; }
+.c-item span { color: #2c3e50; font-weight: 500; }
+
+/* 统计卡片 */
+.bill-summary-cards {
+    display: flex;
+    gap: 20px;
+    padding: 0 40px;
+    margin-bottom: 30px;
+}
+
+.b-card {
+    flex: 1;
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.b-card .icon-wrapper {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.card-blue { background: #e3f2fd; color: #2196f3; }
+.card-purple { background: #f3e5f5; color: #9c27b0; }
+.card-orange { background: #fff3e0; color: #ff9800; }
+
+.b-card .label { font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px; }
+.b-card .val { font-size: 1.5rem; font-weight: 700; color: #2c3e50; }
+
+/* 总金额条 */
+.total-section {
+    margin: 0 40px;
+    background: #2c3e50;
+    color: white;
+    padding: 25px 30px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 20px rgba(44, 62, 80, 0.2);
+}
+
+.total-label span { display: block; font-size: 1.1rem; font-weight: 500; }
+.total-label small { opacity: 0.6; font-size: 0.8rem; }
+.total-price { font-size: 2.2rem; font-weight: 700; color: #f1c40f; }
+
+/* 分割线 */
+.divider {
+    margin: 40px 0 20px;
+    text-align: center;
+    position: relative;
+}
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 40px;
+    right: 40px;
+    height: 1px;
+    background: #ecf0f1;
+    z-index: 1;
+}
+.divider-text {
+    background: white;
+    padding: 0 15px;
+    color: #95a5a6;
+    font-size: 0.9rem;
+    position: relative;
+    z-index: 2;
+    font-weight: 500;
+}
+
+/* 表格 */
+.detail-table-wrapper { padding: 0 40px 30px; }
+.detail-table th { border-bottom: 2px solid #f3f4f6; color: #7f8c8d; font-size: 0.9rem; padding: 15px 10px; }
+.detail-table td { border-bottom: 1px solid #f9f9f9; padding: 15px 10px; color: #2c3e50; font-size: 0.95rem; }
+.text-right { text-align: right; }
+
+/* 底部 */
+.invoice-footer {
+    background: #f8f9fa;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #eee;
+}
+
+.invoice-footer p { margin: 0; color: #95a5a6; font-size: 0.85rem; font-style: italic; }
+
+.invoice-actions { display: flex; gap: 15px; }
+
+/* 动画 */
+.animate-slide-up { animation: slideUp 0.6s ease-out; }
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 打印 */
+@media print {
+    .sidebar, .page-header, .search-box-floating, .invoice-actions { display: none !important; }
+    .invoice-wrapper { margin: 0; padding: 0; }
+    .invoice-paper { box-shadow: none; width: 100%; max-width: 100%; }
+    .b-card { border: 1px solid #eee; background: white !important; -webkit-print-color-adjust: exact; }
+    .total-section { background: #eee !important; color: black !important; -webkit-print-color-adjust: exact; }
+    .total-price { color: black !important; }
+}

@@ -1,102 +1,119 @@
-<!doctype html>
-<html lang="zh">
-  <head>
-    <meta charset="utf-8">
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>客户 - 空调控制</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='customer.css') }}">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  </head>
-  <body>
-    <header>
-      <div class="header-content">
-        <h1>客户空调控制面板</h1>
-        <a href="/" class="btn-back">返回首页</a>
-      </div>
-    </header>
+    <title>客房温控系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/customer.css') }}">
+</head>
+<body>
 
-    <main>
-      <section class="room-selector">
-        <label>
-          选择房间号：
-          <select id="room-selector">
-            <option value="">请选择房间</option>
-          </select>
-        </label>
-        <button id="btn-refresh-rooms" class="btn">刷新房间列表</button>
-      </section>
-
-      <section id="room-control" class="card" style="display: none;">
-        <h2>房间 <span id="current-room-id"></span> 空调控制</h2>
-        
-        <div class="status-grid">
-          <div class="status-item">
-            <label>当前温度</label>
-            <div class="value" id="current-temp">--</div>
-          </div>
-          <div class="status-item">
-            <label>目标温度</label>
-            <div class="value" id="target-temp">--</div>
-          </div>
-          <div class="status-item">
-            <label>风速</label>
-            <div class="value" id="fan-speed">--</div>
-          </div>
-          <div class="status-item">
-            <label>空调状态</label>
-            <div class="value" id="ac-status">--</div>
-          </div>
+<div class="app-container">
+    <nav class="navbar-custom">
+        <div class="room-badge">
+            <i class="fa-solid fa-door-open"></i>
+            <span>房间号: <span id="room-id-display">Loading...</span></span>
         </div>
-
-        <div class="control-panel">
-          <div class="control-group">
-            <h3>启停控制</h3>
-            <div class="button-group">
-              <button id="btn-power-on" class="btn btn-primary">开启空调</button>
-              <button id="btn-power-off" class="btn btn-danger">关闭空调</button>
-            </div>
-          </div>
-
-          <div class="control-group">
-            <h3>温度调节</h3>
-            <div class="input-group">
-              <input type="number" id="temp-input" min="18" max="30" step="0.5" placeholder="目标温度">
-              <button id="btn-set-temp" class="btn">设置温度</button>
-            </div>
-          </div>
-
-          <div class="control-group">
-            <h3>风速调节</h3>
-            <div class="input-group">
-              <select id="speed-select">
-                <option value="LOW">低风</option>
-                <option value="MEDIUM">中风</option>
-                <option value="HIGH">高风</option>
-              </select>
-              <button id="btn-set-speed" class="btn">设置风速</button>
-            </div>
-          </div>
+        <div class="system-status">
+                <span id="ac-status-badge" class="status-indicator">
+                    <i class="fa-solid fa-power-off"></i>
+                    <span id="ac-status">检测中...</span>
+                </span>
         </div>
+    </nav>
 
-        <div class="usage-info">
-          <h3>使用统计</h3>
-          <div class="info-grid">
-            <div>
-              <label>累计时长</label>
-              <div id="total-duration">0 分钟</div>
+    <main class="thermostat-wrapper">
+        <div class="thermostat-card">
+
+            <div class="temp-display-section">
+                <div class="temp-circle">
+                    <div class="current-temp-wrapper">
+                        <span class="label">当前室温</span>
+                        <div class="temp-value">
+                            <span id="current-temp">--</span>
+                            <span class="unit">°C</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div>
-              <label>累计费用</label>
-              <div id="total-cost">¥0.00</div>
+
+            <div class="control-section target-control">
+                <div class="control-label">目标温度</div>
+                <div class="temp-adjust-group">
+                    <button class="btn-circle" onclick="changeTemp(-1)">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <div class="target-display">
+                        <span id="target-temp">25</span>°C
+                    </div>
+                    <button class="btn-circle" onclick="changeTemp(1)">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
             </div>
-          </div>
+
+            <div class="control-grid">
+                <div class="control-item">
+                    <div class="control-label">电源</div>
+                    <div class="btn-group-custom">
+                        <button class="btn-rect power-on" onclick="powerOn()">
+                            <i class="fa-solid fa-play"></i> 开
+                        </button>
+                        <button class="btn-rect power-off" onclick="powerOff()">
+                            <i class="fa-solid fa-stop"></i> 关
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-item">
+                    <div class="control-label">
+                        模式 <span id="mode" class="value-tag">--</span>
+                    </div>
+                    <div class="btn-group-custom">
+                        <button class="btn-icon cool" onclick="changeMode('COOLING')" title="制冷">
+                            <i class="fa-solid fa-snowflake"></i>
+                        </button>
+                        <button class="btn-icon heat" onclick="changeMode('HEATING')" title="制热">
+                            <i class="fa-solid fa-fire"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-item full-width">
+                    <div class="control-label">
+                        风速 <span id="fan-speed" class="value-tag">--</span>
+                    </div>
+                    <div class="segment-control">
+                        <button onclick="changeSpeed('LOW')">低</button>
+                        <button onclick="changeSpeed('MEDIUM')">中</button>
+                        <button onclick="changeSpeed('HIGH')">高</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cost-panel">
+                <div class="cost-item">
+                    <span class="label">当前费用</span>
+                    <span class="value">¥ <span id="cost">0.00</span></span>
+                </div>
+                <div class="cost-divider"></div>
+                <div class="cost-item">
+                    <span class="label">累计费用</span>
+                    <span class="value total">¥ <span id="total-fee">0.00</span></span>
+                </div>
+            </div>
+
         </div>
-      </section>
-
-      <div id="toast"></div>
     </main>
+</div>
 
-    <script src="{{ url_for('static', filename='customer.js') }}" defer></script>
-  </body>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="{{ url_for('static', filename='js/customer.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script src="{{ url_for('static', filename='js/bg-particles.js') }}"></script>
+</body>
 </html>
-

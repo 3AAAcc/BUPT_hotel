@@ -1,62 +1,162 @@
-<!doctype html>
-<html lang="zh">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>前台 - 办理退房</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='reception.css') }}">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  </head>
-  <body>
-    <header>
-      <div class="header-content">
-        <h1>办理退房</h1>
-        <div>
-          <a href="/reception" class="btn-back">返回工作台</a>
-          <a href="/" class="btn-back" style="margin-left: 10px;">返回首页</a>
-        </div>
-      </div>
-    </header>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>办理退房 - 前台系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reception.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo"><i class="fa-solid fa-hotel"></i> <span>Hotel OS</span></div>
+            <nav class="nav-menu">
+                <a href="/" class="nav-item"><i class="fa-solid fa-house"></i> 首页</a>
+                <a href="/reception" class="nav-item"><i class="fa-solid fa-desktop"></i> 前台大厅</a>
+                <a href="/reception/checkin" class="nav-item"><i class="fa-solid fa-user-plus"></i> 办理入住</a>
+                <a href="/reception/checkout" class="nav-item active"><i class="fa-solid fa-file-invoice-dollar"></i> 办理退房</a>
+            </nav>
+        </aside>
 
-    <main>
-      <section class="card">
-        <h2>办理退房</h2>
-        <form id="checkout-form" class="form">
-          <label>
-            房间号
-            <select id="checkout-room-id" required>
-              <option value="">请选择房间</option>
-            </select>
-          </label>
-          <button type="submit" class="btn btn-danger">办理退房</button>
-        </form>
-        <div id="checkout-result" class="result"></div>
-      </section>
+        <main class="main-content no-padding">
+            
+            <div class="page-header">
+                <div class="header-content">
+                    <h1>退房结算中心</h1>
+                    <p>Checkout & Billing Service</p>
+                </div>
+                
+                <div class="search-box-floating">
+                    <div class="search-inner">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="number" id="roomIdInput" placeholder="输入房间号 (例如: 1)..." class="search-input">
+                        <button class="btn-search" onclick="performCheckout()">
+                            结算出单
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-      <section class="card">
-        <div class="section-header">
-          <h2>已入住房间列表</h2>
-          <button id="btn-refresh-rooms" class="btn">刷新</button>
-        </div>
-        <table id="rooms-table">
-          <thead>
-            <tr>
-              <th>房间号</th>
-              <th>客户姓名</th>
-              <th>身份证号</th>
-              <th>联系电话</th>
-              <th>入住时间</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="rooms-body">
-          </tbody>
-        </table>
-      </section>
-    </main>
+            <div id="invoice-container" class="invoice-wrapper" style="display: none;">
+                <div class="invoice-paper animate-slide-up">
+                    <div class="paper-top-strip"></div>
 
-    <div id="toast"></div>
-    <script src="{{ url_for('static', filename='checkout.js') }}" defer></script>
-  </body>
+                    <div class="paid-stamp">已结清</div>
+
+                    <div class="invoice-header">
+                        <div class="hotel-brand">
+                            <i class="fa-solid fa-hotel"></i>
+                            <div>
+                                <div class="name">HOTEL BILL</div>
+                                <div class="sub">官方电子凭证</div>
+                            </div>
+                        </div>
+                        <div class="invoice-meta">
+                            <div class="meta-item">
+                                <span class="label">打印日期</span>
+                                <span class="value" id="bill-date">--</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="label">单据编号</span>
+                                <span class="value code" id="bill-id">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="customer-section">
+                        <div class="section-title">客户信息 / Customer Info</div>
+                        <div class="customer-grid" id="customer-info">
+                            </div>
+                    </div>
+
+                    <div class="bill-summary-cards">
+                        <div class="b-card card-blue">
+                            <div class="icon-wrapper"><i class="fa-regular fa-clock"></i></div>
+                            <div class="card-content">
+                                <div class="label">入住时长</div>
+                                <div class="val" id="stay-days">--</div>
+                            </div>
+                        </div>
+                        <div class="b-card card-purple">
+                            <div class="icon-wrapper"><i class="fa-solid fa-bed"></i></div>
+                            <div class="card-content">
+                                <div class="label">住宿费用</div>
+                                <div class="val">¥ <span id="room-fee">0.00</span></div>
+                            </div>
+                        </div>
+                        <div class="b-card card-orange">
+                            <div class="icon-wrapper"><i class="fa-solid fa-wind"></i></div>
+                            <div class="card-content">
+                                <div class="label">空调费用</div>
+                                <div class="val">¥ <span id="ac-fee">0.00</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="total-section">
+                        <div class="total-label">
+                            <span>应付总金额</span>
+                            <small>Total Amount Due</small>
+                        </div>
+                        <div class="total-price">
+                            ¥ <span id="total-amount">0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="divider">
+                        <span class="divider-text"><i class="fa-solid fa-list-ul"></i> 消费明细</span>
+                    </div>
+
+                    <div class="detail-table-wrapper">
+                        <table class="table detail-table">
+                            <thead>
+                                <tr>
+                                    <th>时间</th>
+                                    <th>类型</th>
+                                    <th>模式</th>
+                                    <th>风速</th>
+                                    <th>时长</th>
+                                    <th class="text-right">费用</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detail-list">
+                                </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="invoice-footer">
+                        <p>感谢您的入住，期待再次光临！</p>
+                        <div class="invoice-actions">
+                            <button class="btn-csv" onclick="downloadCSV()">
+                                <i class="fa-solid fa-file-csv"></i> 导出 CSV
+                            </button>
+                            <button class="btn-print" onclick="window.print()">
+                                <i class="fa-solid fa-print"></i> 打印凭证
+                            </button>
+                            <a href="/reception" class="btn-back">返回大厅</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script src="{{ url_for('static', filename='js/bg-particles.js') }}"></script>
+<script>
+        const params = new URLSearchParams(window.location.search);
+        const rid = params.get('roomId');
+        if(rid) {
+            document.getElementById('roomIdInput').value = rid;
+            // 可选：如果 URL 有房间号，自动触发查询
+            // performCheckout(); 
+        }
+    </script>
+</body>
 </html>
-

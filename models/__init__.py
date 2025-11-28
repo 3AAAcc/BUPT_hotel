@@ -46,6 +46,7 @@ class Room(db.Model, TimestampMixin):
             "acMode": self.ac_mode,
             "fanSpeed": self.fan_speed,
             "defaultTemp": self.default_temp,
+            "customerName": self.customer_name,  # 添加客户姓名字段
         }
 
     def updateState(self, state: str) -> None:

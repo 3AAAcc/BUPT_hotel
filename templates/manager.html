@@ -1,74 +1,82 @@
-<!doctype html>
-<html lang="zh">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>经理 - 经营报表</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='manager.css') }}">
-  </head>
-  <body>
-    <header>
-      <div class="header-content">
-        <h1>酒店经理报表中心</h1>
-        <a href="/" class="btn-back">返回首页</a>
-      </div>
-    </header>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>全能指挥舱 - Hotel Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reception.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/manager.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo"><i class="fa-solid fa-layer-group"></i> <span>Master OS</span></div>
+            <nav class="nav-menu">
+                <a href="/" class="nav-item"><i class="fa-solid fa-house"></i> 首页</a>
+                <a href="#" class="nav-item active"><i class="fa-solid fa-gamepad"></i> 全能指挥舱</a>
+                <a href="/manager/report" class="nav-item"><i class="fa-solid fa-chart-pie"></i> 报表中心</a>
+            </nav>
+        </aside>
 
-    <main>
-      <section class="card">
-        <h2>时间范围筛选</h2>
-        <form id="date-filter" class="form inline">
-          <label>
-            开始日期
-            <input type="date" id="start-date">
-          </label>
-          <label>
-            结束日期
-            <input type="date" id="end-date">
-          </label>
-          <button type="button" id="btn-apply-filter" class="btn">应用筛选</button>
-          <button type="button" id="btn-reset-filter" class="btn">重置</button>
-        </form>
-      </section>
+        <main class="main-content">
+            <!-- 重置按钮（调试用） -->
+            <button id="reset-db-btn" class="btn btn-danger btn-sm" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;" onclick="resetDatabase()" title="重置数据库">
+                <i class="fa-solid fa-trash-can"></i> 重置数据库
+            </button>
+            
+            <div class="monitor-panel">
+                <div class="panel-header">
+                    <div class="ph-left">
+                        <h3><i class="fa-solid fa-network-wired"></i> 实时调度监控</h3>
+                        <span class="sys-badge">服务容量: <span id="sys-capacity">--</span></span>
+                        <span class="sys-badge">时间片: <span id="sys-timeslice">--</span>s</span>
+                    </div>
+                    <div class="ph-right">
+                        <span class="live-dot"></span> Live
+                    </div>
+                </div>
+                
+                <div class="queue-container">
+                    <div class="queue-box serving-box">
+                        <div class="q-title text-success">
+                            <span><i class="fa-solid fa-fan fa-spin"></i> 服务队列 (Running)</span>
+                            <span class="count-badge bg-success" id="serving-count">0</span>
+                        </div>
+                        <div class="q-list" id="serving-list">
+                            </div>
+                    </div>
 
-      <section class="card">
-        <div class="section-header">
-          <h2>运营概览</h2>
-          <button id="btn-refresh-overview" class="btn">刷新</button>
-        </div>
-        <div id="overview-content" class="overview-grid">
-        </div>
-      </section>
+                    <div class="flow-icon">
+                        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                    </div>
 
-      <section class="card">
-        <div class="section-header">
-          <h2>空调使用统计</h2>
-          <button id="btn-refresh-usage" class="btn">刷新</button>
-        </div>
-        <div id="usage-content">
-        </div>
-      </section>
+                    <div class="queue-box waiting-box">
+                        <div class="q-title text-warning">
+                            <span><i class="fa-solid fa-clock"></i> 等待队列 (Pending)</span>
+                            <span class="count-badge bg-warning text-dark" id="waiting-count">0</span>
+                        </div>
+                        <div class="q-list" id="waiting-list">
+                            </div>
+                    </div>
+                </div>
+            </div>
 
-      <section class="card">
-        <div class="section-header">
-          <h2>每日营收趋势</h2>
-          <label>
-            天数
-            <select id="days-select">
-              <option value="7">最近7天</option>
-              <option value="14">最近14天</option>
-              <option value="30">最近30天</option>
-            </select>
-          </label>
-          <button id="btn-refresh-revenue" class="btn">刷新</button>
-        </div>
-        <div id="revenue-content">
-        </div>
-      </section>
-    </main>
+            <div class="section-divider">
+                <span>房间控制 & 费用详情</span>
+            </div>
 
-    <div id="toast"></div>
-    <script src="{{ url_for('static', filename='manager.js') }}" defer></script>
-  </body>
+            <div id="admin-room-grid" class="control-grid">
+                </div>
+
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='js/manager.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="{{ url_for('static', filename='js/bg-particles.js') }}"></script>
+</body>
 </html>
-
