@@ -19,43 +19,17 @@ function queryRoomReport() {
           }
 
           data.forEach(row => {
-              const isSummary = row.type === 'SUMMARY';
-              const acFee = (row.acFee || 0).toFixed(2);
-              const roomFee = (row.roomFee || 0).toFixed(2);
-              const totalFee = (row.fee || row.acFee || 0).toFixed(2);
-              
-              if (isSummary) {
-                  // 汇总行
-                  tbody.innerHTML += `
-                      <tr class="table-info">
-                          <td><strong>${row.roomId}</strong></td>
-                          <td colspan="2" class="text-center"><strong>汇总</strong></td>
-                          <td>--</td>
-                          <td><strong>${row.fanSpeed}</strong></td>
-                          <td>--</td>
-                          <td>
-                              <div class="fee-breakdown">
-                                  <span class="text-muted small">空调费: ¥${acFee}</span><br>
-                                  <span class="text-muted small">房费: ¥${roomFee}</span><br>
-                                  <span class="fw-bold text-primary">总计: ¥${totalFee}</span>
-                              </div>
-                          </td>
-                      </tr>
-                  `;
-              } else {
-                  // 普通详单行（只显示空调费）
-                  tbody.innerHTML += `
-                      <tr>
-                          <td>${row.roomId}</td>
-                          <td>${formatTime(row.startTime)}</td>
-                          <td>${formatTime(row.endTime)}</td>
-                          <td>${row.duration || '--'}</td>
-                          <td>${row.fanSpeed || '--'}</td>
-                          <td>${row.rate || '--'}</td>
-                          <td class="fw-bold text-primary">¥${acFee}</td>
-                      </tr>
-                  `;
-              }
+              tbody.innerHTML += `
+                  <tr>
+                      <td>${row.roomId}</td>
+                      <td>${formatTime(row.startTime)}</td>
+                      <td>${formatTime(row.endTime)}</td>
+                      <td>${row.duration}</td>
+                      <td>${row.fanSpeed}</td>
+                      <td>${row.rate}</td>
+                      <td class="fw-bold text-primary">${row.fee.toFixed(2)}</td>
+                  </tr>
+              `;
           });
       })
       .catch(err => handleError(err, 'room-tbody', 7));
@@ -96,23 +70,11 @@ function renderAggregatedTable(data, tbodyId) {
   }
 
   data.forEach(row => {
-      // 显示房费和空调费的明细
-      const acFee = (row.acFee || 0).toFixed(2);
-      const roomFee = (row.roomFee || 0).toFixed(2);
-      const totalFee = (row.totalFee || 0).toFixed(2);
-      
       tbody.innerHTML += `
           <tr>
               <td><strong>${row.roomId}</strong></td>
               <td>${row.usageCount}</td>
-              <td>${(row.totalDuration / 60).toFixed(1)}</td>
-              <td class="fw-bold text-success">
-                  <div class="fee-breakdown">
-                      <span class="text-muted small">空调: ¥${acFee}</span><br>
-                      <span class="text-muted small">房费: ¥${roomFee}</span><br>
-                      <span class="fw-bold">总计: ¥${totalFee}</span>
-                  </div>
-              </td>
+              <td>${(row.totalDuration / 60).toFixed(1)}</td> <td class="fw-bold text-success">${row.totalFee.toFixed(2)}</td>
               <td>${row.dispatchCount}</td>
               <td>${row.recordCount}</td>
               <td>${row.avgTempDiff ? row.avgTempDiff.toFixed(1) : '--'}</td>

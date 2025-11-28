@@ -145,11 +145,9 @@
         </main>
     </div>
 
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-<script src="{{ url_for('static', filename='js/bg-particles.js') }}"></script>
-<script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+    <script>
         const params = new URLSearchParams(window.location.search);
         const rid = params.get('roomId');
         if(rid) {

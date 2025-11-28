@@ -77,9 +77,16 @@ function createRoomCard(room) {
       else if (room.queueState === 'PAUSED') { statusClass = 'status-WAITING'; statusText = '回温待机'; }
   }
 
-  // 注意：RequestState 返回的是 total_cost (下划线命名)，不是 totalCost
-  const totalCost = (room.total_cost || 0).toFixed(2);
+  const totalCost = (room.total_cost || room.totalCost || 0).toFixed(2);
+  
+  // 增加模式判断
+  const isHeat = room.ac_mode === 'HEATING';
+  const modeIcon = isHeat ? '<i class="fa-solid fa-fire text-danger"></i>' : '<i class="fa-solid fa-snowflake text-primary"></i>';
+  const modeText = isHeat ? '制热' : '制冷';
+
+  // 按钮高亮逻辑
   const getSpeedClass = (s) => (room.fan_speed === s && room.ac_on) ? 'active' : '';
+  const getModeClass = (m) => (room.ac_mode === m) ? 'active' : '';
 
   return `
       <div class="admin-card ${statusClass}">
@@ -91,15 +98,27 @@ function createRoomCard(room) {
               </div>
               <div class="data-row">
                   <div class="data-item">
-                      <span class="label">当前温度</span>
+                      <span class="label">模式</span>
+                      <div class="value" style="font-size: 1.1rem">${modeIcon} ${modeText}</div>
+                  </div>
+                  <div class="data-item">
+                      <span class="label">当前室温</span>
                       <div class="value">${(room.current_temp || 0).toFixed(1)}°</div>
                   </div>
                   <div class="data-item">
-                      <span class="label">累计费用</span>
+                      <span class="label">费用</span>
                       <div class="value cost-val">¥${totalCost}</div>
                   </div>
               </div>
               <div class="control-panel">
+                  
+                  <div class="ctrl-group" style="grid-column: span 2;">
+                      <div class="btn-group-mini">
+                          <button class="btn-mini ${getModeClass('COOLING')}" onclick="controlMode(${room.room_id}, 'COOLING')">❄️ 制冷</button>
+                          <button class="btn-mini ${getModeClass('HEATING')}" onclick="controlMode(${room.room_id}, 'HEATING')">🔥 制热</button>
+                      </div>
+                  </div>
+
                   <div class="ctrl-group">
                       <span class="ctrl-label">目标: ${room.target_temp || 25}°</span>
                       <div class="btn-group-mini">
@@ -107,6 +126,7 @@ function createRoomCard(room) {
                           <button class="btn-mini" onclick="controlTemp(${room.room_id}, ${(room.target_temp || 25) + 1})">+</button>
                       </div>
                   </div>
+
                   <div class="ctrl-group">
                       <span class="ctrl-label">风速: ${room.fan_speed || '-'}</span>
                       <div class="btn-group-mini">
@@ -115,6 +135,7 @@ function createRoomCard(room) {
                           <button class="btn-mini ${getSpeedClass('HIGH')}" onclick="controlSpeed(${room.room_id}, 'HIGH')">H</button>
                       </div>
                   </div>
+
                   <div style="grid-column: span 2;">
                       ${room.ac_on 
                           ? `<button class="btn-power p-off" onclick="controlPower(${room.room_id}, 'off')">强制关机</button>` 
@@ -129,13 +150,7 @@ function createRoomCard(room) {
 
 // === 控制函数 ===
 function controlPower(roomId, action) {
-  // 取消确认对话框，直接执行操作
-  axios.post('/admin/control/power', { roomId, action })
-    .then(() => refreshAll())
-    .catch(err => {
-      console.error('操作失败:', err);
-      // 静默失败，不显示 alert
-    });
+  axios.post('/admin/control/power', { roomId, action }).then(refreshAll).catch(err => alert(err));
 }
 function controlTemp(roomId, targetTemp) {
   axios.post('/admin/control/temp', { roomId, targetTemp }).then(refreshAll).catch(err => alert(err));
@@ -143,31 +158,33 @@ function controlTemp(roomId, targetTemp) {
 function controlSpeed(roomId, fanSpeed) {
   axios.post('/admin/control/speed', { roomId, fanSpeed }).then(refreshAll).catch(err => alert(err));
 }
+function controlMode(roomId, mode) {
+  axios.post('/admin/control/mode', { roomId, mode })
+      .then(() => {
+          // 切换模式后，目标温度可能会变，所以要重新加载数据
+          loadRoomData(); 
+      })
+      .catch(err => alert("切换模式失败: " + err));
+}
 
-// === 重置数据库功能 ===
 function resetDatabase() {
   if (!confirm('⚠️ 警告：此操作将清空所有数据并重新初始化数据库！\n\n确定要继续吗？')) {
     return;
   }
   
-  if (!confirm('⚠️ 再次确认：所有房间、客户、账单数据将被永久删除！\n\n确定要重置吗？')) {
+  if (!confirm('⚠️ 再次确认：这将删除所有房间、客户、账单和详单数据！\n\n确定要重置吗？')) {
     return;
   }
   
-  const btn = document.getElementById('reset-db-btn');
-  const originalText = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 重置中...';
-  
   axios.post('/admin/reset-database')
-    .then(res => {
-      alert('✅ ' + res.data.message);
-      // 刷新页面
-      window.location.reload();
-    })
-    .catch(err => {
-      alert('❌ 重置失败: ' + (err.response?.data?.error || err.message));
-      btn.disabled = false;
-      btn.innerHTML = originalText;
-    });
+      .then(res => {
+          alert('✅ ' + res.data.message);
+          // 重置后刷新页面数据
+          setTimeout(() => {
+              refreshAll();
+          }, 500);
+      })
+      .catch(err => {
+          alert('❌ 重置失败: ' + (err.response?.data?.error || err.message));
+      });
 }

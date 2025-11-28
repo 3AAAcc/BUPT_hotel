@@ -19,10 +19,14 @@
             <span>房间号: <span id="room-id-display">Loading...</span></span>
         </div>
         <div class="system-status">
-                <span id="ac-status-badge" class="status-indicator">
-                    <i class="fa-solid fa-power-off"></i>
-                    <span id="ac-status">检测中...</span>
-                </span>
+            <span id="ac-status-badge" class="status-indicator">
+                <i class="fa-solid fa-power-off"></i>
+                <span id="ac-status">检测中...</span>
+            </span>
+            <span id="queue-status-badge" class="status-indicator" style="margin-left: 12px;">
+                <i class="fa-solid fa-stream"></i>
+                <span id="queue-state">队列: 检测中...</span>
+            </span>
         </div>
     </nav>
 
@@ -74,11 +78,11 @@
                         模式 <span id="mode" class="value-tag">--</span>
                     </div>
                     <div class="btn-group-custom">
-                        <button class="btn-icon cool" onclick="changeMode('COOLING')" title="制冷">
-                            <i class="fa-solid fa-snowflake"></i>
+                        <button id="btn-mode-cool" class="btn-icon cool" onclick="changeMode('COOLING')">
+                            <i class="fa-solid fa-snowflake"></i> 制冷
                         </button>
-                        <button class="btn-icon heat" onclick="changeMode('HEATING')" title="制热">
-                            <i class="fa-solid fa-fire"></i>
+                        <button id="btn-mode-heat" class="btn-icon heat" onclick="changeMode('HEATING')">
+                            <i class="fa-solid fa-fire"></i> 制热
                         </button>
                     </div>
                 </div>
@@ -113,7 +117,5 @@
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="{{ url_for('static', filename='js/customer.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-<script src="{{ url_for('static', filename='js/bg-particles.js') }}"></script>
 </body>
 </html>

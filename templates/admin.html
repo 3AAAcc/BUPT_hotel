@@ -15,8 +15,8 @@
             <div class="logo"><i class="fa-solid fa-chart-line"></i> <span>Hotel BI</span></div>
             <nav class="nav-menu">
                 <a href="/" class="nav-item"><i class="fa-solid fa-house"></i> 首页</a>
-                <a href="/manager" class="nav-item"><i class="fa-solid fa-gamepad"></i> 全能指挥舱</a>
-                <a href="/manager/report" class="nav-item active"><i class="fa-solid fa-table"></i> 报表中心</a>
+                <a href="/monitor/dashboard" class="nav-item"><i class="fa-solid fa-desktop"></i> 调度监控</a>
+                <a href="#" class="nav-item active"><i class="fa-solid fa-table"></i> 报表中心</a>
             </nav>
         </aside>
 
@@ -145,8 +145,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-    <script src="{{ url_for('static', filename='js/bg-particles.js') }}"></script>
     <script>
         // 设置默认日期为今天
         document.getElementById('dailyDate').valueAsDate = new Date();

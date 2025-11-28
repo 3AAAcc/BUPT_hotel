@@ -25,71 +25,39 @@ class Scheduler:
 
     def _rate_by_fan_speed(self, fan_speed: str) -> float:
         fan_speed = (fan_speed or "MEDIUM").upper()
-        if fan_speed == "HIGH":
-            return 1.0
-        if fan_speed == "MEDIUM":
-            return 0.5
+        if fan_speed == "HIGH": return 1.0
+        if fan_speed == "MEDIUM": return 0.5
         return 1.0 / 3.0
 
     def _time_factor(self) -> float:
-        factor = current_app.config.get("TIME_ACCELERATION_FACTOR", 1.0)
-        try:
-            factor = float(factor)
-        except (TypeError, ValueError):
-            factor = 1.0
-        return factor if factor > 0 else 1.0
-    
-    def _settle_current_service_period(
-        self, room: Room, end_time: datetime, reason: str = "CHANGE"
-    ) -> None:
-        if not room.serving_start_time:
-            return
-        
-        start_time = room.serving_start_time
-        duration_minutes = max(
-            1,
-            int(((end_time - start_time).total_seconds() / 60.0) * self._time_factor()),
-        )
-        
-        rate = self._rate_by_fan_speed(room.fan_speed)
-        cost = rate * duration_minutes
-        
-        customer_id = None
-        if room.status == "OCCUPIED":
-            from ..services import customer_service
-            customer = customer_service.getCustomerByRoomId(room.id)
-            if customer:
-                customer_id = customer.id
-        
-        is_cycle_end = (reason == "POWER_OFF")
-        detail_type = "POWER_OFF_CYCLE" if is_cycle_end else "AC"
-        
-        self.bill_detail_service.createBillDetail(
-            room_id=room.id,
-            ac_mode=room.ac_mode,
-            fan_speed=room.fan_speed,
-            start_time=start_time,
-            end_time=end_time,
-            rate=rate,
-            cost=cost,
-            customer_id=customer_id,
-            detail_type=detail_type,
-        )
+        return float(current_app.config.get("TIME_ACCELERATION_FACTOR", 1.0))
 
+    # === 辅助方法 ===
     def _priority_score(self, request: RoomRequest) -> int:
         score_map = {"HIGH": 3, "MEDIUM": 2, "LOW": 1}
         return score_map.get((request.fanSpeed or "MEDIUM").upper(), 2)
 
     def _elapsed_seconds(self, source: Optional[datetime], now: datetime) -> float:
-        if not source:
-            return 0.0
+        if not source: return 0.0
         return max(0.0, (now - source).total_seconds() * self._time_factor())
 
+    # === ⚡️ 核心修复：彻底移除指定 ID 的所有实例 ===
     def _remove_from_queue(self, queue: List[RoomRequest], room_id: int) -> Optional[RoomRequest]:
-        for idx, req in enumerate(queue):
-            if req.roomId == room_id:
-                return queue.pop(idx)
-        return None
+        target_id = int(room_id)
+        removed_item = None
+        
+        # 使用列表推导式重建列表，保留 ID 不匹配的项
+        # 这样可以一次性把所有重复的 ID 全部删掉
+        clean_list = []
+        for req in queue:
+            if int(req.roomId) != target_id:
+                clean_list.append(req)
+            else:
+                removed_item = req # 记录被删除的项（如果有多个，记录最后一个也无所谓）
+        
+        # 原地修改列表引用
+        queue[:] = clean_list
+        return removed_item
 
     def _mark_room_serving(self, room_id: int, started_at: datetime) -> None:
         room = self.room_service.getRoomById(room_id)
@@ -109,6 +77,74 @@ class Scheduler:
         self._remove_from_queue(self.serving_queue, room_id)
         self._remove_from_queue(self.waiting_queue, room_id)
 
+    # === ⚡️ 核心修复：强力去重逻辑 ===
+    def _deduplicate_queues(self) -> None:
+        """确保每个 ID 在整个系统中只出现一次，优先保留服务队列"""
+        unique_ids = set()
+        
+        # 1. 清洗服务队列
+        clean_serving = []
+        for req in self.serving_queue:
+            rid = int(req.roomId)
+            if rid not in unique_ids:
+                unique_ids.add(rid)
+                clean_serving.append(req)
+        self.serving_queue = clean_serving
+        
+        # 2. 清洗等待队列 (如果 ID 已经在 unique_ids 里，说明在服务队列或前面已出现过，删！)
+        clean_waiting = []
+        for req in self.waiting_queue:
+            rid = int(req.roomId)
+            if rid not in unique_ids:
+                unique_ids.add(rid)
+                clean_waiting.append(req)
+        self.waiting_queue = clean_waiting
+
+    # === 队列操作 ===
+    def _move_to_waiting(self, request: RoomRequest, timestamp: datetime, reason: str = "ROTATED") -> None:
+        # 先彻底清理旧状态
+        self._remove_request(request.roomId)
+        
+        room = self.room_service.getRoomById(request.roomId)
+        if room and room.serving_start_time:
+            self._settle_current_service_period(room, timestamp, reason)
+        
+        request.waitingTime = timestamp
+        request.servingTime = None
+        self.waiting_queue.append(request)
+        self._mark_room_waiting(request.roomId, timestamp)
+
+    def _move_to_serving(self, request: RoomRequest, timestamp: datetime) -> None:
+        # 先彻底清理旧状态
+        self._remove_request(request.roomId)
+
+        request.servingTime = timestamp
+        request.waitingTime = None
+        self.serving_queue.append(request)
+        self._mark_room_serving(request.roomId, timestamp)
+
+    # === 计费 ===
+    def _settle_current_service_period(self, room: Room, end_time: datetime, reason: str = "CHANGE") -> None:
+        if not room.serving_start_time: return
+        start_time = room.serving_start_time
+        duration_minutes = max(1, int(((end_time - start_time).total_seconds() / 60.0) * self._time_factor()))
+        rate = self._rate_by_fan_speed(room.fan_speed)
+        cost = rate * duration_minutes
+        
+        cid = None
+        if room.status == "OCCUPIED":
+            from ..services import customer_service
+            cust = customer_service.getCustomerByRoomId(room.id)
+            if cust: cid = cust.id
+        
+        detail_type = "POWER_OFF_CYCLE" if reason == "POWER_OFF" else "AC"
+        self.bill_detail_service.createBillDetail(
+            room_id=room.id, ac_mode=room.ac_mode, fan_speed=room.fan_speed,
+            start_time=start_time, end_time=end_time, rate=rate, cost=cost,
+            customer_id=cid, detail_type=detail_type,
+        )
+
+    # === 状态流转 ===
     def _pause_cooling(self, room: Room) -> None:
         now = datetime.utcnow()
         if room.serving_start_time:
@@ -117,34 +153,25 @@ class Scheduler:
         room.serving_start_time = None
         room.waiting_start_time = None
         room.ac_session_start = now
+        room.cooling_paused = True
         self.room_service.updateRoom(room)
         self._rebalance_queues()
 
     def _resume_cooling(self, room: Room) -> None:
         now = datetime.utcnow()
-        request = RoomRequest(roomId=room.id, fanSpeed=room.fan_speed, mode=room.ac_mode, targetTemp=room.target_temp)
-        capacity = self._capacity()
-        if len(self.serving_queue) < capacity:
-            request.servingTime = now
-            self.serving_queue.append(request)
-            self._mark_room_serving(room.id, now)
+        self._remove_request(room.id) # 这里的 remove 现在会清理得非常干净
+        
+        req = RoomRequest(roomId=room.id, fanSpeed=room.fan_speed, mode=room.ac_mode, targetTemp=room.target_temp)
+        if len(self.serving_queue) < self._capacity():
+            req.servingTime = now; self.serving_queue.append(req); self._mark_room_serving(room.id, now)
         else:
-            request.waitingTime = now
-            self.waiting_queue.append(request)
-            self._mark_room_waiting(room.id, now)
+            req.waitingTime = now; self.waiting_queue.append(req); self._mark_room_waiting(room.id, now)
+        
+        room.cooling_paused = False
+        self.room_service.updateRoom(room)
         self._rebalance_queues()
 
-    def _deduplicate_queues(self) -> None:
-        seen = set()
-        new_s = []
-        for r in self.serving_queue:
-            if r.roomId not in seen: seen.add(r.roomId); new_s.append(r)
-        self.serving_queue = new_s
-        new_w = []
-        for r in self.waiting_queue:
-            if r.roomId not in seen: seen.add(r.roomId); new_w.append(r)
-        self.waiting_queue = new_w
-
+    # === 调度算法 ===
     def _sort_waiting_queue(self) -> None:
         if not self.waiting_queue: return
         now = datetime.utcnow()
@@ -157,9 +184,8 @@ class Scheduler:
         self._sort_waiting_queue()
         while self.waiting_queue and len(self.serving_queue) < capacity:
             p = self.waiting_queue.pop(0)
-            p.servingTime = now; p.waitingTime = None
-            self.serving_queue.append(p)
-            self._mark_room_serving(p.roomId, now)
+            self._move_to_serving(p, now)
+            
         if len(self.serving_queue) >= capacity and self.waiting_queue:
             high = self.waiting_queue[0]
             low_s = min(self.serving_queue, key=lambda r: (self._priority_score(r), -(self._elapsed_seconds(r.servingTime, now))))
@@ -168,29 +194,10 @@ class Scheduler:
                 if d:
                     self._move_to_waiting(d, now, "PREEMPTED")
                     high = self.waiting_queue.pop(0)
-                    high.servingTime = now; high.waitingTime = None
-                    self.serving_queue.append(high)
-                    self._mark_room_serving(high.roomId, now)
-
-    def _move_to_waiting(self, request: RoomRequest, timestamp: datetime, reason: str = "ROTATED") -> None:
-        room = self.room_service.getRoomById(request.roomId)
-        if room and room.serving_start_time:
-            self._settle_current_service_period(room, timestamp, reason)
-        request.waitingTime = timestamp
-        request.servingTime = None
-        self.waiting_queue.append(request)
-        self._mark_room_waiting(request.roomId, timestamp)
-
-    def _move_to_serving(self, request: RoomRequest, timestamp: datetime) -> None:
-        request.servingTime = timestamp
-        request.waitingTime = None
-        self.serving_queue.append(request)
-        self._mark_room_serving(request.roomId, timestamp)
+                    self._move_to_serving(high, now)
 
     def _rotate_time_slice(self, *, force: bool = False) -> None:
         if not self.serving_queue: return
-        capacity = self._capacity()
-        if len(self.serving_queue) < capacity: return
         now = datetime.utcnow()
         limit = self._time_slice()
         to_demote = []
@@ -201,9 +208,7 @@ class Scheduler:
         
         for req in to_demote:
             demoted = self._remove_from_queue(self.serving_queue, req.roomId)
-            if demoted:
-                self._move_to_waiting(demoted, now, "ROTATED")
-        
+            if demoted: self._move_to_waiting(demoted, now, "ROTATED")
         self._promote_waiting_room()
 
     def _enforce_capacity(self) -> None:
@@ -216,83 +221,79 @@ class Scheduler:
         self._promote_waiting_room()
 
     def _rebalance_queues(self, *, force_rotation: bool = False) -> None:
+        self._deduplicate_queues() # 每次平衡前先彻底去重
         self._enforce_capacity()
         self._rotate_time_slice(force=force_rotation)
 
+    # === 外部接口 ===
     def PowerOn(self, RoomId: int, CurrentRoomTemp: float | None) -> str:
-        room_id = RoomId
-        current_temp = CurrentRoomTemp
-        room = self.room_service.getRoomById(room_id)
-        if room is None: raise ValueError("房间不存在")
-        if room.ac_on: return "房间空调已开启"
+        room = self.room_service.getRoomById(RoomId)
+        if not room: raise ValueError("不存在")
+        if room.ac_on: return "已开启"
 
         now = datetime.utcnow()
-        if current_temp is not None:
-            room.current_temp = current_temp
-        elif room.current_temp is None:
-            room.current_temp = room.default_temp or current_app.config["HOTEL_DEFAULT_TEMP"]
+        if CurrentRoomTemp is not None: room.current_temp = CurrentRoomTemp
+        elif room.current_temp is None: room.current_temp = room.default_temp
         
         room.ac_on = True
         room.ac_session_start = now
         room.last_temp_update = now
-        room.target_temp = room.target_temp or current_app.config["HOTEL_DEFAULT_TEMP"]
+        mode = room.ac_mode or 'COOLING'
+        default_target = current_app.config["HEATING_DEFAULT_TARGET"] if mode == 'HEATING' else current_app.config["COOLING_DEFAULT_TARGET"]
+        room.target_temp = default_target
 
-        request = RoomRequest(roomId=room.id, fanSpeed=room.fan_speed, mode=room.ac_mode, targetTemp=room.target_temp)
-        capacity = self._capacity()
-        if len(self.serving_queue) < capacity:
-            request.servingTime = now
-            self.serving_queue.append(request)
-            self._mark_room_serving(room.id, now)
+        self._remove_request(room.id) # 确保干净入队
+
+        if abs(room.current_temp - room.target_temp) < 0.1:
+            room.cooling_paused = True
+            room.pause_start_temp = room.current_temp
         else:
-            request.waitingTime = now
-            self.waiting_queue.append(request)
-            self._mark_room_waiting(room.id, now)
+            req = RoomRequest(roomId=room.id, fanSpeed=room.fan_speed, mode=room.ac_mode, targetTemp=room.target_temp)
+            if len(self.serving_queue) < self._capacity():
+                req.servingTime = now; self.serving_queue.append(req); self._mark_room_serving(room.id, now)
+            else:
+                req.waitingTime = now; self.waiting_queue.append(req); self._mark_room_waiting(room.id, now)
         
-        self._rebalance_queues()
         self.room_service.updateRoom(room)
-        return "空调已开启并进入调度"
+        self._rebalance_queues()
+        return f"开启 ({mode})"
 
     def PowerOff(self, RoomId: int) -> str:
-        room_id = RoomId
-        room = self.room_service.getRoomById(room_id)
-        if room is None: raise ValueError("房间不存在")
-        if not room.ac_on: raise ValueError("房间空调尚未开启")
-
+        room = self.room_service.getRoomById(RoomId)
+        if not room or not room.ac_on: raise ValueError("未开启")
         now = datetime.utcnow()
         if room.serving_start_time:
             self._settle_current_service_period(room, now, "POWER_OFF")
         else:
-            customer_id = None
+            cid = None
             if room.status == "OCCUPIED":
                 from ..services import customer_service
                 cust = customer_service.getCustomerByRoomId(room.id)
-                if cust: customer_id = cust.id
+                if cust: cid = cust.id
             self.bill_detail_service.createBillDetail(
                 room_id=room.id, ac_mode=room.ac_mode, fan_speed=room.fan_speed,
                 start_time=now, end_time=now, rate=0.0, cost=0.0,
-                customer_id=customer_id, detail_type="POWER_OFF_CYCLE"
+                customer_id=cid, detail_type="POWER_OFF_CYCLE"
             )
 
-        if room.default_temp is not None:
-            room.current_temp = room.default_temp
-
-        room.ac_on = False
-        room.ac_session_start = None
-        room.waiting_start_time = None
-        room.serving_start_time = None
-        room.cooling_paused = False
-        room.pause_start_temp = None
-        room.last_temp_update = now
+        if room.default_temp is not None: room.current_temp = room.default_temp
+        room.ac_on = False; room.ac_session_start = None; room.waiting_start_time = None; room.serving_start_time = None
+        room.cooling_paused = False; room.pause_start_temp = None; room.last_temp_update = now
         
         self.room_service.updateRoom(room)
-        self._remove_request(room.id)
+        self._remove_request(room.id) # 这会彻底清除所有实例
         self._rebalance_queues(force_rotation=True)
-        return "空调已关闭"
+        return "已关机"
 
     def ChangeTemp(self, RoomId: int, TargetTemp: float) -> str:
-        room_id = RoomId
-        room = self.room_service.getRoomById(room_id)
-        if not room or not room.ac_on: raise ValueError("请先开启空调")
+        room = self.room_service.getRoomById(RoomId)
+        if not room or not room.ac_on: raise ValueError("请先开机")
+        mode = room.ac_mode or 'COOLING'
+        if mode == 'COOLING':
+            if not (current_app.config["COOLING_MIN_TEMP"] <= TargetTemp <= current_app.config["COOLING_MAX_TEMP"]): raise ValueError("超范围")
+        else:
+            if not (current_app.config["HEATING_MIN_TEMP"] <= TargetTemp <= current_app.config["HEATING_MAX_TEMP"]): raise ValueError("超范围")
+
         room.target_temp = TargetTemp
         if room.cooling_paused:
             room.cooling_paused = False; room.pause_start_temp = None
@@ -300,49 +301,41 @@ class Scheduler:
         self.room_service.updateRoom(room)
         for q in (self.serving_queue, self.waiting_queue):
             for r in q:
-                if r.roomId == room_id: r.targetTemp = TargetTemp
-        return "温度已更新"
+                if int(r.roomId) == RoomId: r.targetTemp = TargetTemp
+        return "成功"
 
     def ChangeSpeed(self, RoomId: int, FanSpeed: str) -> str:
-        room_id = RoomId
-        room = self.room_service.getRoomById(room_id)
-        if not room or not room.ac_on: raise ValueError("请先开启空调")
-        normalized = FanSpeed.upper()
-        old_speed = (room.fan_speed or "MEDIUM").upper()
-        if old_speed != normalized and room.serving_start_time:
-            now = datetime.utcnow()
-            self._settle_current_service_period(room, now, "CHANGE")
-            room.ac_session_start = now
-        
-        room.fan_speed = normalized
+        room = self.room_service.getRoomById(RoomId)
+        if not room or not room.ac_on: raise ValueError("请先开机")
+        norm = FanSpeed.upper()
+        if (room.fan_speed or "MEDIUM").upper() != norm and room.serving_start_time:
+            self._settle_current_service_period(room, datetime.utcnow(), "CHANGE")
+        room.fan_speed = norm
         self.room_service.updateRoom(room)
-        self._remove_request(room_id)
-        now = datetime.utcnow()
-        req = RoomRequest(roomId=room.id, fanSpeed=normalized, mode=room.ac_mode, targetTemp=room.target_temp)
-        if room.serving_start_time:
-            req.servingTime = room.serving_start_time
-            self.serving_queue.append(req)
-        elif room.waiting_start_time:
-            req.waitingTime = room.waiting_start_time
-            self.waiting_queue.append(req)
-        else:
-            if len(self.serving_queue) < self._capacity():
-                req.servingTime = now; self.serving_queue.append(req); self._mark_room_serving(room.id, now)
-            else:
-                req.waitingTime = now; self.waiting_queue.append(req); self._mark_room_waiting(room.id, now)
-        self._rebalance_queues(force_rotation=True)
-        return "风速已更新"
+        
+        self._resume_cooling(room) # 内部会调用 _remove_request
+        return "成功"
 
+    def ChangeMode(self, RoomId: int, Mode: str) -> str:
+        room = self.room_service.getRoomById(RoomId)
+        if not room: raise ValueError("不存在")
+        norm = Mode.upper()
+        if room.ac_mode == norm: return "未变"
+        room.ac_mode = norm
+        room.target_temp = current_app.config["HEATING_DEFAULT_TARGET"] if norm == 'HEATING' else current_app.config["COOLING_DEFAULT_TARGET"]
+        for q in (self.serving_queue, self.waiting_queue):
+            for r in q:
+                if int(r.roomId) == RoomId: r.mode = norm; r.targetTemp = room.target_temp
+        self.room_service.updateRoom(room)
+        return "成功"
+
+    # === 温控 ===
     def _updateRoomTemperature(self, room) -> None:
         now = datetime.utcnow()
         current_temp = room.current_temp or room.default_temp or 0.0
         new_temp = current_temp
-        
-        if room.last_temp_update:
-            elapsed = ((now - room.last_temp_update).total_seconds() / 60.0) * self._time_factor()
-        else:
-            elapsed = (3.0/60.0) * self._time_factor()
-
+        if room.last_temp_update: elapsed = ((now - room.last_temp_update).total_seconds() / 60.0) * self._time_factor()
+        else: elapsed = 0.0
         fan_speed = (room.fan_speed or "MEDIUM").upper()
         rate_map = {"HIGH": 1.0, "MEDIUM": 0.5, "LOW": 1.0/3.0}
         change_rate = rate_map.get(fan_speed, 0.5)
@@ -352,158 +345,116 @@ class Scheduler:
             if room.default_temp is not None:
                 diff = room.default_temp - current_temp
                 if abs(diff) < 0.1: new_temp = room.default_temp
-                else:
-                    step = max(min(diff, rewarming_rate * elapsed), -rewarming_rate * elapsed)
-                    new_temp += step
+                else: new_temp += max(min(diff, rewarming_rate * elapsed), -rewarming_rate * elapsed)
         else:
-            is_serving = any(r.roomId == room.id for r in self.serving_queue)
+            is_serving = any(int(r.roomId) == room.id for r in self.serving_queue)
             if is_serving:
-                if room.cooling_paused:
-                    if room.default_temp is not None:
-                        diff = room.default_temp - current_temp
-                        if abs(diff) < 0.1:
-                            new_temp = room.default_temp
-                            room.cooling_paused = False; room.pause_start_temp = None
-                        else:
-                            step = max(min(diff, rewarming_rate * elapsed), -rewarming_rate * elapsed)
-                            new_temp += step
-                            if room.pause_start_temp and abs(new_temp - room.pause_start_temp) >= 1.0:
-                                room.cooling_paused = False; room.pause_start_temp = None
+                diff = room.target_temp - current_temp
+                if abs(diff) < 0.2:
+                    new_temp = room.target_temp
+                    if room.default_temp and abs(room.target_temp - room.default_temp) > 0.5:
+                        room.cooling_paused = True; room.pause_start_temp = new_temp
+                        self._pause_cooling(room)
                 else:
-                    diff = room.target_temp - current_temp
-                    if abs(diff) < 0.2:
-                        new_temp = room.target_temp
-                        if room.default_temp and abs(room.target_temp - room.default_temp) > 0.2:
-                            room.cooling_paused = True; room.pause_start_temp = new_temp
-                            self._pause_cooling(room)
-                    else:
-                        step = max(min(diff, change_rate * elapsed), -change_rate * elapsed)
-                        new_temp += step
-            elif room.cooling_paused:
+                    new_temp += max(min(diff, change_rate * elapsed), -change_rate * elapsed)
+            elif room.cooling_paused or not is_serving:
                 if room.default_temp is not None:
                     diff = room.default_temp - current_temp
                     if abs(diff) < 0.1:
                         new_temp = room.default_temp
-                        room.cooling_paused = False; room.pause_start_temp = None
-                        self._resume_cooling(room)
-                    else:
-                        step = max(min(diff, rewarming_rate * elapsed), -rewarming_rate * elapsed)
-                        new_temp += step
-                        if room.pause_start_temp and abs(new_temp - room.pause_start_temp) >= 1.0:
+                        if abs(new_temp - (room.target_temp or 0)) >= 1.0:
                             room.cooling_paused = False; room.pause_start_temp = None
                             self._resume_cooling(room)
-            else:
-                # 排队回温
-                if room.default_temp is not None:
-                    diff = room.default_temp - current_temp
-                    if abs(diff) < 0.1: new_temp = room.default_temp
                     else:
-                        step = max(min(diff, rewarming_rate * elapsed), -rewarming_rate * elapsed)
-                        new_temp += step
+                        new_temp += max(min(diff, rewarming_rate * elapsed), -rewarming_rate * elapsed)
+                        if room.cooling_paused and room.pause_start_temp and abs(new_temp - room.pause_start_temp) >= 1.0:
+                            room.cooling_paused = False; room.pause_start_temp = None
+                            self._resume_cooling(room)
 
         if abs(new_temp - current_temp) >= 1e-6:
             room.current_temp = round(new_temp, 2)
             room.last_temp_update = now
             self.room_service.updateRoom(room)
 
+    # === 状态 ===
     def RequestState(self, RoomId: int) -> dict:
         room = self.room_service.getRoomById(RoomId)
-        if not room: raise ValueError("房间不存在")
-        
-        current_val = 0.0
-        total_val = 0.0
+        if not room: raise ValueError("不存在")
         try:
             from ..services import bill_service
-            fee_data = bill_service.getCurrentFeeDetail(room)
-            current_val = fee_data.get("current_session_fee", 0.0)
-            
-            # === 核心修改：这里一定要取 'total' 而不是 'total_fee' ===
-            # 'total' 包含了 roomFee + acFee
-            total_val = fee_data.get("total", 0.0)
-        except Exception: 
-            pass
+            fee = bill_service.getCurrentFeeDetail(room)
+            total = fee.get("total", 0.0); curr = fee.get("current_session_fee", 0.0)
+        except: total=0.0; curr=0.0
 
         status = {
-            "id": room.id, "room_id": room.id,
-            "ac_on": bool(room.ac_on), "ac_mode": room.ac_mode, "fan_speed": room.fan_speed,
-            "current_temp": room.current_temp if room.current_temp is not None else 0.0,
-            "currentTemp": room.current_temp if room.current_temp is not None else 0.0,
-            "target_temp": room.target_temp if room.target_temp is not None else 25.0,
-            "targetTemp": room.target_temp if room.target_temp is not None else 25.0,
-            
-            "current_cost": current_val, "currentCost": current_val,
-            
-            # 这里传给前端的 total_cost 将包含房费
-            "total_cost": total_val, "totalCost": total_val
+            "id": room.id, "room_id": room.id, "ac_on": bool(room.ac_on), "ac_mode": room.ac_mode, "fan_speed": room.fan_speed,
+            "current_temp": room.current_temp, "currentTemp": room.current_temp,
+            "target_temp": room.target_temp, "targetTemp": room.target_temp,
+            "total_cost": total, "totalCost": total, "current_cost": curr, "currentCost": curr
         }
         
         now = datetime.utcnow()
-        qs = "IDLE"; ws = 0.0; ss = 0.0; qp = None
-        if room.cooling_paused: qs = "PAUSED"
+        qs="IDLE"; ws=0; ss=0; qp=None
+        if room.cooling_paused: qs="PAUSED"
         else:
             for r in self.serving_queue:
-                if r.roomId == RoomId: qs = "SERVING"; ss = self._elapsed_seconds(r.servingTime, now); break
+                if int(r.roomId)==RoomId: qs="SERVING"; ss=self._elapsed_seconds(r.servingTime, now); break
             else:
                 for i, r in enumerate(self.waiting_queue):
-                    if r.roomId == RoomId: qs = "WAITING"; ws = self._elapsed_seconds(r.waitingTime, now); qp = i+1; break
-        
+                    if int(r.roomId)==RoomId: qs="WAITING"; ws=self._elapsed_seconds(r.waitingTime, now); qp=i+1; break
         status.update({"queueState": qs, "waitingSeconds": ws, "servingSeconds": ss, "queuePosition": qp})
         return status
-
-    def simulateTemperatureUpdate(self) -> dict:
-        if not self.serving_queue and not self.waiting_queue:
-            from ..models import Room
-            if Room.query.filter_by(ac_on=True).count() > 0:
-                self._restore_queue_from_database()
-        
-        rooms = self.room_service.getAllRooms()
-        u = 0
-        for r in rooms:
-            o = r.current_temp
-            self._updateRoomTemperature(r)
-            r = self.room_service.getRoomById(r.id)
-            if r.current_temp is not None and o is not None and abs(r.current_temp - o) >= 1e-6: u += 1
-        return {"message": "Updated", "updatedRooms": u}
 
     def getScheduleStatus(self) -> dict:
         self._restore_queue_from_database()
         self._deduplicate_queues()
         self._rebalance_queues()
-        rooms = self.room_service.getAllRooms()
-        for room in rooms: self._updateRoomTemperature(room)
-        self._enforce_capacity()
+        for r in self.room_service.getAllRooms(): self._updateRoomTemperature(r)
+        
         now = datetime.utcnow()
-        def _to_payload(queue: List[RoomRequest]) -> List[Dict[str, object]]:
-            payload = []
-            for req in queue:
-                payload.append({
-                    "roomId": req.roomId, "fanSpeed": req.fanSpeed, "mode": req.mode,
-                    "targetTemp": req.targetTemp,
-                    "waitingSeconds": self._elapsed_seconds(req.waitingTime, now),
-                    "servingSeconds": self._elapsed_seconds(req.servingTime, now),
-                })
-            return payload
+        def _to_pl(q): return [{"roomId": r.roomId, "fanSpeed": r.fanSpeed, "servingSeconds": self._elapsed_seconds(r.servingTime, now), "waitingSeconds": self._elapsed_seconds(r.waitingTime, now)} for r in q]
         return {
             "capacity": self._capacity(), "timeSlice": self._time_slice(),
-            "servingQueue": _to_payload(self.serving_queue), "waitingQueue": _to_payload(self.waiting_queue),
+            "servingQueue": _to_pl(self.serving_queue), "waitingQueue": _to_pl(self.waiting_queue)
         }
 
+    def simulateTemperatureUpdate(self) -> dict:
+        if not self.serving_queue and not self.waiting_queue:
+            from ..models import Room
+            if Room.query.filter_by(ac_on=True).count() > 0: self._restore_queue_from_database()
+        for r in self.room_service.getAllRooms(): self._updateRoomTemperature(r)
+        return {"message": "Updated"}
+
     def _restore_queue_from_database(self) -> None:
-        self._deduplicate_queues()
+        self._deduplicate_queues() # 先清理内存
         from ..models import Room
         active = {r.id for r in Room.query.filter_by(ac_on=True).all()}
-        self.serving_queue = [r for r in self.serving_queue if r.roomId in active]
-        self.waiting_queue = [r for r in self.waiting_queue if r.roomId in active]
-        existing = {r.roomId for r in self.serving_queue} | {r.roomId for r in self.waiting_queue}
+        
+        # 移除已关机的
+        self.serving_queue = [r for r in self.serving_queue if int(r.roomId) in active]
+        self.waiting_queue = [r for r in self.waiting_queue if int(r.roomId) in active]
+        
+        existing = {int(r.roomId) for r in self.serving_queue} | {int(r.roomId) for r in self.waiting_queue}
         now = datetime.utcnow()
+        capacity = self._capacity()
+
         for rid in active:
             if rid in existing: continue
             r = self.room_service.getRoomById(rid)
             if not r or r.cooling_paused: continue
-            req = RoomRequest(roomId=r.id, fanSpeed=r.fan_speed or "MEDIUM", mode=r.ac_mode, targetTemp=r.target_temp)
-            if r.serving_start_time: req.servingTime = r.serving_start_time; self.serving_queue.append(req)
-            elif r.waiting_start_time: req.waitingTime = r.waiting_start_time; self.waiting_queue.append(req)
+            
+            req = RoomRequest(roomId=r.id, fanSpeed=r.fan_speed, mode=r.ac_mode, targetTemp=r.target_temp)
+            if r.serving_start_time:
+                if len(self.serving_queue) < capacity:
+                    req.servingTime = r.serving_start_time; self.serving_queue.append(req)
+                else:
+                    req.waitingTime = r.serving_start_time; self.waiting_queue.append(req); self._mark_room_waiting(r.id, req.waitingTime)
+            elif r.waiting_start_time:
+                req.waitingTime = r.waiting_start_time; self.waiting_queue.append(req)
             else:
-                if len(self.serving_queue) < self._capacity(): req.servingTime = r.ac_session_start or now; self.serving_queue.append(req); self._mark_room_serving(r.id, req.servingTime)
-                else: req.waitingTime = r.ac_session_start or now; self.waiting_queue.append(req); self._mark_room_waiting(r.id, req.waitingTime)
+                if len(self.serving_queue) < capacity:
+                    req.servingTime = r.ac_session_start or now; self.serving_queue.append(req); self._mark_room_serving(r.id, now)
+                else:
+                    req.waitingTime = r.ac_session_start or now; self.waiting_queue.append(req); self._mark_room_waiting(r.id, now)
+        
         self._rebalance_queues()

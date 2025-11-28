@@ -24,11 +24,10 @@ def power_on():
     payload = request.get_json() or {}
     room_id = payload.get("roomId")
     try:
-        # 获取房间当前温度（如果提供了则使用，否则为 None，让 PowerOn 使用房间的现有温度）
+        # 开机前获取当前温度，避免调度器缺少参数
         from ..services import room_service
         room = room_service.getRoomById(room_id)
         current_temp = room.current_temp if room else None
-        # 开机（传递当前温度，如果为 None 则使用房间的现有温度）
         message = ac.PowerOn(room_id, current_temp)
         return jsonify({"message": message})
     except Exception as exc:
@@ -71,15 +70,14 @@ def change_speed():
 def change_mode():
     payload = request.get_json() or {}
     room_id = payload.get("roomId")
-    mode = payload.get("mode")
+    mode = payload.get("mode")  # Expected: 'COOLING' or 'HEATING'
     try:
-        # 切换模式 (简单实现，直接操作 Room 对象)
-        from ..services import room_service
-        room = room_service.getRoomById(room_id)
-        if room:
-            room.ac_mode = mode
-            room_service.updateRoom(room)
-            return jsonify({"message": "模式已更新"})
-        return jsonify({"error": "房间不存在"}), 400
+        # === 修改：调用 scheduler 的逻辑，而不是直接改数据库 ===
+        message = scheduler.ChangeMode(room_id, mode)
+        
+        # 为了保证前端看到最新状态，强制计算一次
+        scheduler.simulateTemperatureUpdate()
+        
+        return jsonify({"message": message})
     except Exception as exc:
         return jsonify({"error": str(exc)}), 400

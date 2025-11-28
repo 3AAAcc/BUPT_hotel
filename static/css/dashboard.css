@@ -1,6 +1,5 @@
 body {
-    /* background-color: #1e293b; 注释掉，使用粒子背景 */
-    background: transparent;
+    background-color: #1e293b; /* 深色背景，更有科技感 */
     color: #e2e8f0;
     height: 100vh;
     display: flex;

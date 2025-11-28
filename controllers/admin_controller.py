@@ -70,6 +70,16 @@ def admin_speed():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
+@admin_bp.post("/control/mode")
+def admin_mode():
+    payload = request.get_json() or {}
+    try:
+        # 调用 Scheduler 的 ChangeMode 方法 (会重置目标温度)
+        msg = scheduler.ChangeMode(payload.get("roomId"), payload.get("mode"))
+        return jsonify({"message": msg})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
 @admin_bp.post("/reset-database")
 def reset_database():
     """重置数据库并重新初始化所有数据（调试用）"""

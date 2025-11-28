@@ -30,3 +30,13 @@ class Config:
     # 测试用时间加速因子：现实1秒=系统TIME_ACCELERATION_FACTOR秒
     TIME_ACCELERATION_FACTOR = float(os.getenv("TIME_ACCELERATION_FACTOR", 6.0))
 
+    # === 制冷/制热 配置 ===
+    # 制冷: 18-28度, 默认25
+    COOLING_MIN_TEMP = 18.0
+    COOLING_MAX_TEMP = 28.0
+    COOLING_DEFAULT_TARGET = 25.0
+    # 制热: 18-25度, 默认22
+    HEATING_MIN_TEMP = 18.0
+    HEATING_MAX_TEMP = 25.0
+    HEATING_DEFAULT_TARGET = 22.0
+

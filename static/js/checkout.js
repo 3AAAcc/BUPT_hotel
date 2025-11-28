@@ -30,21 +30,12 @@ function renderInvoice(data) {
   document.getElementById('bill-date').innerText = new Date().toLocaleDateString();
   document.getElementById('bill-id').innerText = Date.now().toString().slice(-6); // 模拟单号
 
-  // 3. 客户信息 (适配新 grid 布局)
+  // 3. 客户信息
   if (customer) {
       document.getElementById('customer-info').innerHTML = `
-          <div class="c-item">
-              <strong>客户姓名 NAME</strong>
-              <span>${customer.name}</span>
-          </div>
-          <div class="c-item">
-              <strong>身份证号 ID CARD</strong>
-              <span>${customer.idCard || '--'}</span>
-          </div>
-          <div class="c-item">
-              <strong>联系电话 PHONE</strong>
-              <span>${customer.phoneNumber || '--'}</span>
-          </div>
+          <div><strong>客户姓名:</strong> ${customer.name}</div>
+          <div><strong>身份证号:</strong> ${customer.idCard || '--'}</div>
+          <div><strong>联系电话:</strong> ${customer.phoneNumber || '--'}</div>
       `;
   }
 
