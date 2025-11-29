@@ -3,7 +3,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f3f4f6; /* 与 reception 背景一致 */
+    background: transparent; /* 使用粒子背景 */
 }
 
 /* 表单卡片 */

@@ -2,7 +2,7 @@ body {
   font-family: "Segoe UI", Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background: #f5f7fb;
+  background: transparent !important; /* 使用粒子背景 */
   color: #1f1f1f;
 }
 
@@ -182,5 +182,31 @@ li {
 
 #toast.success {
   background: #16a34a;
+}
+
+/* === 全局动态背景样式 === */
+#particles-js {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -1; /* 放在最底层 */
+  background-color: #f0f2f5; /* 默认浅灰底色 */
+  background-image: url('');
+  background-size: cover;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+}
+
+/* 确保内容区域显示在粒子背景之上 */
+.dashboard-container {
+  position: relative;
+  z-index: 1;
+}
+
+.main-content {
+  position: relative;
+  z-index: 1;
 }
 

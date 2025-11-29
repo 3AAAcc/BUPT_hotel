@@ -4,7 +4,7 @@
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   31.95 25.0  M    100.50   COOLING
+1   ON   31.96 25.0  M    100.00   COOLING
 2   OFF  28.0  25.0  M    125.00   COOLING
 3   OFF  30.0  25.0  M    150.00   COOLING
 4   OFF  29.0  25.0  M    200.00   COOLING
@@ -14,7 +14,7 @@ Rm  St   Cur   Tar   Spd  Fee      Mode
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=MEDIUM  Serve=3.3s  Wait=0.0s
+  Room 1  Fan=MEDIUM  Serve=3.6s  Wait=0.0s
 WaitingQueue:
 ====================
 
@@ -25,19 +25,19 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   31.31 18.0  M    100.50   COOLING
-2   ON   27.96 25.0  M    125.50   COOLING
+1   ON   31.23 18.0  M    100.50   COOLING
+2   ON   27.95 25.0  M    125.00   COOLING
 3   OFF  30.0  25.0  M    150.00   COOLING
 4   OFF  29.0  25.0  M    200.00   COOLING
-5   ON   34.96 25.0  M    100.50   COOLING
+5   ON   34.95 25.0  M    100.00   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=MEDIUM  Serve=67.1s  Wait=0.0s
-  Room 2  Fan=MEDIUM  Serve=3.7s  Wait=0.0s
-  Room 5  Fan=MEDIUM  Serve=3.6s  Wait=0.0s
+  Room 1  Fan=MEDIUM  Serve=68.0s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=4.2s  Wait=0.0s
+  Room 5  Fan=MEDIUM  Serve=4.1s  Wait=0.0s
 WaitingQueue:
 ====================
 
@@ -46,45 +46,45 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   30.83 18.0  M    102.00   COOLING
-2   ON   27.36 25.0  M    125.50   COOLING
-3   ON   30.0  25.0  M    150.50   COOLING
+1   ON   30.66 18.0  M    101.00   COOLING
+2   ON   27.24 25.0  M    125.50   COOLING
+3   ON   30.0  25.0  M    150.00   COOLING
 4   OFF  29.0  25.0  M    200.00   COOLING
-5   ON   34.36 25.0  M    100.50   COOLING
+5   ON   34.24 25.0  M    100.50   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 2  Fan=MEDIUM  Serve=67.4s  Wait=0.0s
-  Room 5  Fan=MEDIUM  Serve=67.3s  Wait=0.0s
-  Room 1  Fan=MEDIUM  Serve=6.0s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=68.8s  Wait=0.0s
+  Room 5  Fan=MEDIUM  Serve=68.8s  Wait=0.0s
+  Room 1  Fan=MEDIUM  Serve=6.7s  Wait=0.0s
 WaitingQueue:
-  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=0.0s
+  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=4.5s
 ====================
 
 🕒 [Min 3]
-  Room 2 temp 19.0 -> 成功
   Room 4 power_on  -> 成功
+  Room 2 temp 19.0 -> 成功
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   30.16 18.0  M    102.50   COOLING
-2   ON   26.81 19.0  M    127.00   COOLING
-3   ON   29.44 25.0  M    150.50   COOLING
-4   ON   29.0  25.0  M    200.50   COOLING
-5   ON   34.03 25.0  M    102.00   COOLING
+1   ON   29.86 18.0  M    101.50   COOLING
+2   ON   26.57 19.0  M    126.00   COOLING
+3   ON   29.41 25.0  M    150.00   COOLING
+4   ON   29.0  25.0  M    200.00   COOLING
+5   ON   33.71 25.0  M    101.00   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=MEDIUM  Serve=69.9s  Wait=0.0s
-  Room 3  Fan=MEDIUM  Serve=9.9s  Wait=0.0s
-  Room 2  Fan=MEDIUM  Serve=9.9s  Wait=0.0s
+  Room 1  Fan=MEDIUM  Serve=71.2s  Wait=0.0s
+  Room 3  Fan=MEDIUM  Serve=11.1s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=11.1s  Wait=0.0s
 WaitingQueue:
-  Room 5  Fan=MEDIUM  Serve=0.0s  Wait=10.0s
-  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=0.1s
+  Room 5  Fan=MEDIUM  Serve=0.0s  Wait=11.4s
+  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=4.3s
 ====================
 
 🕒 [Min 4]
@@ -92,22 +92,22 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   29.82 18.0  M    104.00   COOLING
-2   ON   26.19 19.0  M    127.50   COOLING
-3   ON   28.82 25.0  M    151.00   COOLING
-4   ON   29.0  25.0  M    200.50   COOLING
-5   ON   34.27 22.0  M    102.50   COOLING
+1   ON   29.47 18.0  M    102.00   COOLING
+2   ON   25.78 19.0  M    126.50   COOLING
+3   ON   28.62 25.0  M    150.50   COOLING
+4   ON   29.0  25.0  M    200.00   COOLING
+5   ON   34.1  22.0  M    101.00   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 3  Fan=MEDIUM  Serve=73.8s  Wait=0.0s
-  Room 2  Fan=MEDIUM  Serve=73.8s  Wait=0.0s
-  Room 5  Fan=MEDIUM  Serve=13.7s  Wait=0.0s
+  Room 3  Fan=MEDIUM  Serve=75.1s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=75.1s  Wait=0.0s
+  Room 5  Fan=MEDIUM  Serve=9.1s  Wait=0.0s
 WaitingQueue:
-  Room 1  Fan=MEDIUM  Serve=0.0s  Wait=13.7s
-  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=0.1s
+  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=68.3s
+  Room 1  Fan=MEDIUM  Serve=0.0s  Wait=9.3s
 ====================
 
 🕒 [Min 5]
@@ -115,22 +115,22 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   30.09 18.0  H    107.50   COOLING
-2   ON   25.87 19.0  M    129.00   COOLING
-3   ON   28.54 25.0  M    152.50   COOLING
-4   ON   27.87 25.0  M    201.00   COOLING
-5   ON   33.62 22.0  M    103.00   COOLING
+1   ON   29.79 18.0  H    102.00   COOLING
+2   ON   25.39 19.0  M    127.00   COOLING
+3   ON   28.37 25.0  M    151.00   COOLING
+4   ON   27.8  25.0  M    200.00   COOLING
+5   ON   33.35 22.0  M    101.50   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 5  Fan=MEDIUM  Serve=78.0s  Wait=0.0s
-  Room 4  Fan=MEDIUM  Serve=17.7s  Wait=0.0s
-  Room 1  Fan=HIGH  Serve=4.1s  Wait=0.0s
+  Room 5  Fan=MEDIUM  Serve=73.4s  Wait=0.0s
+  Room 4  Fan=MEDIUM  Serve=13.4s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=15.5s  Wait=0.0s
 WaitingQueue:
-  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=17.8s
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=17.7s
+  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=13.6s
+  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=13.6s
 ====================
 
 🕒 [Min 6]
@@ -138,21 +138,21 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   28.74 18.0  H    108.50   COOLING
+1   ON   28.39 18.0  H    103.00   COOLING
 2   OFF  28.0  19.0  M    127.00   COOLING
-3   ON   28.75 25.0  M    153.00   COOLING
-4   ON   27.19 25.0  M    201.50   COOLING
-5   ON   33.42 22.0  M    104.50   COOLING
+3   ON   29.01 25.0  M    151.00   COOLING
+4   ON   27.04 25.0  M    200.50   COOLING
+5   ON   33.03 22.0  M    102.00   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 4  Fan=MEDIUM  Serve=81.8s  Wait=0.0s
-  Room 1  Fan=HIGH  Serve=68.2s  Wait=0.0s
-  Room 3  Fan=MEDIUM  Serve=16.2s  Wait=0.0s
+  Room 4  Fan=MEDIUM  Serve=77.3s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=79.5s  Wait=0.0s
+  Room 3  Fan=MEDIUM  Serve=3.7s  Wait=0.0s
 WaitingQueue:
-  Room 5  Fan=MEDIUM  Serve=0.0s  Wait=16.4s
+  Room 5  Fan=MEDIUM  Serve=0.0s  Wait=11.6s
 ====================
 
 🕒 [Min 7]
@@ -161,44 +161,44 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   27.61 18.0  H    111.50   COOLING
-2   ON   28.0  25.0  M    252.50   COOLING
-3   ON   28.09 25.0  M    153.50   COOLING
-4   ON   27.12 25.0  M    203.00   COOLING
-5   ON   33.39 22.0  H    108.50   COOLING
+1   ON   27.08 18.0  H    104.00   COOLING
+2   ON   28.0  19.0  M    252.00   COOLING
+3   ON   28.2  25.0  M    151.50   COOLING
+4   ON   26.77 25.0  M    201.00   COOLING
+5   ON   33.18 22.0  H    102.00   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 3  Fan=MEDIUM  Serve=80.6s  Wait=0.0s
-  Room 1  Fan=HIGH  Serve=8.7s  Wait=0.0s
-  Room 5  Fan=HIGH  Serve=4.0s  Wait=0.0s
+  Room 3  Fan=MEDIUM  Serve=68.0s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=21.8s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=17.8s  Wait=0.0s
 WaitingQueue:
-  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=20.7s
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=0.2s
+  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=15.9s
+  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=4.1s
 ====================
 
 🕒 [Min 8]
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   26.41 18.0  H    112.50   COOLING
-2   ON   28.0  25.0  M    252.50   COOLING
-3   ON   28.11 25.0  M    155.00   COOLING
-4   ON   27.15 25.0  M    203.50   COOLING
-5   ON   32.09 22.0  H    109.50   COOLING
+1   ON   25.67 18.0  H    105.00   COOLING
+2   ON   28.0  19.0  M    252.00   COOLING
+3   ON   27.81 25.0  M    152.00   COOLING
+4   ON   27.16 25.0  M    201.00   COOLING
+5   ON   31.66 22.0  H    103.00   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=HIGH  Serve=72.8s  Wait=0.0s
-  Room 5  Fan=HIGH  Serve=68.1s  Wait=0.0s
-  Room 4  Fan=MEDIUM  Serve=24.7s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=85.6s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=81.6s  Wait=0.0s
+  Room 4  Fan=MEDIUM  Serve=7.5s  Wait=0.0s
 WaitingQueue:
-  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=24.7s
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=0.2s
+  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=67.9s
+  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=7.8s
 ====================
 
 🕒 [Min 9]
@@ -208,44 +208,44 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   25.05 22.0  H    115.50   COOLING
-2   ON   26.97 25.0  M    253.50   COOLING
-3   ON   28.66 25.0  M    156.00   COOLING
-4   ON   26.83 18.0  H    207.50   COOLING
-5   ON   30.75 22.0  H    112.50   COOLING
+1   ON   24.5  22.0  H    106.00   COOLING
+2   ON   28.0  19.0  M    252.00   COOLING
+3   ON   28.52 25.0  M    152.00   COOLING
+4   ON   26.43 18.0  H    202.50   COOLING
+5   ON   30.51 22.0  H    104.00   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=HIGH  Serve=17.0s  Wait=0.0s
-  Room 5  Fan=HIGH  Serve=11.1s  Wait=0.0s
-  Room 4  Fan=HIGH  Serve=4.1s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=23.9s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=23.9s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=74.2s  Wait=0.0s
 WaitingQueue:
-  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=11.4s
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=4.1s
+  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=132.5s
+  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=72.4s
 ====================
 
 🕒 [Min 10]
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   23.68 22.0  H    116.50   COOLING
-2   ON   27.65 25.0  M    254.00   COOLING
-3   ON   29.35 25.0  M    156.50   COOLING
-4   ON   25.37 18.0  H    208.50   COOLING
-5   ON   29.38 22.0  H    113.50   COOLING
+1   ON   23.14 22.0  H    107.00   COOLING
+2   ON   28.0  19.0  M    252.00   COOLING
+3   ON   29.19 25.0  M    152.00   COOLING
+4   ON   24.98 18.0  H    203.50   COOLING
+5   ON   29.05 22.0  H    105.00   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=HIGH  Serve=82.8s  Wait=0.0s
-  Room 4  Fan=HIGH  Serve=70.8s  Wait=0.0s
-  Room 5  Fan=HIGH  Serve=76.8s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=87.7s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=87.7s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=16.5s  Wait=0.0s
 WaitingQueue:
-  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=76.8s
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=70.8s
+  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=196.3s
+  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=136.2s
 ====================
 
 🕒 [Min 11]
@@ -253,22 +253,21 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   22.54 22.0  H    119.50   COOLING
-2   ON   28.0  22.0  M    256.00   COOLING
-3   ON   30.0  25.0  M    158.50   COOLING
-4   ON   23.93 18.0  H    211.50   COOLING
-5   ON   27.93 22.0  H    116.50   COOLING
+1   ON   22.09 22.0  H    108.00   COOLING
+2   ON   25.8  22.0  M    252.00   COOLING
+3   ON   29.87 25.0  M    152.00   COOLING
+4   ON   23.54 18.0  H    204.50   COOLING
+5   ON   27.8  22.0  H    106.00   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=HIGH  Serve=25.6s  Wait=0.0s
-  Room 5  Fan=HIGH  Serve=19.5s  Wait=0.0s
-  Room 4  Fan=HIGH  Serve=13.6s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=80.8s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=26.6s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=8.8s  Wait=0.0s
 WaitingQueue:
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=0.2s
-  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=0.2s
+  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=200.5s
 ====================
 
 🕒 [Min 12]
@@ -276,43 +275,42 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   22.42 22.0  H    111.50   COOLING
-2   ON   27.12 22.0  M    256.50   COOLING
-3   ON   29.44 25.0  M    159.00   COOLING
-4   ON   22.46 18.0  H    212.50   COOLING
-5   ON   26.64 22.0  L    111.50   COOLING
+1   ON   22.77 22.0  H    108.00   COOLING
+2   ON   25.15 22.0  M    252.50   COOLING
+3   ON   29.56 25.0  M    152.00   COOLING
+4   ON   22.11 18.0  H    205.50   COOLING
+5   ON   26.64 22.0  L    107.33   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 4  Fan=HIGH  Serve=78.3s  Wait=0.0s
-  Room 2  Fan=MEDIUM  Serve=42.3s  Wait=0.0s
-  Room 3  Fan=MEDIUM  Serve=4.3s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=73.6s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=19.5s  Wait=0.0s
+  Room 3  Fan=MEDIUM  Serve=4.5s  Wait=0.0s
 WaitingQueue:
-  Room 5  Fan=LOW  Serve=0.0s  Wait=4.3s
+  Room 5  Fan=LOW  Serve=0.0s  Wait=4.5s
 ====================
 
 🕒 [Min 13]
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   22.94 22.0  H    111.50   COOLING
-2   ON   26.43 22.0  M    257.50   COOLING
-3   ON   28.99 25.0  M    160.00   COOLING
-4   ON   20.97 18.0  H    215.50   COOLING
-5   ON   27.34 22.0  L    111.83   COOLING
+1   ON   22.15 22.0  H    109.00   COOLING
+2   ON   24.36 22.0  M    253.50   COOLING
+3   ON   29.89 25.0  M    152.00   COOLING
+4   ON   20.62 18.0  H    206.50   COOLING
+5   ON   27.39 22.0  L    107.33   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 2  Fan=MEDIUM  Serve=4.5s  Wait=0.0s
-  Room 4  Fan=HIGH  Serve=16.3s  Wait=0.0s
-  Room 1  Fan=HIGH  Serve=4.4s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=41.4s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=83.6s  Wait=0.0s
+  Room 3  Fan=MEDIUM  Serve=0.3s  Wait=0.0s
 WaitingQueue:
-  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=4.2s
-  Room 5  Fan=LOW  Serve=0.0s  Wait=68.3s
+  Room 5  Fan=LOW  Serve=0.0s  Wait=68.6s
 ====================
 
 🕒 [Min 14]
@@ -322,19 +320,19 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   OFF  32.0  22.0  H    112.50   COOLING
-2   ON   25.79 22.0  M    258.00   COOLING
-3   ON   29.24 24.0  L    159.00   COOLING
-4   ON   19.61 18.0  H    216.50   COOLING
-5   ON   27.99 22.0  L    112.17   COOLING
+1   OFF  32.0  22.0  H    109.00   COOLING
+2   ON   23.58 22.0  M    254.00   COOLING
+3   ON   29.14 24.0  L    152.83   COOLING
+4   ON   19.06 18.0  H    207.50   COOLING
+5   ON   28.18 22.0  L    107.33   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 2  Fan=MEDIUM  Serve=69.0s  Wait=0.0s
-  Room 4  Fan=HIGH  Serve=80.8s  Wait=0.0s
-  Room 3  Fan=LOW  Serve=4.1s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=105.7s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=27.5s  Wait=0.0s
+  Room 3  Fan=LOW  Serve=65.6s  Wait=0.0s
 WaitingQueue:
   Room 5  Fan=LOW  Serve=0.0s  Wait=132.9s
 ====================
@@ -345,21 +343,20 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   OFF  32.0  22.0  H    112.50   COOLING
-2   ON   25.28 22.0  M    259.50   COOLING
-3   ON   28.94 24.0  L    159.67   COOLING
-4   ON   18.29 18.0  H    219.50   COOLING
-5   ON   28.42 20.0  H    122.83   COOLING
+1   OFF  32.0  22.0  H    109.00   COOLING
+2   ON   22.93 22.0  M    254.50   COOLING
+3   ON   28.8  24.0  L    153.17   COOLING
+4   ON   18.26 18.0  H    209.50   COOLING
+5   ON   28.28 20.0  H    107.33   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 4  Fan=HIGH  Serve=19.4s  Wait=0.0s
-  Room 2  Fan=MEDIUM  Serve=7.4s  Wait=0.0s
-  Room 5  Fan=HIGH  Serve=4.1s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=44.0s  Wait=0.0s
+  Room 3  Fan=LOW  Serve=7.9s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=22.0s  Wait=0.0s
 WaitingQueue:
-  Room 3  Fan=LOW  Serve=0.0s  Wait=4.1s
 ====================
 
 🕒 [Min 16]
@@ -367,18 +364,19 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   OFF  32.0  22.0  H    112.50   COOLING
-2   OFF  28.0  22.0  M    256.00   COOLING
-3   ON   28.73 24.0  L    160.33   COOLING
-4   ON   18.53 18.0  H    210.50   COOLING
-5   ON   26.97 20.0  H    123.83   COOLING
+1   OFF  32.0  22.0  H    109.00   COOLING
+2   OFF  28.0  22.0  M    255.00   COOLING
+3   ON   28.4  24.0  L    153.50   COOLING
+4   ON   18.99 18.0  H    209.50   COOLING
+5   ON   26.9  20.0  H    108.33   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 5  Fan=HIGH  Serve=68.1s  Wait=0.0s
-  Room 3  Fan=LOW  Serve=53.2s  Wait=0.0s
+  Room 3  Fan=LOW  Serve=72.1s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=86.1s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=0.2s  Wait=0.0s
 WaitingQueue:
 ====================
 
@@ -387,44 +385,43 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   OFF  32.0  22.0  H    112.50   COOLING
-2   OFF  28.0  22.0  M    256.00   COOLING
-3   ON   28.16 24.0  H    171.67   COOLING
-4   ON   18.69 18.0  H    210.50   COOLING
-5   ON   25.77 20.0  H    126.83   COOLING
+1   OFF  32.0  22.0  H    109.00   COOLING
+2   OFF  28.0  22.0  M    255.00   COOLING
+3   ON   27.89 24.0  H    155.83   COOLING
+4   ON   18.26 18.0  H    211.50   COOLING
+5   ON   25.37 20.0  H    109.33   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 4  Fan=HIGH  Serve=15.6s  Wait=0.0s
-  Room 5  Fan=HIGH  Serve=9.6s  Wait=0.0s
-  Room 3  Fan=HIGH  Serve=3.9s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=27.8s  Wait=0.0s
+  Room 3  Fan=HIGH  Serve=137.8s  Wait=0.0s
 WaitingQueue:
 ====================
 
 🕒 [Min 18]
   Room 1 power_on  -> 成功
-  Room 4 temp 20.0 -> 成功
   Room 4 speed MEDIUM -> 成功
+  Room 4 temp 20.0 -> 成功
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   31.94 25.0  H    213.50   COOLING
-2   OFF  28.0  22.0  M    256.00   COOLING
-3   ON   26.92 24.0  H    172.67   COOLING
-4   ON   18.26 20.0  M    212.00   COOLING
-5   ON   24.5  20.0  H    127.83   COOLING
+1   ON   31.88 22.0  H    209.00   COOLING
+2   OFF  28.0  22.0  M    255.00   COOLING
+3   ON   26.46 24.0  H    156.83   COOLING
+4   ON   19.03 20.0  M    211.50   COOLING
+5   ON   23.88 20.0  H    111.33   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 5  Fan=HIGH  Serve=73.8s  Wait=0.0s
-  Room 3  Fan=HIGH  Serve=68.1s  Wait=0.0s
-  Room 1  Fan=HIGH  Serve=4.1s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=92.5s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=4.5s  Wait=0.0s
+  Room 3  Fan=HIGH  Serve=4.3s  Wait=0.0s
 WaitingQueue:
-  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=3.9s
+  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=2.7s
 ====================
 
 🕒 [Min 19]
@@ -432,22 +429,22 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   30.65 25.0  H    213.50   COOLING
-2   ON   28.0  25.0  M    381.50   COOLING
-3   ON   25.63 24.0  H    175.67   COOLING
-4   ON   18.92 20.0  M    212.00   COOLING
-5   ON   23.29 20.0  H    130.83   COOLING
+1   ON   30.55 22.0  H    210.00   COOLING
+2   ON   28.0  22.0  M    380.00   COOLING
+3   ON   25.12 24.0  H    157.83   COOLING
+4   ON   19.78 20.0  M    211.50   COOLING
+5   ON   22.44 20.0  H    112.33   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=HIGH  Serve=68.5s  Wait=0.0s
-  Room 3  Fan=HIGH  Serve=12.1s  Wait=0.0s
-  Room 5  Fan=HIGH  Serve=12.1s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=68.6s  Wait=0.0s
+  Room 3  Fan=HIGH  Serve=68.4s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=30.7s  Wait=0.0s
 WaitingQueue:
-  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=68.4s
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=0.3s
+  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=66.8s
+  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=3.9s
 ====================
 
 🕒 [Min 20]
@@ -455,41 +452,39 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   29.5  25.0  H    216.50   COOLING
-2   ON   28.0  25.0  M    381.50   COOLING
-3   ON   24.21 24.0  H    176.67   COOLING
-4   ON   19.59 20.0  M    212.50   COOLING
-5   ON   22.02 25.0  H    131.83   COOLING
+1   ON   29.07 22.0  H    211.00   COOLING
+2   ON   27.43 22.0  M    380.00   COOLING
+3   ON   24.21 24.0  H    160.83   COOLING
+4   ON   20.12 20.0  M    211.50   COOLING
+5   ON   21.06 25.0  H    113.33   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 3  Fan=HIGH  Serve=76.3s  Wait=0.0s
-  Room 5  Fan=HIGH  Serve=76.3s  Wait=0.0s
-  Room 1  Fan=HIGH  Serve=10.5s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=94.8s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=10.7s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=10.1s  Wait=0.0s
 WaitingQueue:
-  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=132.5s
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=0.2s
 ====================
 
 🕒 [Min 21]
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   28.21 25.0  H    217.50   COOLING
-2   ON   26.86 25.0  M    382.00   COOLING
-3   ON   24.58 24.0  H    160.67   COOLING
-4   ON   20.34 20.0  M    213.00   COOLING
-5   ON   23.44 25.0  H    134.83   COOLING
+1   ON   27.62 22.0  H    212.00   COOLING
+2   ON   26.65 22.0  M    380.50   COOLING
+3   ON   24.99 24.0  H    160.83   COOLING
+4   ON   20.91 20.0  M    211.50   COOLING
+5   ON   22.62 25.0  H    114.33   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=HIGH  Serve=74.5s  Wait=0.0s
-  Room 2  Fan=MEDIUM  Serve=32.1s  Wait=0.0s
-  Room 5  Fan=HIGH  Serve=14.5s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=74.9s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=74.2s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=33.0s  Wait=0.0s
 WaitingQueue:
 ====================
 
@@ -498,20 +493,21 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   27.0  25.0  H    220.50   COOLING
-2   ON   26.52 25.0  M    384.00   COOLING
-3   OFF  30.0  24.0  H    160.67   COOLING
-4   ON   21.02 20.0  M    213.00   COOLING
-5   ON   24.89 25.0  H    135.83   COOLING
+1   ON   26.27 22.0  H    213.00   COOLING
+2   ON   26.9  22.0  M    380.50   COOLING
+3   OFF  30.0  24.0  H    162.83   COOLING
+4   ON   21.68 20.0  M    211.50   COOLING
+5   ON   24.18 25.0  H    115.33   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=HIGH  Serve=18.8s  Wait=0.0s
-  Room 2  Fan=MEDIUM  Serve=4.5s  Wait=0.0s
-  Room 4  Fan=MEDIUM  Serve=0.2s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=97.3s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=55.5s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=18.9s  Wait=0.0s
 WaitingQueue:
+  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=55.1s
 ====================
 
 🕒 [Min 23]
@@ -519,19 +515,19 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   ON   25.66 25.0  H    221.50   COOLING
-2   ON   25.85 25.0  M    384.50   COOLING
-3   OFF  30.0  24.0  H    160.67   COOLING
-4   ON   20.39 20.0  M    213.50   COOLING
-5   OFF  35.0  25.0  H    114.83   COOLING
+1   ON   24.87 22.0  H    214.00   COOLING
+2   ON   26.14 22.0  M    381.00   COOLING
+3   OFF  30.0  24.0  H    162.83   COOLING
+4   ON   21.62 20.0  M    212.00   COOLING
+5   OFF  35.0  25.0  H    115.33   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=HIGH  Serve=83.0s  Wait=0.0s
-  Room 2  Fan=MEDIUM  Serve=68.8s  Wait=0.0s
-  Room 4  Fan=MEDIUM  Serve=64.4s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=119.8s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=83.3s  Wait=0.0s
+  Room 4  Fan=MEDIUM  Serve=35.0s  Wait=0.0s
 WaitingQueue:
 ====================
 
@@ -540,17 +536,18 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   OFF  25.35 25.0  H    218.50   COOLING
-2   ON   25.3  25.0  M    386.00   COOLING
-3   OFF  30.0  24.0  H    160.67   COOLING
-4   ON   20.42 20.0  M    214.00   COOLING
-5   OFF  35.0  25.0  H    114.83   COOLING
+1   OFF  32.0  22.0  H    215.00   COOLING
+2   ON   25.47 22.0  M    381.50   COOLING
+3   OFF  30.0  24.0  H    162.83   COOLING
+4   ON   20.81 20.0  M    212.50   COOLING
+5   OFF  35.0  25.0  H    115.33   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 2  Fan=MEDIUM  Serve=9.6s  Wait=0.0s
+  Room 4  Fan=MEDIUM  Serve=99.0s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=21.6s  Wait=0.0s
 WaitingQueue:
 ====================
 
@@ -560,11 +557,11 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   OFF  25.99 25.0  H    218.50   COOLING
-2   OFF  28.0  25.0  M    384.50   COOLING
-3   OFF  30.0  24.0  H    160.67   COOLING
-4   OFF  29.0  20.0  M    213.50   COOLING
-5   OFF  35.0  25.0  H    114.83   COOLING
+1   OFF  32.0  22.0  H    215.00   COOLING
+2   OFF  28.0  22.0  M    382.00   COOLING
+3   OFF  30.0  24.0  H    162.83   COOLING
+4   OFF  29.0  20.0  M    213.00   COOLING
+5   OFF  35.0  25.0  H    115.33   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===
@@ -577,11 +574,11 @@ WaitingQueue:
 ------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 ------------------------------------------------------------
-1   OFF  26.63 25.0  H    218.50   COOLING
-2   OFF  28.0  25.0  M    384.50   COOLING
-3   OFF  30.0  24.0  H    160.67   COOLING
-4   OFF  29.0  20.0  M    213.50   COOLING
-5   OFF  35.0  25.0  H    114.83   COOLING
+1   OFF  32.0  22.0  H    215.00   COOLING
+2   OFF  28.0  22.0  M    382.00   COOLING
+3   OFF  30.0  24.0  H    162.83   COOLING
+4   OFF  29.0  20.0  M    213.00   COOLING
+5   OFF  35.0  25.0  H    115.33   COOLING
 ------------------------------------------------------------
 
 === Queue Status ===

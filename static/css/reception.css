@@ -14,13 +14,14 @@ body {
   /* background-color: var(--main-bg); 注释掉，使用粒子背景 */
   background: transparent;
   margin: 0;
-  height: 100vh;
-  overflow: hidden; /* 防止双重滚动条 */
+  min-height: 100vh;
+  overflow-x: hidden; /* 只隐藏横向滚动条 */
+  overflow-y: auto; /* 允许纵向滚动 */
 }
 
 .dashboard-container {
   display: flex;
-  height: 100%;
+  min-height: 100vh;
 }
 
 /* 侧边栏 */

@@ -75,17 +75,21 @@ def init_env():
     print(">>> 初始化环境...")
     for rid, cfg in ROOM_CONFIG.items():
         try:
-            # 1. 强制切换模式 (保持不变)
-            requests.post(f"{API_BASE}/admin/control/mode", json={"roomId": rid, "mode": "HEATING"})  # 或 HEATING
+            # 1. 强制切换模式为制热
+            mode_res = requests.post(f"{API_BASE}/admin/control/mode", json={"roomId": rid, "mode": "HEATING"})
+            if mode_res.status_code != 200:
+                print(f"  ⚠️ Room {rid} 模式设置失败: {mode_res.text}")
 
-            # 2. 初始化温度 AND 房费 (修改这里!)
-            requests.post(f"{API_BASE}/test/initRoom", json={
+            # 2. 初始化温度 AND 房费
+            init_res = requests.post(f"{API_BASE}/test/initRoom", json={
                 "roomId": rid,
                 "temperature": cfg["init_temp"],
-                "dailyRate": cfg["rate"]  # <--- 新增这行，把配置里的价格传过去
+                "dailyRate": cfg["rate"]
             })
+            if init_res.status_code != 200:
+                print(f"  ⚠️ Room {rid} 初始化失败: {init_res.text}")
 
-            print(f"  √ Room {rid}: Temp={cfg['init_temp']}°C, Rate={cfg['rate']}")
+            print(f"  √ Room {rid}: Mode=HEATING, Temp={cfg['init_temp']}°C, Rate={cfg['rate']}")
         except Exception as e:
             print(f"  × Room {rid} Error: {e}")
     print(">>> 初始化完成\n")
@@ -95,6 +99,11 @@ def execute(rid, act, val):
     url = f"{API_BASE}/ac"
     try:
         if act == "power_on":
+            # 开机前确保模式是 HEATING
+            mode_res = requests.post(f"{API_BASE}/admin/control/mode", json={"roomId": rid, "mode": "HEATING"})
+            if mode_res.status_code != 200:
+                return f"⚠️ Room {rid} 模式设置失败 -> {mode_res.json().get('error', '未知')}"
+            # 然后开机
             res = requests.post(f"{url}/power", json={"roomId": rid})
         elif act == "power_off":
             res = requests.post(f"{url}/power/off", json={"roomId": rid})
@@ -102,6 +111,8 @@ def execute(rid, act, val):
             res = requests.post(f"{url}/temp", json={"roomId": rid, "targetTemp": val})
         elif act == "speed":
             res = requests.post(f"{url}/speed", json={"roomId": rid, "fanSpeed": val})
+        else:
+            return f"❌ Room {rid} 未知动作: {act}"
 
         status = "✅" if res.status_code == 200 else "⚠️"
         msg = "成功" if res.status_code == 200 else f"失败: {res.json().get('error', '未知')}"

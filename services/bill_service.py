@@ -86,7 +86,10 @@ class AccommodationFeeBillService:
             
             # 使用 serving_start_time 计算当前片段时长
             elapsed_seconds = (now - room.serving_start_time).total_seconds()
-            elapsed_minutes = max(1, int((elapsed_seconds / 60.0) * factor))
+            
+            # === 修改处：改为标准四舍五入 ===
+            raw_minutes = (elapsed_seconds / 60.0) * factor
+            elapsed_minutes = round(raw_minutes)  # 四舍五入
             
             # 费率逻辑
             fan_speed = (room.fan_speed or "MEDIUM").upper()

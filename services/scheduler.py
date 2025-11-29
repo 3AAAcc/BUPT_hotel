@@ -46,11 +46,20 @@ class Scheduler:
             return
         
         start_time = room.serving_start_time
-        duration_minutes = max(
-            1,
-            int(((end_time - start_time).total_seconds() / 60.0) * self._time_factor()),
-        )
         
+        # 1. 计算原始分钟数 (含小数)
+        # 例如: 物理10秒 + 延迟2秒 = 12秒 -> 乘以6.0 = 72秒 = 1.2分钟
+        raw_minutes = ((end_time - start_time).total_seconds() / 60.0) * self._time_factor()
+        
+        # 2. 使用 round() 进行四舍五入
+        duration_minutes = round(raw_minutes)
+        
+        # 特殊处理：如果是 POWER_OFF 且时长为0，为了记录周期，允许为0
+        # 如果是正常运行但不足30秒（系统时间），算作0费用是合理的（这是防抖动）
+        # 如果你非常在意"不足1分钟按1分钟算"，可以只对 POWER_OFF 且总时长极短的情况做特殊处理
+        # 但对于"中间状态切换"，算0是最好的。
+        
+        # 使用当前风速的费率
         rate = self._rate_by_fan_speed(room.fan_speed)
         cost = rate * duration_minutes
         
@@ -332,6 +341,41 @@ class Scheduler:
                 req.waitingTime = now; self.waiting_queue.append(req); self._mark_room_waiting(room.id, now)
         self._rebalance_queues(force_rotation=True)
         return "风速已更新"
+
+    def ChangeMode(self, RoomId: int, Mode: str) -> str:
+        """切换空调模式（制冷/制热）"""
+        room_id = RoomId
+        room = self.room_service.getRoomById(room_id)
+        if not room:
+            raise ValueError("房间不存在")
+        
+        normalized_mode = Mode.upper()
+        if normalized_mode not in ['COOLING', 'HEATING']:
+            raise ValueError("无效模式，必须是 COOLING 或 HEATING")
+        
+        # 如果模式没变，直接返回
+        if room.ac_mode == normalized_mode:
+            return "模式未改变"
+        
+        # 切换模式时，重置目标温度为默认值
+        if normalized_mode == 'COOLING':
+            default_target = current_app.config.get("COOLING_DEFAULT_TARGET", 25.0)
+        else:  # HEATING
+            default_target = current_app.config.get("HEATING_DEFAULT_TARGET", 22.0)
+        
+        room.ac_mode = normalized_mode
+        room.target_temp = default_target
+        room.last_temp_update = datetime.utcnow()
+        
+        # 如果正在运行，需要更新队列里的请求参数
+        for q in (self.serving_queue, self.waiting_queue):
+            for r in q:
+                if r.roomId == room_id:
+                    r.mode = normalized_mode
+                    r.targetTemp = default_target
+        
+        self.room_service.updateRoom(room)
+        return f"已切换至 {normalized_mode} 模式，目标温度重置为 {default_target}°C"
 
     def _updateRoomTemperature(self, room) -> None:
         now = datetime.utcnow()

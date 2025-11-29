@@ -67,13 +67,13 @@ def create_app(
     def reception_checkout():
         return render_template("checkout.html")
 
-    @app.route("/admin")
-    def admin():
-        return render_template("admin.html")
-
     @app.route("/manager")
     def manager():
         return render_template("manager.html")
+
+    @app.route("/manager/report")
+    def manager_report():
+        return render_template("admin.html")
 
     return app
 

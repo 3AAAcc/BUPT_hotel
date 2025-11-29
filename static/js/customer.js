@@ -17,7 +17,7 @@ function initRoomId() {
     
     if (!currentRoomId) {
         currentRoomId = prompt("请输入当前房间号 (1-5):", "1");
-    }
+}
 
     if (currentRoomId) {
         localStorage.setItem('lastRoomId', currentRoomId);
@@ -35,7 +35,7 @@ function initRoomId() {
         alert("未指定房间号！");
     }
 }
-
+  
 function updateState() {
     if (!currentRoomId) return;
     axios.get(`/ac/state?roomId=${currentRoomId}`)
@@ -138,14 +138,14 @@ function changeTemp(delta) {
     
     if (newTemp < limit.min || newTemp > limit.max) {
         alert(`当前模式(${currentMode}) 温度范围: ${limit.min} ~ ${limit.max}°C`);
-        return;
+      return;
     }
-
+    
     axios.post('/ac/temp', { roomId: currentRoomId, targetTemp: newTemp })
         .then(() => document.getElementById('target-temp').innerText = newTemp)
         .catch(err => alert("调温失败: " + err.response?.data?.error));
-}
-
+        }
+        
 function changeSpeed(speed) {
     axios.post('/ac/speed', { roomId: currentRoomId, fanSpeed: speed }).then(updateState);
 }
