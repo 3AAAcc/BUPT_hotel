@@ -17,11 +17,15 @@
             <nav class="nav-menu">
                 <a href="/" class="nav-item"><i class="fa-solid fa-house"></i> 首页</a>
                 <a href="#" class="nav-item active"><i class="fa-solid fa-gamepad"></i> 全能指挥舱</a>
-                <a href="/admin" class="nav-item"><i class="fa-solid fa-chart-pie"></i> 报表中心</a>
+                <a href="/manager/report" class="nav-item"><i class="fa-solid fa-chart-pie"></i> 报表中心</a>
             </nav>
         </aside>
 
         <main class="main-content">
+            <!-- 重置按钮（调试用） -->
+            <button id="reset-db-btn" class="btn btn-danger btn-sm" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;" onclick="resetDatabase()" title="重置数据库">
+                <i class="fa-solid fa-trash-can"></i> 重置数据库
+            </button>
             
             <div class="monitor-panel">
                 <div class="panel-header">
@@ -70,12 +74,9 @@
         </main>
     </div>
 
-    <!-- 重置数据库按钮 -->
-    <button id="reset-db-btn" class="btn btn-danger btn-sm" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;" onclick="resetDatabase()" title="重置数据库">
-        <i class="fa-solid fa-trash-can"></i> 重置数据库
-    </button>
-
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="{{ url_for('static', filename='js/manager.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="{{ url_for('static', filename='js/bg-particles.js') }}"></script>
 </body>
 </html>
