@@ -21,7 +21,7 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   10.06 22.0  M    100.00   HEATING
+1   ON   10.04 22.0  M    100.00   HEATING
 2   OFF  15.0  22.0  M    125.00   HEATING
 3   OFF  18.0  22.0  M    150.00   HEATING
 4   OFF  12.0  22.0  M    200.00   HEATING
@@ -31,7 +31,7 @@ Rm  St   Cur   Tar   Spd  Fee      Mode
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=MEDIUM  Serve=4.0s  Wait=0.0s
+  Room 1  Fan=MEDIUM  Serve=3.8s  Wait=0.0s
 WaitingQueue:
 ====================
 
@@ -41,8 +41,8 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   10.81 24.0  M    100.50   HEATING
-2   ON   15.04 22.0  M    125.00   HEATING
+1   ON   10.68 24.0  M    100.50   HEATING
+2   ON   15.01 22.0  M    125.00   HEATING
 3   OFF  18.0  22.0  M    150.00   HEATING
 4   OFF  12.0  22.0  M    200.00   HEATING
 5   OFF  14.0  22.0  M    100.00   HEATING
@@ -51,7 +51,7 @@ Rm  St   Cur   Tar   Spd  Fee      Mode
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=MEDIUM  Serve=68.1s  Wait=0.0s
+  Room 1  Fan=MEDIUM  Serve=67.9s  Wait=0.0s
   Room 2  Fan=MEDIUM  Serve=3.8s  Wait=0.0s
 WaitingQueue:
 ====================
@@ -61,9 +61,9 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   11.36 24.0  M    101.00   HEATING
-2   ON   15.59 22.0  M    125.50   HEATING
-3   ON   18.01 22.0  M    150.00   HEATING
+1   ON   11.33 24.0  M    101.00   HEATING
+2   ON   15.66 22.0  M    125.50   HEATING
+3   ON   18.05 22.0  M    150.00   HEATING
 4   OFF  12.0  22.0  M    200.00   HEATING
 5   OFF  14.0  22.0  M    100.00   HEATING
 -----------------------------------------------------------------
@@ -71,22 +71,22 @@ Rm  St   Cur   Tar   Spd  Fee      Mode
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 2  Fan=MEDIUM  Serve=67.9s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=67.8s  Wait=0.0s
   Room 3  Fan=MEDIUM  Serve=3.8s  Wait=0.0s
-  Room 1  Fan=MEDIUM  Serve=3.7s  Wait=0.0s
+  Room 1  Fan=MEDIUM  Serve=3.6s  Wait=0.0s
 WaitingQueue:
 ====================
 
 🔥 [Min 4]
   ✅ Room 2 temp 25.0 -> 成功
-  ✅ Room 5 power_on  -> 成功
   ✅ Room 4 power_on  -> 成功
+  ✅ Room 5 power_on  -> 成功
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   11.79 24.0  M    101.50   HEATING
-2   ON   16.02 25.0  M    126.00   HEATING
-3   ON   18.43 22.0  M    150.50   HEATING
+1   ON   12.0  24.0  M    101.50   HEATING
+2   ON   16.27 25.0  M    126.00   HEATING
+3   ON   18.8  22.0  M    150.50   HEATING
 4   ON   12.0  22.0  M    200.00   HEATING
 5   ON   14.0  22.0  M    100.00   HEATING
 -----------------------------------------------------------------
@@ -94,12 +94,12 @@ Rm  St   Cur   Tar   Spd  Fee      Mode
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 3  Fan=MEDIUM  Serve=68.1s  Wait=0.0s
-  Room 1  Fan=MEDIUM  Serve=68.0s  Wait=0.0s
-  Room 2  Fan=MEDIUM  Serve=8.3s  Wait=0.0s
+  Room 3  Fan=MEDIUM  Serve=68.2s  Wait=0.0s
+  Room 1  Fan=MEDIUM  Serve=68.1s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=8.4s  Wait=0.0s
 WaitingQueue:
-  Room 5  Fan=MEDIUM  Serve=0.0s  Wait=4.0s
-  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=4.0s
+  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=4.2s
+  Room 5  Fan=MEDIUM  Serve=0.0s  Wait=4.1s
 ====================
 
 🔥 [Min 5]
@@ -108,22 +108,22 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   11.91 24.0  M    102.00   HEATING
-2   ON   16.5  25.0  M    126.50   HEATING
-3   ON   18.56 27.0  M    151.00   HEATING
-4   ON   12.63 22.0  M    200.00   HEATING
-5   ON   14.74 22.0  H    100.00   HEATING
+1   ON   12.47 24.0  M    102.00   HEATING
+2   ON   16.96 25.0  M    126.50   HEATING
+3   ON   19.2  27.0  M    151.00   HEATING
+4   ON   12.6  22.0  M    200.00   HEATING
+5   ON   14.68 22.0  H    100.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
   Room 2  Fan=MEDIUM  Serve=72.7s  Wait=0.0s
-  Room 4  Fan=MEDIUM  Serve=9.3s  Wait=0.0s
-  Room 5  Fan=HIGH  Serve=10.2s  Wait=0.0s
+  Room 4  Fan=MEDIUM  Serve=6.5s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=8.5s  Wait=0.0s
 WaitingQueue:
-  Room 1  Fan=MEDIUM  Serve=0.0s  Wait=9.6s
-  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=9.6s
+  Room 1  Fan=MEDIUM  Serve=0.0s  Wait=7.0s
+  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=7.0s
 ====================
 
 🔥 [Min 6]
@@ -131,44 +131,44 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   11.7  24.0  H    102.00   HEATING
-2   ON   16.83 25.0  M    127.00   HEATING
-3   ON   18.0  27.0  M    151.00   HEATING
-4   ON   13.43 22.0  M    200.50   HEATING
-5   ON   16.39 22.0  H    101.00   HEATING
+1   ON   12.08 24.0  H    102.00   HEATING
+2   ON   17.3  25.0  M    127.00   HEATING
+3   ON   18.44 27.0  M    151.00   HEATING
+4   ON   13.38 22.0  M    200.50   HEATING
+5   ON   16.17 22.0  H    101.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 4  Fan=MEDIUM  Serve=73.9s  Wait=0.0s
-  Room 5  Fan=HIGH  Serve=74.8s  Wait=0.0s
-  Room 1  Fan=HIGH  Serve=14.8s  Wait=0.0s
+  Room 4  Fan=MEDIUM  Serve=70.8s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=72.9s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=12.9s  Wait=0.0s
 WaitingQueue:
-  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=74.2s
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=14.2s
+  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=71.4s
+  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=11.4s
 ====================
 
 🔥 [Min 7]
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   13.33 24.0  H    103.00   HEATING
-2   ON   16.0  25.0  M    127.00   HEATING
-3   ON   18.71 27.0  M    151.00   HEATING
-4   ON   13.83 22.0  M    201.00   HEATING
-5   ON   18.1  22.0  H    102.00   HEATING
+1   ON   13.21 24.0  H    103.00   HEATING
+2   ON   16.74 25.0  M    127.00   HEATING
+3   ON   18.0  27.0  M    151.00   HEATING
+4   ON   13.96 22.0  M    201.00   HEATING
+5   ON   17.31 22.0  H    102.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=HIGH  Serve=78.8s  Wait=0.0s
-  Room 5  Fan=HIGH  Serve=18.1s  Wait=0.0s
-  Room 3  Fan=MEDIUM  Serve=10.3s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=77.6s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=0.6s  Wait=0.0s
+  Room 3  Fan=MEDIUM  Serve=0.6s  Wait=0.0s
 WaitingQueue:
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=78.2s
-  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=10.4s
+  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=76.2s
+  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=1.0s
 ====================
 
 🔥 [Min 8]
@@ -176,44 +176,44 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   14.9  24.0  H    104.00   HEATING
-2   ON   15.21 25.0  M    127.00   HEATING
-3   ON   19.53 27.0  M    151.50   HEATING
-4   ON   13.01 22.0  M    201.00   HEATING
-5   ON   19.71 24.0  H    103.00   HEATING
+1   ON   14.27 24.0  H    104.00   HEATING
+2   ON   16.22 25.0  M    127.00   HEATING
+3   ON   18.54 27.0  M    151.50   HEATING
+4   ON   13.44 22.0  M    201.00   HEATING
+5   ON   18.38 24.0  H    103.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 5  Fan=HIGH  Serve=82.7s  Wait=0.0s
-  Room 3  Fan=MEDIUM  Serve=74.8s  Wait=0.0s
-  Room 1  Fan=HIGH  Serve=22.7s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=65.5s  Wait=0.0s
+  Room 3  Fan=MEDIUM  Serve=65.5s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=0.4s  Wait=0.0s
 WaitingQueue:
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=142.8s
-  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=74.9s
+  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=141.1s
+  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=65.9s
 ====================
 
 🔥 [Min 9]
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   16.37 24.0  H    105.00   HEATING
-2   ON   15.45 25.0  M    127.00   HEATING
-3   ON   19.88 27.0  M    152.00   HEATING
-4   ON   12.26 22.0  M    201.00   HEATING
-5   ON   21.27 24.0  H    104.00   HEATING
+1   ON   15.37 24.0  H    105.00   HEATING
+2   ON   15.71 25.0  M    127.00   HEATING
+3   ON   19.07 27.0  M    152.00   HEATING
+4   ON   12.93 22.0  M    201.00   HEATING
+5   ON   19.45 24.0  H    104.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=HIGH  Serve=87.2s  Wait=0.0s
-  Room 5  Fan=HIGH  Serve=19.1s  Wait=0.0s
-  Room 2  Fan=MEDIUM  Serve=18.9s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=64.8s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=0.3s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=0.3s  Wait=0.0s
 WaitingQueue:
-  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=139.4s
-  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=19.0s
+  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=130.3s
+  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=0.6s
 ====================
 
 🔥 [Min 10]
@@ -223,43 +223,44 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   17.97 28.0  H    106.00   HEATING
-2   ON   16.11 25.0  M    127.50   HEATING
-3   ON   19.08 27.0  M    152.00   HEATING
-4   ON   12.73 28.0  H    201.00   HEATING
-5   ON   22.78 24.0  H    105.00   HEATING
+1   ON   16.44 28.0  H    106.00   HEATING
+2   ON   16.28 25.0  M    127.50   HEATING
+3   ON   18.44 27.0  M    152.00   HEATING
+4   ON   12.47 28.0  H    201.00   HEATING
+5   ON   20.83 24.0  H    105.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 5  Fan=HIGH  Serve=84.2s  Wait=0.0s
-  Room 1  Fan=HIGH  Serve=24.2s  Wait=0.0s
-  Room 4  Fan=HIGH  Serve=4.6s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=68.3s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=7.6s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=6.1s  Wait=0.0s
 WaitingQueue:
-  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=84.1s
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=4.6s
+  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=68.6s
+  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=6.1s
 ====================
 
 🔥 [Min 11]
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   19.57 28.0  H    108.00   HEATING
-2   ON   15.3  25.0  M    127.50   HEATING
-3   ON   18.8  27.0  M    152.00   HEATING
-4   ON   14.42 28.0  H    202.00   HEATING
-5   ON   23.73 24.0  H    106.00   HEATING
+1   ON   17.77 28.0  H    107.00   HEATING
+2   ON   15.61 25.0  M    127.50   HEATING
+3   ON   18.0  27.0  M    152.00   HEATING
+4   ON   13.89 28.0  H    202.00   HEATING
+5   ON   22.28 24.0  H    106.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=HIGH  Serve=88.5s  Wait=0.0s
-  Room 4  Fan=HIGH  Serve=68.9s  Wait=0.0s
-  Room 3  Fan=MEDIUM  Serve=22.0s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=74.9s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=73.4s  Wait=0.0s
+  Room 5  Fan=HIGH  Serve=5.2s  Wait=0.0s
 WaitingQueue:
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=68.9s
+  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=135.8s
+  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=73.4s
 ====================
 
 🔥 [Min 12]
@@ -267,22 +268,22 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   21.2  28.0  H    108.00   HEATING
+1   ON   18.94 28.0  H    108.00   HEATING
 2   ON   15.0  25.0  M    127.50   HEATING
-3   ON   19.41 27.0  M    152.50   HEATING
-4   ON   16.13 28.0  H    203.00   HEATING
-5   ON   23.06 24.0  M    106.00   HEATING
+3   ON   18.0  27.0  M    152.00   HEATING
+4   ON   15.09 28.0  H    203.00   HEATING
+5   ON   23.62 24.0  M    107.50   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=HIGH  Serve=28.6s  Wait=0.0s
-  Room 4  Fan=HIGH  Serve=8.7s  Wait=0.0s
-  Room 5  Fan=MEDIUM  Serve=5.3s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=16.8s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=16.8s  Wait=0.0s
+  Room 5  Fan=MEDIUM  Serve=72.2s  Wait=0.0s
 WaitingQueue:
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=133.1s
-  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=8.2s
+  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=201.8s
+  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=139.4s
 ====================
 
 🔥 [Min 13]
@@ -290,44 +291,43 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   22.68 28.0  H    110.00   HEATING
-2   ON   16.8  25.0  H    127.50   HEATING
-3   ON   18.67 27.0  M    152.50   HEATING
-4   ON   17.66 28.0  H    204.00   HEATING
-5   ON   23.59 24.0  M    106.50   HEATING
+1   ON   20.23 28.0  H    109.00   HEATING
+2   ON   16.29 25.0  H    127.50   HEATING
+3   ON   19.2  27.0  M    152.50   HEATING
+4   ON   16.38 28.0  H    204.00   HEATING
+5   ON   23.6  24.0  M    109.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=HIGH  Serve=93.7s  Wait=0.0s
-  Room 4  Fan=HIGH  Serve=73.7s  Wait=0.0s
-  Room 2  Fan=HIGH  Serve=4.3s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=81.9s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=81.9s  Wait=0.0s
+  Room 2  Fan=HIGH  Serve=4.6s  Wait=0.0s
 WaitingQueue:
-  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=73.2s
-  Room 5  Fan=MEDIUM  Serve=0.0s  Wait=4.3s
+  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=4.6s
 ====================
 
 🔥 [Min 14]
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   24.04 28.0  H    111.00   HEATING
-2   ON   18.38 25.0  H    128.50   HEATING
-3   ON   18.0  27.0  M    152.50   HEATING
-4   ON   19.29 28.0  H    205.00   HEATING
-5   ON   22.84 24.0  M    106.50   HEATING
+1   ON   21.36 28.0  H    110.00   HEATING
+2   ON   17.6  25.0  H    128.50   HEATING
+3   ON   18.56 27.0  M    152.50   HEATING
+4   ON   17.6  28.0  H    205.00   HEATING
+5   ON   22.96 24.0  M    109.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 2  Fan=HIGH  Serve=68.9s  Wait=0.0s
-  Room 1  Fan=HIGH  Serve=30.4s  Wait=0.0s
-  Room 4  Fan=HIGH  Serve=14.3s  Wait=0.0s
+  Room 2  Fan=HIGH  Serve=69.0s  Wait=0.0s
+  Room 1  Fan=HIGH  Serve=20.0s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=20.0s  Wait=0.0s
 WaitingQueue:
-  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=137.8s
-  Room 5  Fan=MEDIUM  Serve=0.0s  Wait=68.9s
+  Room 3  Fan=MEDIUM  Serve=0.0s  Wait=69.0s
+  Room 5  Fan=MEDIUM  Serve=0.0s  Wait=2.0s
 ====================
 
 🔥 [Min 15]
@@ -336,42 +336,42 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   OFF  10.0  28.0  M    112.00   HEATING
-2   ON   19.19 25.0  H    129.50   HEATING
+1   OFF  10.0  28.0  M    111.00   HEATING
+2   ON   18.77 25.0  H    129.50   HEATING
 3   ON   18.0  27.0  L    152.50   HEATING
-4   ON   20.2  28.0  H    206.00   HEATING
-5   ON   22.51 24.0  M    106.50   HEATING
+4   ON   19.04 28.0  H    206.00   HEATING
+5   ON   22.42 24.0  M    109.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 4  Fan=HIGH  Serve=78.8s  Wait=0.0s
-  Room 2  Fan=HIGH  Serve=9.7s  Wait=0.0s
-  Room 5  Fan=MEDIUM  Serve=4.0s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=84.8s  Wait=0.0s
+  Room 2  Fan=HIGH  Serve=13.1s  Wait=0.0s
+  Room 5  Fan=MEDIUM  Serve=4.2s  Wait=0.0s
 WaitingQueue:
-  Room 3  Fan=LOW  Serve=0.0s  Wait=199.4s
+  Room 3  Fan=LOW  Serve=0.0s  Wait=134.5s
 ====================
 
 🔥 [Min 16]
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   OFF  10.0  28.0  M    112.00   HEATING
-2   ON   20.08 25.0  H    130.50   HEATING
+1   OFF  10.0  28.0  M    111.00   HEATING
+2   ON   20.14 25.0  H    130.50   HEATING
 3   ON   18.0  27.0  L    152.50   HEATING
-4   ON   21.15 28.0  H    207.00   HEATING
-5   ON   22.97 24.0  M    107.00   HEATING
+4   ON   20.23 28.0  H    207.00   HEATING
+5   ON   23.11 24.0  M    109.50   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 2  Fan=HIGH  Serve=73.6s  Wait=0.0s
-  Room 5  Fan=MEDIUM  Serve=67.9s  Wait=0.0s
-  Room 4  Fan=HIGH  Serve=21.5s  Wait=0.0s
+  Room 2  Fan=HIGH  Serve=77.4s  Wait=0.0s
+  Room 5  Fan=MEDIUM  Serve=68.4s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=23.3s  Wait=0.0s
 WaitingQueue:
-  Room 3  Fan=LOW  Serve=0.0s  Wait=263.3s
+  Room 3  Fan=LOW  Serve=0.0s  Wait=198.8s
 ====================
 
 🔥 [Min 17]
@@ -379,19 +379,19 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   OFF  10.0  28.0  M    112.00   HEATING
-2   ON   20.88 25.0  H    131.50   HEATING
-3   ON   19.16 27.0  L    152.50   HEATING
-4   ON   22.04 28.0  H    208.00   HEATING
-5   OFF  14.0  24.0  M    107.50   HEATING
+1   OFF  10.0  28.0  M    111.00   HEATING
+2   ON   21.33 25.0  H    131.50   HEATING
+3   ON   18.8  27.0  L    152.50   HEATING
+4   ON   21.63 28.0  H    208.00   HEATING
+5   OFF  14.0  24.0  M    110.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 4  Fan=HIGH  Serve=86.5s  Wait=0.0s
-  Room 2  Fan=HIGH  Serve=14.6s  Wait=0.0s
-  Room 3  Fan=LOW  Serve=4.4s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=88.4s  Wait=0.0s
+  Room 2  Fan=HIGH  Serve=16.4s  Wait=0.0s
+  Room 3  Fan=LOW  Serve=4.3s  Wait=0.0s
 WaitingQueue:
 ====================
 
@@ -400,177 +400,174 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   OFF  10.0  28.0  M    112.00   HEATING
-2   ON   21.68 25.0  H    132.50   HEATING
-3   ON   19.47 27.0  H    153.83   HEATING
-4   ON   22.92 28.0  H    209.00   HEATING
-5   OFF  14.0  24.0  M    107.50   HEATING
+1   OFF  10.0  28.0  M    111.00   HEATING
+2   ON   22.58 25.0  H    132.50   HEATING
+3   ON   19.37 27.0  H    153.83   HEATING
+4   ON   23.0  28.0  H    209.00   HEATING
+5   OFF  14.0  24.0  M    110.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 2  Fan=HIGH  Serve=78.8s  Wait=0.0s
-  Room 4  Fan=HIGH  Serve=23.0s  Wait=0.0s
-  Room 3  Fan=HIGH  Serve=68.5s  Wait=0.0s
+  Room 2  Fan=HIGH  Serve=80.8s  Wait=0.0s
+  Room 4  Fan=HIGH  Serve=26.9s  Wait=0.0s
+  Room 3  Fan=HIGH  Serve=70.3s  Wait=0.0s
 WaitingQueue:
 ====================
 
 🔥 [Min 19]
   ✅ Room 4 temp 25.0 -> 成功
-  ✅ Room 1 power_on  -> 成功
   ✅ Room 4 speed MEDIUM -> 成功
+  ✅ Room 1 power_on  -> 成功
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   10.02 28.0  M    212.00   HEATING
-2   ON   22.39 25.0  H    133.50   HEATING
-3   ON   20.37 27.0  H    154.83   HEATING
-4   ON   23.7  25.0  M    210.50   HEATING
-5   OFF  14.0  24.0  M    107.50   HEATING
+1   ON   10.0  28.0  M    211.00   HEATING
+2   ON   23.8  25.0  H    133.50   HEATING
+3   ON   20.65 27.0  H    154.83   HEATING
+4   ON   24.42 25.0  M    211.00   HEATING
+5   OFF  14.0  24.0  M    110.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=MEDIUM  Serve=4.4s  Wait=0.0s
-  Room 2  Fan=HIGH  Serve=15.8s  Wait=0.0s
-  Room 3  Fan=HIGH  Serve=11.7s  Wait=0.0s
+  Room 2  Fan=HIGH  Serve=18.1s  Wait=0.0s
+  Room 3  Fan=HIGH  Serve=12.8s  Wait=0.0s
+  Room 4  Fan=MEDIUM  Serve=92.7s  Wait=0.0s
 WaitingQueue:
-  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=4.4s
+  Room 1  Fan=MEDIUM  Serve=0.0s  Wait=4.0s
 ====================
 
 🔥 [Min 20]
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   10.43 28.0  M    212.50   HEATING
-2   ON   23.27 25.0  H    134.50   HEATING
-3   ON   21.25 27.0  H    155.83   HEATING
-4   ON   23.29 25.0  M    210.50   HEATING
-5   OFF  14.0  24.0  M    107.50   HEATING
+1   ON   10.61 28.0  M    211.50   HEATING
+2   ON   24.88 25.0  H    135.50   HEATING
+3   ON   22.12 27.0  H    155.83   HEATING
+4   ON   24.61 25.0  M    211.00   HEATING
+5   OFF  14.0  24.0  M    110.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=MEDIUM  Serve=68.4s  Wait=0.0s
-  Room 2  Fan=HIGH  Serve=79.8s  Wait=0.0s
-  Room 3  Fan=HIGH  Serve=75.7s  Wait=0.0s
+  Room 3  Fan=HIGH  Serve=76.8s  Wait=0.0s
+  Room 1  Fan=MEDIUM  Serve=35.0s  Wait=0.0s
+  Room 4  Fan=MEDIUM  Serve=10.7s  Wait=0.0s
 WaitingQueue:
-  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=68.3s
 ====================
 
 🔥 [Min 21]
+  ✅ Room 2 speed MEDIUM -> 成功
   ✅ Room 2 temp 27.0 -> 成功
   ✅ Room 5 power_on  -> 成功
-  ✅ Room 2 speed MEDIUM -> 成功
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   10.65 28.0  M    213.00   HEATING
-2   ON   24.1  27.0  M    135.50   HEATING
-3   ON   22.11 27.0  H    156.83   HEATING
-4   ON   23.1  25.0  M    210.50   HEATING
-5   ON   14.0  24.0  M    207.50   HEATING
+1   ON   11.27 28.0  M    212.00   HEATING
+2   ON   24.21 27.0  M    135.50   HEATING
+3   ON   23.57 27.0  H    156.83   HEATING
+4   ON   24.54 25.0  M    212.00   HEATING
+5   ON   14.08 24.0  M    210.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 3  Fan=HIGH  Serve=20.5s  Wait=0.0s
-  Room 4  Fan=MEDIUM  Serve=12.7s  Wait=0.0s
-  Room 2  Fan=MEDIUM  Serve=22.5s  Wait=0.0s
+  Room 5  Fan=MEDIUM  Serve=4.2s  Wait=0.0s
+  Room 1  Fan=MEDIUM  Serve=4.2s  Wait=0.0s
+  Room 3  Fan=HIGH  Serve=4.0s  Wait=0.0s
 WaitingQueue:
-  Room 1  Fan=MEDIUM  Serve=0.0s  Wait=13.1s
-  Room 5  Fan=MEDIUM  Serve=0.0s  Wait=4.6s
+  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=3.8s
 ====================
 
 🔥 [Min 22]
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   10.17 28.0  M    213.00   HEATING
-2   ON   24.62 27.0  M    136.00   HEATING
-3   ON   23.17 27.0  H    157.83   HEATING
-4   ON   23.62 25.0  M    211.00   HEATING
-5   ON   14.0  24.0  M    207.50   HEATING
+1   ON   11.91 28.0  M    212.50   HEATING
+2   ON   23.52 27.0  M    135.50   HEATING
+3   ON   24.95 27.0  H    157.83   HEATING
+4   ON   23.82 25.0  M    212.00   HEATING
+5   ON   14.82 24.0  M    210.50   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 3  Fan=HIGH  Serve=84.9s  Wait=0.0s
-  Room 4  Fan=MEDIUM  Serve=77.2s  Wait=0.0s
-  Room 2  Fan=MEDIUM  Serve=86.9s  Wait=0.0s
+  Room 5  Fan=MEDIUM  Serve=68.2s  Wait=0.0s
+  Room 1  Fan=MEDIUM  Serve=68.2s  Wait=0.0s
+  Room 3  Fan=HIGH  Serve=68.1s  Wait=0.0s
 WaitingQueue:
-  Room 1  Fan=MEDIUM  Serve=0.0s  Wait=77.6s
-  Room 5  Fan=MEDIUM  Serve=0.0s  Wait=69.1s
+  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=67.8s
+  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=13.3s
 ====================
 
 🔥 [Min 23]
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   10.25 28.0  M    213.50   HEATING
-2   ON   24.13 27.0  M    136.50   HEATING
-3   ON   24.36 27.0  H    158.83   HEATING
-4   ON   24.0  25.0  M    211.50   HEATING
-5   ON   15.06 24.0  M    207.50   HEATING
+1   ON   12.3  28.0  M    213.00   HEATING
+2   ON   23.13 27.0  M    135.50   HEATING
+3   ON   26.36 27.0  H    158.83   HEATING
+4   ON   23.4  25.0  M    212.00   HEATING
+5   ON   15.14 24.0  M    211.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=MEDIUM  Serve=30.9s  Wait=0.0s
-  Room 3  Fan=HIGH  Serve=23.4s  Wait=0.0s
-  Room 5  Fan=MEDIUM  Serve=15.3s  Wait=0.0s
+  Room 3  Fan=HIGH  Serve=12.0s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=12.0s  Wait=0.0s
+  Room 4  Fan=MEDIUM  Serve=12.0s  Wait=0.0s
 WaitingQueue:
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=31.2s
-  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=15.8s
+  Room 1  Fan=MEDIUM  Serve=0.0s  Wait=12.4s
+  Room 5  Fan=MEDIUM  Serve=0.0s  Wait=12.4s
 ====================
 
 🔥 [Min 24]
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   10.68 28.0  M    214.00   HEATING
-2   ON   23.76 27.0  M    136.50   HEATING
-3   ON   25.28 27.0  H    159.83   HEATING
-4   ON   23.61 25.0  M    211.50   HEATING
-5   ON   15.51 24.0  M    208.00   HEATING
+1   ON   12.28 28.0  M    213.50   HEATING
+2   ON   23.73 27.0  M    136.00   HEATING
+3   ON   26.71 27.0  H    160.83   HEATING
+4   ON   24.02 25.0  M    212.50   HEATING
+5   ON   14.51 24.0  M    211.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=MEDIUM  Serve=95.1s  Wait=0.0s
-  Room 3  Fan=HIGH  Serve=87.7s  Wait=0.0s
-  Room 5  Fan=MEDIUM  Serve=79.6s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=76.0s  Wait=0.0s
+  Room 4  Fan=MEDIUM  Serve=76.0s  Wait=0.0s
+  Room 1  Fan=MEDIUM  Serve=34.2s  Wait=0.0s
 WaitingQueue:
-  Room 2  Fan=MEDIUM  Serve=0.0s  Wait=95.5s
-  Room 4  Fan=MEDIUM  Serve=0.0s  Wait=80.0s
+  Room 5  Fan=MEDIUM  Serve=0.0s  Wait=76.4s
 ====================
 
 🔥 [Min 25]
-  ✅ Room 1 power_off  -> 成功
   ✅ Room 5 power_off  -> 成功
   ✅ Room 3 power_off  -> 成功
+  ✅ Room 1 power_off  -> 成功
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
 1   OFF  10.0  28.0  M    214.00   HEATING
-2   ON   23.88 27.0  M    137.00   HEATING
+2   ON   24.26 27.0  M    136.50   HEATING
 3   OFF  18.0  27.0  M    160.83   HEATING
-4   ON   23.59 25.0  M    211.50   HEATING
-5   OFF  14.0  24.0  M    208.50   HEATING
+4   ON   24.55 25.0  M    213.00   HEATING
+5   OFF  14.0  24.0  M    211.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 2  Fan=MEDIUM  Serve=36.7s  Wait=0.0s
-  Room 4  Fan=MEDIUM  Serve=20.3s  Wait=0.0s
+  Room 2  Fan=MEDIUM  Serve=140.5s  Wait=0.0s
+  Room 4  Fan=MEDIUM  Serve=140.5s  Wait=0.0s
 WaitingQueue:
 ====================
 
@@ -581,10 +578,10 @@ WaitingQueue:
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
 1   OFF  10.0  28.0  M    214.00   HEATING
-2   OFF  15.0  27.0  M    137.50   HEATING
+2   OFF  15.0  27.0  M    137.00   HEATING
 3   OFF  18.0  27.0  M    160.83   HEATING
-4   OFF  12.0  25.0  M    212.00   HEATING
-5   OFF  14.0  24.0  M    208.50   HEATING
+4   OFF  12.0  25.0  M    213.50   HEATING
+5   OFF  14.0  24.0  M    211.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
@@ -598,10 +595,10 @@ WaitingQueue:
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
 1   OFF  10.0  28.0  M    214.00   HEATING
-2   OFF  15.0  27.0  M    137.50   HEATING
+2   OFF  15.0  27.0  M    137.00   HEATING
 3   OFF  18.0  27.0  M    160.83   HEATING
-4   OFF  12.0  25.0  M    212.00   HEATING
-5   OFF  14.0  24.0  M    208.50   HEATING
+4   OFF  12.0  25.0  M    213.50   HEATING
+5   OFF  14.0  24.0  M    211.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
