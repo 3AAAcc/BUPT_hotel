@@ -21,7 +21,7 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   10.0  22.0  M    100.00   HEATING
+1   ON   10.01 22.0  M    100.00   HEATING
 2   OFF  15.0  22.0  M    125.00   HEATING
 3   OFF  18.0  22.0  M    150.00   HEATING
 4   OFF  12.0  22.0  M    200.00   HEATING
@@ -31,7 +31,7 @@ Rm  St   Cur   Tar   Spd  Fee      Mode
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=MEDIUM  Slice=0.5s  Total=1s
+  Room 1  Fan=MEDIUM  Slice=0.8s  Total=1s
 WaitingQueue:
 ====================
 
@@ -41,7 +41,7 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   10.6  24.0  M    100.50   HEATING
+1   ON   10.57 24.0  M    100.50   HEATING
 2   ON   15.0  22.0  M    125.00   HEATING
 3   OFF  18.0  22.0  M    150.00   HEATING
 4   OFF  12.0  22.0  M    200.00   HEATING
@@ -51,8 +51,8 @@ Rm  St   Cur   Tar   Spd  Fee      Mode
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 1  Fan=MEDIUM  Slice=61.2s  Total=61s
-  Room 2  Fan=MEDIUM  Slice=0.6s  Total=1s
+  Room 1  Fan=MEDIUM  Slice=61.5s  Total=62s
+  Room 2  Fan=MEDIUM  Slice=0.7s  Total=1s
 WaitingQueue:
 ====================
 
@@ -61,9 +61,9 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   11.14 24.0  M    101.00   HEATING
-2   ON   15.54 22.0  M    125.50   HEATING
-3   ON   18.0  22.0  M    150.00   HEATING
+1   ON   11.03 24.0  M    101.00   HEATING
+2   ON   15.46 22.0  M    125.50   HEATING
+3   ON   18.01 22.0  M    150.00   HEATING
 4   OFF  12.0  22.0  M    200.00   HEATING
 5   OFF  14.0  22.0  M    100.00   HEATING
 -----------------------------------------------------------------
@@ -71,9 +71,9 @@ Rm  St   Cur   Tar   Spd  Fee      Mode
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 2  Fan=MEDIUM  Slice=61.2s  Total=61s
-  Room 3  Fan=MEDIUM  Slice=0.6s  Total=1s
-  Room 1  Fan=MEDIUM  Slice=0.6s  Total=121s
+  Room 2  Fan=MEDIUM  Slice=61.5s  Total=62s
+  Room 3  Fan=MEDIUM  Slice=0.8s  Total=1s
+  Room 1  Fan=MEDIUM  Slice=0.7s  Total=121s
 WaitingQueue:
 ====================
 
@@ -84,9 +84,9 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   11.65 24.0  M    101.50   HEATING
-2   ON   15.77 25.0  M    126.00   HEATING
-3   ON   18.51 22.0  M    150.50   HEATING
+1   ON   11.47 24.0  M    101.50   HEATING
+2   ON   15.88 25.0  M    126.00   HEATING
+3   ON   18.44 22.0  M    150.50   HEATING
 4   ON   12.0  22.0  M    200.00   HEATING
 5   ON   14.0  22.0  M    100.00   HEATING
 -----------------------------------------------------------------
@@ -94,12 +94,12 @@ Rm  St   Cur   Tar   Spd  Fee      Mode
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 3  Fan=MEDIUM  Slice=61.3s  Total=61s
-  Room 1  Fan=MEDIUM  Slice=61.3s  Total=181s
-  Room 5  Fan=MEDIUM  Slice=0.6s  Total=1s
+  Room 3  Fan=MEDIUM  Slice=61.4s  Total=61s
+  Room 1  Fan=MEDIUM  Slice=61.4s  Total=181s
+  Room 2  Fan=MEDIUM  Slice=1.2s  Total=121s
 WaitingQueue:
   Room 4  Fan=MEDIUM  Wait=0.6s
-  Room 2  Fan=MEDIUM  Wait=0.6s
+  Room 5  Fan=MEDIUM  Wait=0.6s
 ====================
 
 🔥 [Min 5]
@@ -108,503 +108,21 @@ WaitingQueue:
 -----------------------------------------------------------------
 Rm  St   Cur   Tar   Spd  Fee      Mode
 -----------------------------------------------------------------
-1   ON   11.86 24.0  M    102.00   HEATING
-2   ON   15.56 25.0  M    126.00   HEATING
-3   ON   18.72 22.0  M    151.00   HEATING
-4   ON   12.51 22.0  M    200.00   HEATING
-5   ON   14.67 22.0  H    101.50   HEATING
+1   ON   11.48 24.0  M    102.00   HEATING
+2   ON   16.38 25.0  M    126.50   HEATING
+3   ON   18.45 22.0  M    151.00   HEATING
+4   ON   12.25 22.0  M    200.00   HEATING
+5   ON   14.49 22.0  H    100.00   HEATING
 -----------------------------------------------------------------
 
 === Queue Status ===
 Capacity=3  TimeSlice=120s
 ServingQueue:
-  Room 5  Fan=HIGH  Slice=61.8s  Total=62s
-  Room 2  Fan=MEDIUM  Slice=0.6s  Total=121s
-  Room 4  Fan=MEDIUM  Slice=0.6s  Total=1s
-WaitingQueue:
-  Room 1  Fan=MEDIUM  Wait=0.7s
-  Room 3  Fan=MEDIUM  Wait=0.7s
-====================
-
-🔥 [Min 6]
-  ✅ Room 1 speed HIGH -> 成功
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   ON   11.82 24.0  H    102.00   HEATING
-2   ON   15.76 25.0  M    126.50   HEATING
-3   ON   18.22 22.0  M    151.00   HEATING
-4   ON   13.01 22.0  M    200.50   HEATING
-5   ON   15.69 22.0  H    102.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 4  Fan=MEDIUM  Slice=61.4s  Total=61s
-  Room 1  Fan=HIGH  Slice=0.7s  Total=241s
-  Room 5  Fan=HIGH  Slice=0.6s  Total=1s
-WaitingQueue:
-  Room 3  Fan=MEDIUM  Wait=61.5s
-  Room 2  Fan=MEDIUM  Wait=0.7s
-====================
-
-🔥 [Min 7]
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   ON   12.85 24.0  H    103.00   HEATING
-2   ON   15.25 25.0  M    126.50   HEATING
-3   ON   18.0  22.0  M    151.00   HEATING
-4   ON   13.52 22.0  M    201.00   HEATING
-5   ON   16.72 22.0  H    103.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 1  Fan=HIGH  Slice=61.3s  Total=301s
-  Room 5  Fan=HIGH  Slice=61.3s  Total=61s
-  Room 3  Fan=MEDIUM  Slice=0.0s  Total=120s
-WaitingQueue:
-  Room 2  Fan=MEDIUM  Wait=61.3s
-  Room 4  Fan=MEDIUM  Wait=0.0s
-====================
-
-🔥 [Min 8]
-  ✅ Room 5 temp 24.0 -> 成功
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   ON   13.87 24.0  H    104.00   HEATING
-2   ON   15.0  25.0  M    126.50   HEATING
-3   ON   18.67 22.0  M    151.50   HEATING
-4   ON   13.0  22.0  M    201.00   HEATING
-5   ON   17.74 24.0  H    104.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 3  Fan=MEDIUM  Slice=60.8s  Total=181s
-  Room 1  Fan=HIGH  Slice=0.0s  Total=240s
-  Room 5  Fan=HIGH  Slice=0.0s  Total=0s
-WaitingQueue:
-  Room 2  Fan=MEDIUM  Wait=122.1s
-  Room 4  Fan=MEDIUM  Wait=60.8s
-====================
-
-🔥 [Min 9]
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   ON   14.88 24.0  H    105.00   HEATING
-2   ON   15.0  25.0  M    126.50   HEATING
-3   ON   19.18 22.0  M    152.00   HEATING
-4   ON   12.49 22.0  M    201.00   HEATING
-5   ON   18.75 24.0  H    105.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 1  Fan=HIGH  Slice=60.8s  Total=421s
-  Room 5  Fan=HIGH  Slice=60.8s  Total=181s
-  Room 2  Fan=MEDIUM  Slice=0.0s  Total=180s
-WaitingQueue:
-  Room 4  Fan=MEDIUM  Wait=121.5s
-  Room 3  Fan=MEDIUM  Wait=0.1s
-====================
-
-🔥 [Min 10]
-  ✅ Room 1 temp 28.0 -> 成功
-  ✅ Room 4 temp 28.0 -> 成功
-  ✅ Room 4 speed HIGH -> 成功
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   ON   15.9  24.0  H    106.00   HEATING
-2   ON   15.82 25.0  M    127.00   HEATING
-3   ON   18.67 22.0  M    152.00   HEATING
-4   ON   12.52 22.0  H    201.00   HEATING
-5   ON   19.77 24.0  H    106.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 4  Fan=HIGH  Slice=0.7s  Total=121s
-  Room 1  Fan=HIGH  Slice=0.6s  Total=481s
-  Room 5  Fan=HIGH  Slice=0.6s  Total=241s
-WaitingQueue:
-  Room 3  Fan=MEDIUM  Wait=60.9s
-  Room 2  Fan=MEDIUM  Wait=0.7s
-====================
-
-🔥 [Min 11]
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   ON   17.11 24.0  H    107.00   HEATING
-2   ON   15.23 25.0  M    127.00   HEATING
-3   ON   18.0  22.0  M    152.00   HEATING
-4   ON   13.73 22.0  H    202.00   HEATING
-5   ON   20.98 24.0  H    107.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 4  Fan=HIGH  Slice=61.3s  Total=181s
-  Room 1  Fan=HIGH  Slice=61.2s  Total=541s
-  Room 5  Fan=HIGH  Slice=61.2s  Total=301s
-WaitingQueue:
-  Room 3  Fan=MEDIUM  Wait=121.5s
-  Room 2  Fan=MEDIUM  Wait=61.3s
-====================
-
-🔥 [Min 12]
-  ✅ Room 5 speed MEDIUM -> 成功
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   ON   18.14 24.0  H    108.00   HEATING
-2   ON   15.0  25.0  M    127.00   HEATING
-3   ON   18.51 22.0  M    152.00   HEATING
-4   ON   14.76 22.0  H    203.00   HEATING
-5   ON   21.44 24.0  M    109.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 1  Fan=HIGH  Slice=0.6s  Total=601s
-  Room 4  Fan=HIGH  Slice=0.6s  Total=241s
-  Room 3  Fan=MEDIUM  Slice=0.6s  Total=241s
-WaitingQueue:
-  Room 2  Fan=MEDIUM  Wait=122.1s
-  Room 5  Fan=MEDIUM  Wait=0.7s
-====================
-
-🔥 [Min 13]
-  ✅ Room 2 speed HIGH -> 成功
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   ON   19.15 24.0  H    109.00   HEATING
-2   ON   16.39 25.0  H    127.00   HEATING
-3   ON   18.62 22.0  M    152.50   HEATING
-4   ON   15.77 22.0  H    204.00   HEATING
-5   ON   20.93 24.0  M    109.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 1  Fan=HIGH  Slice=61.3s  Total=661s
-  Room 4  Fan=HIGH  Slice=61.3s  Total=301s
-  Room 2  Fan=HIGH  Slice=0.6s  Total=241s
-WaitingQueue:
-  Room 5  Fan=MEDIUM  Wait=61.4s
-  Room 3  Fan=MEDIUM  Wait=0.6s
-====================
-
-🔥 [Min 14]
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   ON   20.21 24.0  H    110.00   HEATING
-2   ON   17.45 25.0  H    128.00   HEATING
-3   ON   18.0  22.0  M    152.50   HEATING
-4   ON   16.83 22.0  H    205.00   HEATING
-5   ON   20.4  24.0  M    109.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 2  Fan=HIGH  Slice=61.3s  Total=301s
-  Room 1  Fan=HIGH  Slice=1.2s  Total=721s
-  Room 4  Fan=HIGH  Slice=1.2s  Total=361s
-WaitingQueue:
-  Room 5  Fan=MEDIUM  Wait=122.0s
-  Room 3  Fan=MEDIUM  Wait=61.3s
-====================
-
-🔥 [Min 15]
-  ✅ Room 3 speed LOW -> 成功
-  ✅ Room 1 power_off  -> 成功
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   OFF  10.0  24.0  M    111.00   HEATING
-2   ON   18.63 25.0  H    129.00   HEATING
-3   ON   18.0  22.0  L    152.50   HEATING
-4   ON   18.04 22.0  H    206.00   HEATING
-5   ON   19.82 24.0  M    109.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 4  Fan=HIGH  Slice=61.9s  Total=422s
-  Room 2  Fan=HIGH  Slice=1.5s  Total=362s
-  Room 5  Fan=MEDIUM  Slice=0.6s  Total=1s
-WaitingQueue:
-  Room 3  Fan=LOW  Wait=121.9s
-====================
-
-🔥 [Min 16]
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   OFF  10.0  24.0  M    111.00   HEATING
-2   ON   19.8  25.0  H    130.00   HEATING
-3   ON   18.0  22.0  L    152.50   HEATING
-4   ON   19.21 22.0  H    207.00   HEATING
-5   ON   20.42 24.0  M    110.00   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 2  Fan=HIGH  Slice=62.2s  Total=422s
-  Room 5  Fan=MEDIUM  Slice=61.3s  Total=61s
-  Room 4  Fan=HIGH  Slice=0.0s  Total=360s
-WaitingQueue:
-  Room 3  Fan=LOW  Wait=182.6s
-====================
-
-🔥 [Min 17]
-  ✅ Room 5 power_off  -> 成功
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   OFF  10.0  24.0  M    111.00   HEATING
-2   ON   20.82 25.0  H    131.00   HEATING
-3   ON   19.01 22.0  L    152.50   HEATING
-4   ON   20.23 22.0  H    208.00   HEATING
-5   OFF  14.0  24.0  M    110.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 4  Fan=HIGH  Slice=60.8s  Total=541s
-  Room 3  Fan=LOW  Slice=0.7s  Total=301s
-  Room 2  Fan=HIGH  Slice=0.6s  Total=481s
-WaitingQueue:
-====================
-
-🔥 [Min 18]
-  ✅ Room 3 speed HIGH -> 成功
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   OFF  10.0  24.0  M    111.00   HEATING
-2   ON   21.84 25.0  H    132.00   HEATING
-3   ON   19.65 22.0  H    153.83   HEATING
-4   ON   21.25 22.0  H    209.00   HEATING
-5   OFF  14.0  24.0  M    110.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 2  Fan=HIGH  Slice=61.3s  Total=541s
-  Room 3  Fan=HIGH  Slice=61.1s  Total=61s
-  Room 4  Fan=HIGH  Slice=0.6s  Total=601s
-WaitingQueue:
-====================
-
-🔥 [Min 19]
-  ✅ Room 4 temp 25.0 -> 成功
-  ✅ Room 4 speed MEDIUM -> 成功
-  ✅ Room 1 power_on  -> 成功
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   ON   10.0  24.0  M    211.00   HEATING
-2   ON   22.86 25.0  H    133.00   HEATING
-3   ON   20.67 22.0  H    154.83   HEATING
-4   ON   21.58 25.0  M    210.50   HEATING
-5   OFF  14.0  24.0  M    110.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 1  Fan=MEDIUM  Slice=0.6s  Total=1s
-  Room 2  Fan=HIGH  Slice=0.6s  Total=601s
-  Room 3  Fan=HIGH  Slice=0.6s  Total=1s
-WaitingQueue:
-  Room 4  Fan=MEDIUM  Wait=0.6s
-====================
-
-🔥 [Min 20]
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   ON   10.52 24.0  M    211.50   HEATING
-2   ON   23.87 25.0  H    134.00   HEATING
-3   ON   21.68 22.0  H    155.83   HEATING
-4   ON   21.07 25.0  M    210.50   HEATING
-5   OFF  14.0  24.0  M    110.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 1  Fan=MEDIUM  Slice=61.3s  Total=61s
-  Room 2  Fan=HIGH  Slice=61.3s  Total=661s
-  Room 3  Fan=HIGH  Slice=61.2s  Total=61s
-WaitingQueue:
-  Room 4  Fan=MEDIUM  Wait=61.3s
-====================
-
-🔥 [Min 21]
-  ✅ Room 2 temp 27.0 -> 成功
-  ✅ Room 5 power_on  -> 成功
-  ✅ Room 2 speed MEDIUM -> 成功
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   ON   10.55 24.0  M    212.00   HEATING
-2   ON   24.17 25.0  M    136.00   HEATING
-3   ON   22.0  22.0  H    156.83   HEATING
-4   ON   21.04 25.0  M    210.50   HEATING
-5   ON   14.0  24.0  M    210.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
+  Room 2  Fan=MEDIUM  Slice=62.0s  Total=182s
+  Room 5  Fan=HIGH  Slice=0.7s  Total=1s
   Room 4  Fan=MEDIUM  Slice=0.7s  Total=1s
-  Room 5  Fan=MEDIUM  Slice=0.7s  Total=1s
-  Room 2  Fan=MEDIUM  Slice=0.1s  Total=0s
 WaitingQueue:
+  Room 3  Fan=MEDIUM  Wait=0.7s
   Room 1  Fan=MEDIUM  Wait=0.7s
-====================
-
-🔥 [Min 22]
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   ON   10.04 24.0  M    212.00   HEATING
-2   ON   24.68 25.0  M    136.50   HEATING
-3   ON   21.25 22.0  H    156.83   HEATING
-4   ON   21.55 25.0  M    211.00   HEATING
-5   ON   14.51 24.0  M    211.00   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 4  Fan=MEDIUM  Slice=61.4s  Total=61s
-  Room 5  Fan=MEDIUM  Slice=61.3s  Total=61s
-  Room 2  Fan=MEDIUM  Slice=60.8s  Total=61s
-WaitingQueue:
-  Room 1  Fan=MEDIUM  Wait=61.4s
-====================
-
-🔥 [Min 23]
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   ON   10.5  24.0  M    212.50   HEATING
-2   ON   24.68 25.0  M    137.00   HEATING
-3   ON   21.51 22.0  H    157.83   HEATING
-4   ON   21.05 25.0  M    211.50   HEATING
-5   ON   14.01 24.0  M    211.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 1  Fan=MEDIUM  Slice=30.2s  Total=150s
-  Room 3  Fan=HIGH  Slice=30.2s  Total=90s
-  Room 4  Fan=MEDIUM  Slice=0.0s  Total=60s
-WaitingQueue:
-  Room 5  Fan=MEDIUM  Wait=30.2s
-  Room 2  Fan=MEDIUM  Wait=30.1s
-====================
-
-🔥 [Min 24]
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   ON   11.0  24.0  M    213.00   HEATING
-2   ON   24.18 25.0  M    137.00   HEATING
-3   ON   22.0  22.0  H    158.83   HEATING
-4   ON   21.56 25.0  M    212.00   HEATING
-5   ON   14.51 24.0  M    211.50   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 1  Fan=MEDIUM  Slice=90.9s  Total=211s
-  Room 4  Fan=MEDIUM  Slice=60.7s  Total=121s
-  Room 5  Fan=MEDIUM  Slice=0.1s  Total=60s
-WaitingQueue:
-  Room 2  Fan=MEDIUM  Wait=90.9s
-====================
-
-🔥 [Min 25]
-  ✅ Room 5 power_off  -> 成功
-  ✅ Room 1 power_off  -> 成功
-  ✅ Room 3 power_off  -> 成功
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   OFF  10.0  24.0  M    213.50   HEATING
-2   ON   23.68 25.0  M    137.00   HEATING
-3   OFF  18.0  22.0  M    158.83   HEATING
-4   ON   21.54 25.0  M    212.50   HEATING
-5   OFF  14.0  24.0  M    212.00   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-  Room 2  Fan=MEDIUM  Slice=1.1s  Total=61s
-  Room 4  Fan=MEDIUM  Slice=0.6s  Total=121s
-WaitingQueue:
-====================
-
-🔥 [Min 26]
-  ✅ Room 2 power_off  -> 成功
-  ✅ Room 4 power_off  -> 成功
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   OFF  10.0  24.0  M    213.50   HEATING
-2   OFF  15.0  25.0  M    137.50   HEATING
-3   OFF  18.0  22.0  M    158.83   HEATING
-4   OFF  12.0  25.0  M    213.00   HEATING
-5   OFF  14.0  24.0  M    212.00   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-WaitingQueue:
-====================
-
-🔥 [Min 27]
------------------------------------------------------------------
-Rm  St   Cur   Tar   Spd  Fee      Mode
------------------------------------------------------------------
-1   OFF  10.0  24.0  M    213.50   HEATING
-2   OFF  15.0  25.0  M    137.50   HEATING
-3   OFF  18.0  22.0  M    158.83   HEATING
-4   OFF  12.0  25.0  M    213.00   HEATING
-5   OFF  14.0  24.0  M    212.00   HEATING
------------------------------------------------------------------
-
-=== Queue Status ===
-Capacity=3  TimeSlice=120s
-ServingQueue:
-WaitingQueue:
 ====================
 

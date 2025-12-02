@@ -325,6 +325,7 @@ class Scheduler:
         # ====================
         
         room.target_temp = TargetTemp
+        # 注意：不在这里更新 last_temp_update，让温度更新逻辑自己处理时间计算
         if room.cooling_paused:
             room.cooling_paused = False; room.pause_start_temp = None
             self._resume_cooling(room)
@@ -346,6 +347,7 @@ class Scheduler:
             room.ac_session_start = now
         
         room.fan_speed = normalized
+        # 注意：不在这里更新 last_temp_update，让温度更新逻辑自己处理时间计算
         self.room_service.updateRoom(room)
         self._remove_request(room_id)
         now = datetime.utcnow()
@@ -400,77 +402,114 @@ class Scheduler:
         return f"已切换至 {normalized_mode} 模式，目标温度重置为 {default_target}°C"
 
     def _updateRoomTemperature(self, room) -> None:
+        """
+        通用温控逻辑：
+        1. 在服务队列中 -> 向 目标温度 (Target) 变化
+        2. 不在服务队列 (排队/待机/关机) -> 向 初始温度 (Default) 回归
+        """
         now = datetime.utcnow()
-        current_temp = room.current_temp or room.default_temp or 0.0
+        current_temp = room.current_temp if room.current_temp is not None else (room.default_temp or 0.0)
         new_temp = current_temp
         
+        # 1. 计算时间流逝 (分钟)
         if room.last_temp_update:
-            elapsed = ((now - room.last_temp_update).total_seconds() / 60.0) * self._time_factor()
+            real_elapsed_seconds = (now - room.last_temp_update).total_seconds()
+            time_factor = self._time_factor()
+            elapsed = (real_elapsed_seconds / 60.0) * time_factor
         else:
-            elapsed = (3.0/60.0) * self._time_factor()
+            real_elapsed_seconds = 0.0
+            elapsed = 0.0
+            time_factor = self._time_factor()
 
+        # 2. 获取速率参数
         fan_speed = (room.fan_speed or "MEDIUM").upper()
+        # 制冷/制热速率
         rate_map = {"HIGH": 1.0, "MEDIUM": 0.5, "LOW": 1.0/3.0}
         change_rate = rate_map.get(fan_speed, 0.5)
-        rewarming_rate = 0.5
+        # 回温速率 (自然回归)
+        rewarming_rate = 0.5 
 
-        if not room.ac_on:
-            if room.default_temp is not None:
-                diff = room.default_temp - current_temp
-                if abs(diff) < 0.1: new_temp = room.default_temp
-                else:
-                    step = max(min(diff, rewarming_rate * elapsed), -rewarming_rate * elapsed)
-                    new_temp += step
-        else:
-            is_serving = any(r.roomId == room.id for r in self.serving_queue)
-            if is_serving:
-                if room.cooling_paused:
-                    if room.default_temp is not None:
-                        diff = room.default_temp - current_temp
-                        if abs(diff) < 0.1:
-                            new_temp = room.default_temp
-                            room.cooling_paused = False; room.pause_start_temp = None
-                        else:
-                            step = max(min(diff, rewarming_rate * elapsed), -rewarming_rate * elapsed)
-                            new_temp += step
-                            if room.pause_start_temp and abs(new_temp - room.pause_start_temp) >= 1.0:
-                                room.cooling_paused = False; room.pause_start_temp = None
-                else:
-                    diff = room.target_temp - current_temp
-                    if abs(diff) < 0.2:
-                        new_temp = room.target_temp
-                        if room.default_temp and abs(room.target_temp - room.default_temp) > 0.2:
-                            room.cooling_paused = True; room.pause_start_temp = new_temp
-                            self._pause_cooling(room)
-                    else:
-                        step = max(min(diff, change_rate * elapsed), -change_rate * elapsed)
-                        new_temp += step
-            elif room.cooling_paused:
-                if room.default_temp is not None:
-                    diff = room.default_temp - current_temp
-                    if abs(diff) < 0.1:
-                        new_temp = room.default_temp
-                        room.cooling_paused = False; room.pause_start_temp = None
-                        self._resume_cooling(room)
-                    else:
-                        step = max(min(diff, rewarming_rate * elapsed), -rewarming_rate * elapsed)
-                        new_temp += step
-                        if room.pause_start_temp and abs(new_temp - room.pause_start_temp) >= 1.0:
-                            room.cooling_paused = False; room.pause_start_temp = None
-                            self._resume_cooling(room)
+        # 3. 判断当前状态
+        # 只要 开机 且 在服务队列中，才算"正在服务"
+        is_serving = room.ac_on and any(int(r.roomId) == room.id for r in self.serving_queue)
+
+        # ==========================================
+        # 情况 A: 正在服务 (主动制冷/制热)
+        # ==========================================
+        if is_serving:
+            # 物理逻辑：向 Target 靠拢
+            diff = room.target_temp - current_temp
+            
+            # 检查是否到达目标 (容差 0.1)
+            # 注意：这里要防止"过冲"，即一步跨过目标温度
+            if abs(diff) < 0.1:
+                new_temp = room.target_temp
+                # 达到目标，触发 PAUSED
+                # (制冷时当前<=目标，制热时当前>=目标，都算达标)
+                # 这里简单用绝对值判断接近程度
+                room.cooling_paused = True
+                room.pause_start_temp = new_temp
+                print(f"[Scheduler] Room {room.id} 温度达标 ({new_temp})，进入待机")
+                self._pause_cooling(room)
             else:
-                # 排队回温
-                if room.default_temp is not None:
-                    diff = room.default_temp - current_temp
-                    if abs(diff) < 0.1: new_temp = room.default_temp
-                    else:
-                        step = max(min(diff, rewarming_rate * elapsed), -rewarming_rate * elapsed)
-                        new_temp += step
+                # 计算本轮变化量 (不超过剩余温差)
+                # step_size 是绝对值
+                step_size = change_rate * elapsed
+                
+                # 调试信息：打印温度计算详情（Room 1 的所有情况都打印）
+                if room.id == 1:
+                    print(f"[DEBUG] Room {room.id} 温度计算: "
+                          f"当前={current_temp:.2f}℃, 目标={room.target_temp:.2f}℃, "
+                          f"实际时间={real_elapsed_seconds:.1f}秒, 时间因子={time_factor:.2f}, "
+                          f"计算时间={elapsed:.3f}分钟, 风速={fan_speed}, 速率={change_rate:.3f}度/分钟, "
+                          f"步长={step_size:.3f}度, 新温度={new_temp:.2f}℃")
+                
+                if diff > 0: # 需要升温 (制热)
+                    new_temp = min(room.target_temp, current_temp + step_size)
+                else: # 需要降温 (制冷)
+                    new_temp = max(room.target_temp, current_temp - step_size)
 
-        if abs(new_temp - current_temp) >= 0.01:
-            room.current_temp = round(new_temp, 2)
-            room.last_temp_update = now
-            self.room_service.updateRoom(room)
+        # ==========================================
+        # 情况 B: 不在服务 (排队 WAITING / 待机 PAUSED / 关机 OFF)
+        # ==========================================
+        else:
+            # 物理逻辑：向 Default (环境温度) 回归
+            if room.default_temp is not None:
+                diff_to_default = room.default_temp - current_temp
+                
+                if abs(diff_to_default) < 0.1:
+                    new_temp = room.default_temp
+                else:
+                    # 计算回温变化量
+                    step_size = rewarming_rate * elapsed
+                    
+                    if diff_to_default > 0: # 环境比当前热 -> 升温 (制冷后的回温)
+                        new_temp = min(room.default_temp, current_temp + step_size)
+                    else: # 环境比当前冷 -> 降温 (制热后的回冷)
+                        new_temp = max(room.default_temp, current_temp - step_size)
+
+            # 仅针对 PAUSED 状态的唤醒检查 (回温超过 1 度)
+            if room.ac_on and room.cooling_paused:
+                # 唤醒阈值检查：
+                # 如果没有 pause_start_temp，就用 target_temp 做基准
+                base_temp = room.pause_start_temp if room.pause_start_temp is not None else room.target_temp
+                
+                # 检查偏离程度
+                if abs(new_temp - base_temp) >= 1.0:
+                    print(f"[Scheduler] Room {room.id} 回温超过1度 ({new_temp} vs {base_temp})，重新唤醒")
+                    room.cooling_paused = False
+                    room.pause_start_temp = None
+                    self._resume_cooling(room)
+
+        # 4. 更新数据库
+        # === 关键修复：无论温度是否变化，都要更新 last_temp_update 并保存到数据库 ===
+        # 这样可以确保时间计算准确，避免时间累积错误和时间戳不一致
+        if abs(new_temp - current_temp) >= 1e-6:
+            room.current_temp = new_temp  # 去掉 round()，保留完整精度
+        # 无论温度是否变化，都要更新时间戳并保存到数据库，确保时间戳一致
+        room.last_temp_update = now
+        # 如果温度变化了，保存到数据库；如果没变化，也要保存时间戳
+        self.room_service.updateRoom(room)
 
     def RequestState(self, RoomId: int) -> dict:
         room = self.room_service.getRoomById(RoomId)
@@ -492,10 +531,11 @@ class Scheduler:
         status = {
             "id": room.id, "room_id": room.id,
             "ac_on": bool(room.ac_on), "ac_mode": room.ac_mode, "fan_speed": room.fan_speed,
-            "current_temp": room.current_temp if room.current_temp is not None else 0.0,
-            "currentTemp": room.current_temp if room.current_temp is not None else 0.0,
-            "target_temp": room.target_temp if room.target_temp is not None else 25.0,
-            "targetTemp": room.target_temp if room.target_temp is not None else 25.0,
+            # 在这里展示时 round 是安全的，不会影响物理核心的累积
+            "current_temp": round(room.current_temp, 2) if room.current_temp is not None else 0.0,
+            "currentTemp": round(room.current_temp, 2) if room.current_temp is not None else 0.0,
+            "target_temp": round(room.target_temp, 2) if room.target_temp is not None else 25.0,
+            "targetTemp": round(room.target_temp, 2) if room.target_temp is not None else 25.0,
             
             "current_cost": current_val, "currentCost": current_val,
             
