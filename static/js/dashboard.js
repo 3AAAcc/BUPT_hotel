@@ -36,9 +36,17 @@ function renderDashboard(data) {
 }
 
 function createServingCard(item, maxTime) {
-    // 简单的进度条逻辑：假设服务时间不超过时间片太多
+    // 计算时间片进度百分比 (0-100%)
+    // item.servingSeconds 是当前时间片的进度 (0-120)
     const percent = Math.min(100, (item.servingSeconds / maxTime) * 100);
     
+    // 格式化累计时间 (秒 -> 分:秒)
+    // item.totalActiveSeconds 是我们刚才在后端加的字段
+    const totalSec = item.totalActiveSeconds || item.servingSeconds;
+    const totalMin = Math.floor(totalSec / 60);
+    const totalRemSec = Math.floor(totalSec % 60);
+    const totalStr = `${totalMin}分${totalRemSec.toString().padStart(2, '0')}秒`;
+
     return `
         <div class="mon-card serving-card">
             <div class="card-top">
@@ -51,9 +59,19 @@ function createServingCard(item, maxTime) {
                 <span class="tag">${item.fanSpeed}</span>
                 <span class="tag">${item.mode}</span>
             </div>
-            <div class="time-info">
-                <small>已服务: ${item.servingSeconds.toFixed(0)}s</small>
+            
+            <div class="time-info" style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div style="font-size: 0.8rem; color: #94a3b8;">
+                    <div>当前片: ${item.servingSeconds.toFixed(0)}s</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 0.7rem; color: #64748b;">累计运行</div>
+                    <div style="font-size: 1.1rem; font-weight: bold; color: #2ecc71;">
+                        ${totalStr}
+                    </div>
+                </div>
             </div>
+
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" style="width: ${percent}%"></div>
             </div>

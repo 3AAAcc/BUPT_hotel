@@ -2,7 +2,6 @@ from flask import Blueprint, jsonify, request
 # 注意这里导入的是 ac (ACService) 和 scheduler
 from ..services import ac, scheduler
 
-# === 核心修改：去掉 /api 前缀 ===
 ac_bp = Blueprint("ac", __name__, url_prefix="/ac")
 
 @ac_bp.get("/state")

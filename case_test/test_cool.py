@@ -12,7 +12,7 @@ import os
 
 # === 配置 ===
 API_BASE = "http://127.0.0.1:8080"  # 请确认你的端口
-TIME_FACTOR = 10  # 1分钟 = 10秒
+TIME_FACTOR = 60  # 1分钟 = 10秒
 LOG_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "csv", "test_cool.txt")
 
 
@@ -140,16 +140,16 @@ def print_queue():
 
         log("ServingQueue:")
         for item in data.get("servingQueue", []):
+            # 新增显示 Total
             log(f"  Room {item['roomId']}  "
                 f"Fan={item['fanSpeed']}  "
-                f"Serve={item['servingSeconds']:.1f}s  "
-                f"Wait={item['waitingSeconds']:.1f}s")
+                f"Slice={item['servingSeconds']:.1f}s  "
+                f"Total={item.get('totalSeconds', item['servingSeconds']):.0f}s")
 
         log("WaitingQueue:")
         for item in data.get("waitingQueue", []):
             log(f"  Room {item['roomId']}  "
                 f"Fan={item['fanSpeed']}  "
-                f"Serve={item['servingSeconds']:.1f}s  "
                 f"Wait={item['waitingSeconds']:.1f}s")
         log("====================\n")
     except Exception as e:

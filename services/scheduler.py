@@ -285,6 +285,7 @@ class Scheduler:
         if room.default_temp is not None:
             room.current_temp = room.default_temp
 
+
         # === 新增：关机恢复默认风速 (中风) ===
         room.fan_speed = "MEDIUM"
         # ==================================
@@ -305,6 +306,24 @@ class Scheduler:
         room_id = RoomId
         room = self.room_service.getRoomById(room_id)
         if not room or not room.ac_on: raise ValueError("请先开启空调")
+        
+        # === 温度范围验证 ===
+        mode = room.ac_mode or "COOLING"
+        if mode == "HEATING":
+            min_temp = current_app.config.get("HEATING_MIN_TEMP", 18.0)
+            max_temp = current_app.config.get("HEATING_MAX_TEMP", 25.0)
+        else:  # COOLING
+            min_temp = current_app.config.get("COOLING_MIN_TEMP", 18.0)
+            max_temp = current_app.config.get("COOLING_MAX_TEMP", 28.0)
+        
+        # 如果超出范围，保持上一次的目标温度
+        current_target = room.target_temp
+        if TargetTemp < min_temp:
+            return f"目标温度 {TargetTemp}℃ 低于{mode}模式最低温度 {min_temp}℃，已保持当前设置 {current_target}℃"
+        if TargetTemp > max_temp:
+            return f"目标温度 {TargetTemp}℃ 高于{mode}模式最高温度 {max_temp}℃，已保持当前设置 {current_target}℃"
+        # ====================
+        
         room.target_temp = TargetTemp
         if room.cooling_paused:
             room.cooling_paused = False; room.pause_start_temp = None
@@ -448,7 +467,7 @@ class Scheduler:
                         step = max(min(diff, rewarming_rate * elapsed), -rewarming_rate * elapsed)
                         new_temp += step
 
-        if abs(new_temp - current_temp) >= 1e-6:
+        if abs(new_temp - current_temp) >= 0.01:
             room.current_temp = round(new_temp, 2)
             room.last_temp_update = now
             self.room_service.updateRoom(room)
@@ -464,7 +483,7 @@ class Scheduler:
             fee_data = bill_service.getCurrentFeeDetail(room)
             current_val = fee_data.get("current_session_fee", 0.0)
             
-            # === 核心修改：这里一定要取 'total' 而不是 'total_fee' ===
+            # ===这里一定要取 'total' 而不是 'total_fee' ===
             # 'total' 包含了 roomFee + acFee
             total_val = fee_data.get("total", 0.0)
         except Exception: 
@@ -513,26 +532,62 @@ class Scheduler:
         return {"message": "Updated", "updatedRooms": u}
 
     def getScheduleStatus(self) -> dict:
+        """获取调度器的全局状态（用于监控大屏和测试脚本）"""
+
+        # 1. 状态整理
         self._restore_queue_from_database()
         self._deduplicate_queues()
         self._rebalance_queues()
-        rooms = self.room_service.getAllRooms()
-        for room in rooms: self._updateRoomTemperature(room)
+        for r in self.room_service.getAllRooms():
+             self._updateRoomTemperature(r)
         self._enforce_capacity()
+        
         now = datetime.utcnow()
-        def _to_payload(queue: List[RoomRequest]) -> List[Dict[str, object]]:
+
+        # 内部函数：生成队列数据
+        def _to_payload(queue: List[RoomRequest], is_serving: bool) -> List[Dict[str, object]]:
             payload = []
             for req in queue:
+                # A. 当前状态的时间片 (用于调度逻辑，满120秒清零)
+                if is_serving:
+                    slice_seconds = self._elapsed_seconds(req.servingTime, now)
+                else:
+                    slice_seconds = self._elapsed_seconds(req.waitingTime, now)
+                
+                # B. 累计总时长 (用于展示，从开机到现在)
+                total_seconds = slice_seconds # 起步是当前片段
+                
+                # 查询数据库里的历史账单时长
+                room = self.room_service.getRoomById(req.roomId)
+                if room and room.ac_session_start:
+                    # 获取本次开机后的所有详单
+                    details = self.bill_detail_service.getBillDetailsByRoomIdAndTimeRange(
+                        room_id=room.id,
+                        start=room.ac_session_start,
+                        end=now
+                    )
+                    # 累加历史分钟数 -> 转为秒
+                    # 过滤掉 POWER_OFF_CYCLE 这种标记
+                    history_minutes = sum(d.duration for d in details if getattr(d, 'detail_type', 'AC') != 'POWER_OFF_CYCLE')
+                    total_seconds += (history_minutes * 60)
+
                 payload.append({
-                    "roomId": req.roomId, "fanSpeed": req.fanSpeed, "mode": req.mode,
+                    "roomId": req.roomId,
+                    "fanSpeed": req.fanSpeed,
+                    "mode": req.mode,
                     "targetTemp": req.targetTemp,
-                    "waitingSeconds": self._elapsed_seconds(req.waitingTime, now),
-                    "servingSeconds": self._elapsed_seconds(req.servingTime, now),
+                    # 区分两个时间
+                    "servingSeconds": slice_seconds if is_serving else 0, # 时间片
+                    "waitingSeconds": slice_seconds if not is_serving else 0, # 等待时间
+                    "totalSeconds": total_seconds # 总时长
                 })
             return payload
+
         return {
-            "capacity": self._capacity(), "timeSlice": self._time_slice(),
-            "servingQueue": _to_payload(self.serving_queue), "waitingQueue": _to_payload(self.waiting_queue),
+            "capacity": self._capacity(),
+            "timeSlice": self._time_slice(),
+            "servingQueue": _to_payload(self.serving_queue, True),
+            "waitingQueue": _to_payload(self.waiting_queue, False),
         }
 
     def _restore_queue_from_database(self) -> None:
