@@ -28,7 +28,8 @@ class Config:
     ENABLE_AC_CYCLE_DAILY_FEE = True
 
     # 测试用时间加速因子：现实1秒=系统TIME_ACCELERATION_FACTOR秒
-    TIME_ACCELERATION_FACTOR = float(os.getenv("TIME_ACCELERATION_FACTOR", 1))
+    # 硬加速：限时1秒等于系统6秒
+    TIME_ACCELERATION_FACTOR = float(os.getenv("TIME_ACCELERATION_FACTOR", 6.0))
 
     # === 制冷/制热 配置 ===
     # 制冷: 18-28度, 默认25

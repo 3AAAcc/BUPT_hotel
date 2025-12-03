@@ -14,7 +14,14 @@ if __package__ is None or __package__ == "":
     __package__ = "hotel.database"
 
 from .. import create_app
-from . import execute_schema_sql, seed_default_ac_config
+from . import (
+    ensure_bill_detail_update_time_column,
+    ensure_room_billing_start_temp_column,
+    ensure_room_daily_rate_column,
+    ensure_room_last_temp_update_column,
+    execute_schema_sql,
+    seed_default_ac_config,
+)
 from ..services import room_service
 
 
@@ -22,6 +29,11 @@ def main():
     app = create_app(setup_database=False)
     with app.app_context():
         execute_schema_sql()
+        # 确保所有必要的列都存在
+        ensure_bill_detail_update_time_column()
+        ensure_room_last_temp_update_column()
+        ensure_room_daily_rate_column()
+        ensure_room_billing_start_temp_column()
         seed_default_ac_config()
         room_service.ensureRoomsInitialized(
             total_count=app.config["HOTEL_ROOM_COUNT"],

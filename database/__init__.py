@@ -129,3 +129,33 @@ def ensure_room_daily_rate_column() -> None:
         db.session.rollback()
         print(f"警告：添加daily_rate字段时出错: {e}")
         # 如果字段已存在或其他非致命错误，继续执行
+
+
+def ensure_room_billing_start_temp_column() -> None:
+    """确保rooms表有billing_start_temp字段"""
+    inspector = inspect(db.engine)
+    try:
+        # 检查表是否存在
+        if "rooms" not in inspector.get_table_names():
+            # 表不存在，会在create_all时创建，不需要手动添加字段
+            return
+        
+        columns = {column["name"] for column in inspector.get_columns("rooms")}
+        if "billing_start_temp" in columns:
+            return
+        
+        # 表存在但字段不存在，添加字段
+        db.session.execute(
+            text(
+                """
+                ALTER TABLE rooms
+                ADD COLUMN billing_start_temp DOUBLE COMMENT '计费开始时的温度（用于基于温度变化的计费）'
+                """
+            )
+        )
+        db.session.commit()
+    except Exception as e:
+        # 如果出错，回滚并打印错误（但不中断程序）
+        db.session.rollback()
+        print(f"警告：添加billing_start_temp字段时出错: {e}")
+        # 如果字段已存在或其他非致命错误，继续执行

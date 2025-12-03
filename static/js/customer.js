@@ -79,10 +79,18 @@ function renderUI(data) {
     }
 
     // 3. 温度显示
+    // === 关键修复：格式化温度显示，确保显示正确的精度 ===
     const cTemp = data.current_temp ?? data.currentTemp ?? '--';
     const tTemp = data.target_temp ?? data.targetTemp ?? '--';
-    document.getElementById('current-temp').innerText = cTemp;
-    document.getElementById('target-temp').innerText = tTemp;
+    // 如果是数字，格式化为1位小数；如果是字符串，直接显示
+    const formatTemp = (temp) => {
+        if (temp === '--' || temp === null || temp === undefined) return '--';
+        const num = typeof temp === 'number' ? temp : parseFloat(temp);
+        if (isNaN(num)) return '--';
+        return num.toFixed(1);
+    };
+    document.getElementById('current-temp').innerText = formatTemp(cTemp);
+    document.getElementById('target-temp').innerText = formatTemp(tTemp);
 
     // 4. 模式与风速文字
     const modeMap = { 'COOLING': '制冷', 'HEATING': '制热' };

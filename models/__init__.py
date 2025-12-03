@@ -35,6 +35,7 @@ class Room(db.Model, TimestampMixin):
     cooling_paused = db.Column(db.Boolean, default=False)  # 是否因达到目标温度而暂停服务
     pause_start_temp = db.Column(db.Float)  # 暂停时的温度（用于判断是否回温1℃）
     daily_rate = db.Column(db.Float, default=100.0)  # 房间日房费（元/天）
+    billing_start_temp = db.Column(db.Float, nullable=True)  # 计费开始时的温度（用于基于温度变化的计费）
 
     def to_dict(self) -> dict:
         return {

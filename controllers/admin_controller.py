@@ -2,7 +2,14 @@ from flask import Blueprint, jsonify, request, current_app
 from ..services import maintenance_service, scheduler, room_service
 from ..extensions import db
 from ..models import AccommodationFeeBill, Customer, DetailRecord, Room, ACConfig
-from ..database import execute_schema_sql, seed_default_ac_config
+from ..database import (
+    ensure_bill_detail_update_time_column,
+    ensure_room_billing_start_temp_column,
+    ensure_room_daily_rate_column,
+    ensure_room_last_temp_update_column,
+    execute_schema_sql,
+    seed_default_ac_config,
+)
 
 # 修正前缀
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -102,10 +109,16 @@ def reset_database():
         # 4. 执行 schema.sql
         execute_schema_sql()
         
-        # 5. 初始化 AC 配置
+        # 5. 确保所有必要的列都存在（包括新添加的字段）
+        ensure_bill_detail_update_time_column()
+        ensure_room_last_temp_update_column()
+        ensure_room_daily_rate_column()
+        ensure_room_billing_start_temp_column()
+        
+        # 6. 初始化 AC 配置
         seed_default_ac_config()
         
-        # 6. 初始化房间数据
+        # 7. 初始化房间数据
         room_service.ensureRoomsInitialized(
             total_count=current_app.config["HOTEL_ROOM_COUNT"],
             default_temp=current_app.config["HOTEL_DEFAULT_TEMP"],

@@ -16,3 +16,136 @@ ServingQueue:
 WaitingQueue:
 ====================
 
+🔥 [Min 1]
+  ✅ Room 1 power_on  -> 成功
+-----------------------------------------------------------------
+Rm  St   Cur   Tar   Spd  Fee      Mode
+-----------------------------------------------------------------
+1   ON   10.0  22.0  M    100.00   HEATING
+2   OFF  15.0  22.0  M    125.00   HEATING
+3   OFF  18.0  22.0  M    150.00   HEATING
+4   OFF  12.0  22.0  M    200.00   HEATING
+5   OFF  14.0  22.0  M    100.00   HEATING
+-----------------------------------------------------------------
+
+=== Queue Status ===
+Capacity=3  TimeSlice=120s
+ServingQueue:
+  Room 1  Fan=MEDIUM  Slice=3.5s  Total=3s
+WaitingQueue:
+====================
+
+🔥 [Min 2]
+  ✅ Room 1 temp 24.0 -> 成功
+  ✅ Room 2 power_on  -> 成功
+-----------------------------------------------------------------
+Rm  St   Cur   Tar   Spd  Fee      Mode
+-----------------------------------------------------------------
+1   ON   10.47 24.0  M    100.47   HEATING
+2   ON   15.0  22.0  M    125.00   HEATING
+3   OFF  18.0  22.0  M    150.00   HEATING
+4   OFF  12.0  22.0  M    200.00   HEATING
+5   OFF  14.0  22.0  M    100.00   HEATING
+-----------------------------------------------------------------
+
+=== Queue Status ===
+Capacity=3  TimeSlice=120s
+ServingQueue:
+  Room 1  Fan=MEDIUM  Slice=67.4s  Total=67s
+  Room 2  Fan=MEDIUM  Slice=3.5s  Total=4s
+WaitingQueue:
+====================
+
+🔥 [Min 3]
+  ✅ Room 3 power_on  -> 成功
+-----------------------------------------------------------------
+Rm  St   Cur   Tar   Spd  Fee      Mode
+-----------------------------------------------------------------
+1   ON   11.19 24.0  M    101.19   HEATING
+2   ON   15.64 22.0  M    125.64   HEATING
+3   ON   18.0  22.0  M    150.00   HEATING
+4   OFF  12.0  22.0  M    200.00   HEATING
+5   OFF  14.0  22.0  M    100.00   HEATING
+-----------------------------------------------------------------
+
+=== Queue Status ===
+Capacity=3  TimeSlice=120s
+ServingQueue:
+  Room 2  Fan=MEDIUM  Slice=67.6s  Total=68s
+  Room 3  Fan=MEDIUM  Slice=3.8s  Total=4s
+  Room 1  Fan=MEDIUM  Slice=3.6s  Total=4s
+WaitingQueue:
+====================
+
+🔥 [Min 4]
+  ✅ Room 2 temp 25.0 -> 成功
+  ✅ Room 4 power_on  -> 成功
+  ✅ Room 5 power_on  -> 成功
+-----------------------------------------------------------------
+Rm  St   Cur   Tar   Spd  Fee      Mode
+-----------------------------------------------------------------
+1   ON   11.65 24.0  M    101.65   HEATING
+2   ON   16.16 25.0  M    126.16   HEATING
+3   ON   18.48 22.0  M    150.48   HEATING
+4   ON   12.0  22.0  M    200.00   HEATING
+5   ON   14.0  22.0  M    100.00   HEATING
+-----------------------------------------------------------------
+
+=== Queue Status ===
+Capacity=3  TimeSlice=120s
+ServingQueue:
+  Room 3  Fan=MEDIUM  Slice=67.7s  Total=68s
+  Room 1  Fan=MEDIUM  Slice=67.5s  Total=67s
+  Room 2  Fan=MEDIUM  Slice=6.6s  Total=7s
+WaitingQueue:
+  Room 4  Fan=MEDIUM  Wait=3.5s
+  Room 5  Fan=MEDIUM  Wait=3.4s
+====================
+
+🔥 [Min 5]
+  ✅ Room 3 temp 27.0 -> 成功
+  ✅ Room 5 speed HIGH -> 成功
+-----------------------------------------------------------------
+Rm  St   Cur   Tar   Spd  Fee      Mode
+-----------------------------------------------------------------
+1   ON   12.18 24.0  M    102.18   HEATING
+2   ON   16.65 25.0  M    126.65   HEATING
+3   ON   18.98 22.0  M    150.98   HEATING
+4   ON   12.0  22.0  M    200.00   HEATING
+5   ON   14.01 22.0  H    100.01   HEATING
+-----------------------------------------------------------------
+
+=== Queue Status ===
+Capacity=3  TimeSlice=120s
+ServingQueue:
+  Room 2  Fan=MEDIUM  Slice=70.4s  Total=70s
+  Room 4  Fan=MEDIUM  Slice=5.2s  Total=5s
+  Room 5  Fan=HIGH  Slice=3.3s  Total=3s
+WaitingQueue:
+  Room 3  Fan=MEDIUM  Wait=5.5s
+  Room 1  Fan=MEDIUM  Wait=5.3s
+====================
+
+🔥 [Min 6]
+  ✅ Room 1 speed HIGH -> 成功
+-----------------------------------------------------------------
+Rm  St   Cur   Tar   Spd  Fee      Mode
+-----------------------------------------------------------------
+1   ON   11.63 24.0  H    102.18   HEATING
+2   ON   17.13 25.0  M    127.17   HEATING
+3   ON   18.49 22.0  M    151.02   HEATING
+4   ON   12.57 22.0  M    200.57   HEATING
+5   ON   15.19 22.0  H    101.19   HEATING
+-----------------------------------------------------------------
+
+=== Queue Status ===
+Capacity=3  TimeSlice=120s
+ServingQueue:
+  Room 5  Fan=HIGH  Slice=67.1s  Total=67s
+  Room 3  Fan=MEDIUM  Slice=10.1s  Total=10s
+  Room 1  Fan=HIGH  Slice=3.4s  Total=3s
+WaitingQueue:
+  Room 2  Fan=MEDIUM  Wait=10.3s
+  Room 4  Fan=MEDIUM  Wait=3.5s
+====================
+

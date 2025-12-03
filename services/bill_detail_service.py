@@ -51,10 +51,15 @@ class BillDetailService:
     def getBillDetailsByRoomIdAndTimeRange(
         self, room_id: int, start: datetime, end: datetime, customer_id: int | None = None
     ) -> List[DetailRecord]:
+        # === 关键修复：使用更宽松的查询条件，确保查询到所有相关费用 ===
+        # 使用 start_time < end + 1秒，或者使用 end_time <= end + 1秒
+        # 这样可以确保所有在时间范围内的记录都被查询到，即使时间精度有微小差异
+        from datetime import timedelta
+        query_end = end + timedelta(seconds=1)  # 添加1秒缓冲，确保查询到所有费用
         query = DetailRecord.query.filter(
             DetailRecord.room_id == room_id,
             DetailRecord.start_time >= start,
-            DetailRecord.end_time <= end,
+            DetailRecord.start_time < query_end,  # 使用 < 而不是 <=，并添加缓冲时间
         )
         # 如果提供了customer_id，只返回该客户的账单详情（排除管理员开启的空调产生的账单）
         if customer_id is not None:

@@ -25,6 +25,7 @@ CREATE TABLE rooms (
     cooling_paused TINYINT(1) DEFAULT 0,
     pause_start_temp DOUBLE,
     daily_rate DOUBLE DEFAULT 100.0 COMMENT '房间日房费（元/天）',
+    billing_start_temp DOUBLE COMMENT '计费开始时的温度（用于基于温度变化的计费）',
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -3,6 +3,7 @@ from flask import Flask, render_template
 from .config import Config
 from .database import (
     ensure_bill_detail_update_time_column,
+    ensure_room_billing_start_temp_column,
     ensure_room_daily_rate_column,
     ensure_room_last_temp_update_column,
     seed_default_ac_config,
@@ -25,6 +26,7 @@ def create_app(
             ensure_bill_detail_update_time_column()
             ensure_room_last_temp_update_column()
             ensure_room_daily_rate_column()
+            ensure_room_billing_start_temp_column()
             seed_default_ac_config()
             room_service.ensureRoomsInitialized(
                 total_count=app.config["HOTEL_ROOM_COUNT"],
@@ -32,7 +34,13 @@ def create_app(
             )
     
     # 启动温度自动更新后台任务
+    # === 关键修复：确保在启动 TemperatureScheduler 之前，所有必要的列都已存在 ===
+    # 即使 setup_database=False，也要确保列存在，因为 TemperatureScheduler 会立即查询 Room 表
     with app.app_context():
+        ensure_bill_detail_update_time_column()
+        ensure_room_last_temp_update_column()
+        ensure_room_daily_rate_column()
+        ensure_room_billing_start_temp_column()
         temperature_scheduler.start(app)
 
     from .controllers.ac_controller import ac_bp

@@ -12,7 +12,9 @@ import os
 
 # === 配置 ===
 API_BASE = "http://127.0.0.1:8080"
-TIME_FACTOR = 60
+# 硬加速：限时1秒等于系统6秒
+# 1分钟系统时间 = 60秒系统时间 = 60/6 = 10秒物理时间
+TIME_FACTOR = 10  # 1分钟系统时间 = 10秒物理时间
 LOG_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "csv", "test_heat.txt")
 
 
@@ -133,11 +135,12 @@ def print_status():
         for r in data:
             st = "ON" if r['ac_on'] else "OFF"
             sp = (r['fan_speed'] or "-")[0]
+            mode = r.get('mode') or r.get('ac_mode', '-')  # 兼容两种字段名
             log(
-                f"{r['room_id']:<3} {st:<4} {r['current_temp']:<5} {r['target_temp']:<5} {sp:<4} {r['total_cost']:<8.2f} {r['ac_mode']}")
+                f"{r['room_id']:<3} {st:<4} {r['current_temp']:<5} {r['target_temp']:<5} {sp:<4} {r['total_cost']:<8.2f} {mode}")
         log("-" * 65 + "\n")
-    except:
-        pass
+    except Exception as e:
+        log(f"[ERROR] 获取房间状态失败: {e}")
 
 
 def print_queue():

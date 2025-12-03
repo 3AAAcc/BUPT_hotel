@@ -39,9 +39,21 @@ def init_room_state():
             if temperature is not None:
                 temp_val = float(temperature)
                 update_dict["current_temp"] = temp_val
-                update_dict["last_temp_update"] = None  # 清除上次更新时间，防止自动跳变
+                # === 关键修复：如果房间已开机，需要同时重置 ac_session_start，避免时间计算错误 ===
+                # 如果房间未开机，只清除 last_temp_update 即可
+                if room.ac_on:
+                    # 房间已开机，需要重置时间基准，使用当前时间
+                    from datetime import datetime
+                    now = datetime.utcnow()
+                    update_dict["last_temp_update"] = now
+                    update_dict["ac_session_start"] = now
+                    room.last_temp_update = now
+                    room.ac_session_start = now
+                else:
+                    # 房间未开机，只清除 last_temp_update
+                    update_dict["last_temp_update"] = None
+                    room.last_temp_update = None
                 room.current_temp = temp_val
-                room.last_temp_update = None
                 
                 # === 关键修复：如果提供了 defaultTemp，使用它；否则使用 temperature ===
                 if default_temp is not None:
@@ -58,7 +70,22 @@ def init_room_state():
                 update_dict["daily_rate"] = float(daily_rate)
                 room.daily_rate = float(daily_rate)
 
-            # 3. 使用原子更新，确保 default_temp 被正确保存
+            # 3. 清理队列相关状态（如果房间未开机，确保队列状态被清理）
+            # 这样可以避免之前测试留下的脏数据影响当前状态
+            if not room.ac_on:
+                update_dict["serving_start_time"] = None
+                update_dict["waiting_start_time"] = None
+                update_dict["billing_start_temp"] = None
+                update_dict["cooling_paused"] = False
+                update_dict["pause_start_temp"] = None
+                update_dict["ac_session_start"] = None  # 清理空调会话开始时间，避免时间计算错误
+                # 同时从内存队列中移除（如果存在）- 使用锁保护
+                from ..services import scheduler
+                with scheduler._lock:
+                    scheduler._remove_request(scheduler.serving_queue, room_id)
+                    scheduler._remove_request(scheduler.waiting_queue, room_id)
+
+            # 4. 使用原子更新，确保 default_temp 被正确保存
             if update_dict:
                 db.session.query(Room).filter(Room.id == room_id).update(update_dict)
                 db.session.commit()

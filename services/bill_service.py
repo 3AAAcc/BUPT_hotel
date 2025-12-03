@@ -67,39 +67,61 @@ class AccommodationFeeBillService:
         
         # 1. 累加数据库里已结算的历史详单费用
         from ..services import bill_detail_service
+        from ..extensions import db
+        # === 关键修复：刷新数据库会话缓存，确保查询到刚提交的费用 ===
+        # expire_all() 会清除所有对象的缓存，强制从数据库重新加载
+        db.session.expire_all()
+        # 使用稍微延后的时间，确保查询到所有已结算的费用（包括刚提交的）
+        query_end = datetime.utcnow()
         details = bill_detail_service.getBillDetailsByRoomIdAndTimeRange(
             room_id=room.id,
             start=datetime.min,
-            end=datetime.utcnow(),
+            end=query_end,
             customer_id=None,
         )
         ac_fee = sum(detail.cost for detail in details)
         
         # 2. 计算当前正在进行的片段 (Pending Cost)
+        # === 核心修改：基于温度变化计算费用，1度=1元 ===
         current_session_fee = 0.0
         
-        # === 核心修复：只有 serving_start_time 存在时，说明正在吹风，才计算实时费用 ===
+        # 只有 serving_start_time 和 billing_start_temp 都存在时，说明正在服务，才计算实时费用
         # 如果是 PAUSED 或 WAITING，serving_start_time 是 None，这里就不会进，费用就不会涨
-        if room.ac_on and room.serving_start_time:
-            now = datetime.utcnow()
-            factor = current_app.config.get("TIME_ACCELERATION_FACTOR", 1.0)
+        if room.ac_on and room.serving_start_time and room.billing_start_temp is not None and room.current_temp is not None:
+            # 计算温度变化量
+            start_temp = float(room.billing_start_temp)
+            end_temp = float(room.current_temp)
             
-            # 使用 serving_start_time 计算当前片段时长
-            elapsed_seconds = (now - room.serving_start_time).total_seconds()
+            # === 关键修复：确保费用只增不减 ===
+            # 对于制热模式，温度应该上升，费用应该只增不减
+            # 对于制冷模式，温度应该下降，费用应该只增不减
+            # 如果温度变化为负（回温或升温），说明没有实际服务效果，不应该计费
+            if room.ac_mode == "HEATING":
+                # 制热：温度应该上升，如果 end_temp > start_temp，计费
+                if end_temp > start_temp:
+                    temp_change = end_temp - start_temp
+                else:
+                    # 如果温度没有上升，说明还没有服务效果，费用为0
+                    temp_change = 0.0
+            elif room.ac_mode == "COOLING":
+                # 制冷：温度应该下降，如果 end_temp < start_temp，计费
+                if end_temp < start_temp:
+                    temp_change = start_temp - end_temp
+                else:
+                    # 如果温度没有下降，说明还没有服务效果，费用为0
+                    temp_change = 0.0
+            else:
+                # 其他模式：使用绝对值
+                temp_change = abs(end_temp - start_temp)
             
-            # === 修改处：改为标准四舍五入 ===
-            raw_minutes = (elapsed_seconds / 60.0) * factor
-            elapsed_minutes = round(raw_minutes)  # 四舍五入
-            
-            # 费率逻辑
-            fan_speed = (room.fan_speed or "MEDIUM").upper()
-            if fan_speed == "HIGH": rate = 1.0
-            elif fan_speed == "MEDIUM": rate = 0.5
-            else: rate = 1.0 / 3.0
-            
-            current_session_fee = rate * elapsed_minutes
-            ac_fee += current_session_fee
+            # 费用 = 温度变化量（度）* 1元/度
+            current_session_fee = temp_change
         # ===================================================================
+        
+        # === 关键修复：总费用 = 历史费用 + 当前会话费用 ===
+        # ac_fee 是历史已结算费用，current_session_fee 是当前未结算费用
+        # 总空调费用 = 历史费用 + 当前会话费用
+        total_ac_fee = ac_fee + current_session_fee
         
         # 3. 计算房费 (Cycle Logic)
         cycle_days = 1 
@@ -114,13 +136,12 @@ class AccommodationFeeBillService:
         
         return {
             "roomFee": room_fee,
-            "acFee": round(ac_fee, 2),
-            "total": round(room_fee + ac_fee, 2),
+            "acFee": round(total_ac_fee, 2),  # 总空调费用 = 历史 + 当前
+            "total": round(room_fee + total_ac_fee, 2),
             "current_session_fee": round(current_session_fee, 2),
-            "total_fee": round(ac_fee, 2) 
+            "total_fee": round(total_ac_fee, 2)  # 总空调费用
         }
 
-    # ... (Getter 方法保持不变) ...
     def getAllBills(self) -> List[AccommodationFeeBill]:
         return AccommodationFeeBill.query.order_by(AccommodationFeeBill.create_time.desc()).all()
 
