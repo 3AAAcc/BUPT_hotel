@@ -12,9 +12,32 @@ class RoomService:
         return Room.query.get(room_id)
 
     def updateRoom(self, room: Room) -> Room:
-        db.session.add(room)
-        db.session.commit()
-        return room
+        try:
+            # 使用 merge 方法，如果对象已存在则更新，不存在则添加
+            # 这样可以避免 "expected to update 1 row(s); 0 were matched" 错误
+            merged_room = db.session.merge(room)
+            db.session.commit()
+            return merged_room
+        except Exception as e:
+            # 如果更新失败，回滚并重新尝试
+            db.session.rollback()
+            try:
+                # 重新从数据库获取房间对象，避免使用过期的对象
+                fresh_room = self.getRoomById(room.id)
+                if fresh_room:
+                    # 更新字段
+                    for key, value in room.__dict__.items():
+                        if not key.startswith('_') and key != 'id' and hasattr(fresh_room, key):
+                            setattr(fresh_room, key, value)
+                    db.session.add(fresh_room)
+                    db.session.commit()
+                    return fresh_room
+                else:
+                    # 如果房间不存在，抛出异常
+                    raise ValueError(f"房间 {room.id} 不存在")
+            except Exception as e2:
+                db.session.rollback()
+                raise e2
 
     def getAvailableRoomIds(self) -> List[int]:
         return [room.id for room in self.getAllRooms() if room.status == "AVAILABLE"]

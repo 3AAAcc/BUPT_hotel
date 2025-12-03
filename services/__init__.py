@@ -7,6 +7,7 @@ from .maintenance_service import MaintenanceService
 from .report_service import ReportService
 from .room_service import RoomService
 from .scheduler import Scheduler
+from .temperature_scheduler import TemperatureScheduler
 
 room_service = RoomService()
 customer_service = CustomerService()
@@ -14,6 +15,7 @@ bill_detail_service = BillDetailService()
 accommodation_fee_bill_service = AccommodationFeeBillService()
 bill_service = accommodation_fee_bill_service  # 别名，方便使用
 scheduler = Scheduler(room_service, bill_detail_service)
+temperature_scheduler = TemperatureScheduler(scheduler)
 ac = AC(room_service, scheduler)
 maintenance_service = MaintenanceService(room_service, scheduler)
 report_service = ReportService()

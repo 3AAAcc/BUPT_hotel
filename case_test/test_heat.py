@@ -27,12 +27,13 @@ def log(line: str):
         pass
 
 # 房间配置 (制热 - 初始温度低)
+# default_temp 设置为与 init_temp 相同，表示环境温度
 ROOM_CONFIG = {
-    1: {"init_temp": 10.0, "rate": 100.0},
-    2: {"init_temp": 15.0, "rate": 125.0},
-    3: {"init_temp": 18.0, "rate": 150.0},
-    4: {"init_temp": 12.0, "rate": 200.0},
-    5: {"init_temp": 14.0, "rate": 100.0},
+    1: {"init_temp": 10.0, "default_temp": 10.0, "rate": 100.0},
+    2: {"init_temp": 15.0, "default_temp": 15.0, "rate": 125.0},
+    3: {"init_temp": 18.0, "default_temp": 18.0, "rate": 150.0},
+    4: {"init_temp": 12.0, "default_temp": 12.0, "rate": 200.0},
+    5: {"init_temp": 14.0, "default_temp": 14.0, "rate": 100.0},
 }
 
 # 动作序列 (制热)
@@ -80,10 +81,11 @@ def init_env():
             if mode_res.status_code != 200:
                 print(f"  ⚠️ Room {rid} 模式设置失败: {mode_res.text}")
 
-            # 2. 初始化温度 AND 房费
+            # 2. 初始化温度、默认温度和房费
             init_res = requests.post(f"{API_BASE}/test/initRoom", json={
                 "roomId": rid,
                 "temperature": cfg["init_temp"],
+                "defaultTemp": cfg.get("default_temp", cfg["init_temp"]),  # 如果没有设置 default_temp，使用 init_temp
                 "dailyRate": cfg["rate"]
             })
             if init_res.status_code != 200:

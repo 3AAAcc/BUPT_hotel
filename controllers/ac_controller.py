@@ -10,9 +10,8 @@ def request_ac_state():
     if not room_id:
         return jsonify({"error": "roomId is required"}), 400
     try:
-        # 1. 强制触发温度计算 (让温度动起来)
-        scheduler.simulateTemperatureUpdate()
-        # 2. 获取状态 (使用我们修复后的 RequestState 方法)
+        # 注意：温度更新由后台任务自动处理，这里不再手动触发
+        # 获取状态 (使用我们修复后的 RequestState 方法)
         status = scheduler.RequestState(room_id)
         return jsonify(status)
     except Exception as exc:
@@ -75,7 +74,7 @@ def change_mode():
         message = scheduler.ChangeMode(room_id, mode)
         
         # 为了保证前端看到最新状态，强制计算一次
-        scheduler.simulateTemperatureUpdate()
+        # 注意：温度更新由后台任务自动处理，这里不再手动触发
         
         return jsonify({"message": message})
     except Exception as exc:

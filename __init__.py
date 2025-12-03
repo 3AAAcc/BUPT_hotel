@@ -8,7 +8,7 @@ from .database import (
     seed_default_ac_config,
 )
 from .extensions import db
-from .services import room_service
+from .services import room_service, temperature_scheduler
 
 
 def create_app(
@@ -30,6 +30,10 @@ def create_app(
                 total_count=app.config["HOTEL_ROOM_COUNT"],
                 default_temp=app.config["HOTEL_DEFAULT_TEMP"],
             )
+    
+    # 启动温度自动更新后台任务
+    with app.app_context():
+        temperature_scheduler.start(app)
 
     from .controllers.ac_controller import ac_bp
     from .controllers.admin_controller import admin_bp

@@ -7,8 +7,7 @@ hotel_bp = Blueprint("hotel", __name__, url_prefix="/hotel")
 @hotel_bp.route("/rooms", methods=["GET"])
 def get_all_rooms():
     try:
-        # === 核心修复：前台大厅查询时，强制刷新全酒店温度 ===
-        scheduler.simulateTemperatureUpdate()
+        # 注意：温度更新由后台任务自动处理，这里不再手动触发
         
         # 获取所有房间对象
         rooms = room_service.getAllRooms()

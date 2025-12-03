@@ -24,7 +24,7 @@ class Room(db.Model, TimestampMixin):
     ac_on = db.Column(db.Boolean, default=False)
     ac_mode = db.Column(db.String(20), default="COOLING")
     fan_speed = db.Column(db.String(20), default="MEDIUM")
-    default_temp = db.Column(db.Float, default=25.0)
+    default_temp = db.Column(db.Float, nullable=True)  # 必须有这一行，否则 test_controller 的赋值无法持久化！
     check_in_time = db.Column(db.DateTime)
     ac_session_start = db.Column(db.DateTime)
     last_temp_update = db.Column(db.DateTime)

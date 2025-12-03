@@ -11,10 +11,9 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 def get_all_rooms_status():
     """获取所有房间的详细状态（上帝视角）"""
     try:
-        # 1. 强制触发全量温度计算
-        scheduler.simulateTemperatureUpdate()
+        # 注意：温度更新由后台任务自动处理，这里不再手动触发
         
-        # 2. 获取所有房间
+        # 1. 获取所有房间
         rooms = room_service.getAllRooms()
         
         # 3. 逐个调用 RequestState 获取详细信息（含费用、队列状态）
