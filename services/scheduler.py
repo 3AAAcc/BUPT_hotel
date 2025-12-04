@@ -348,8 +348,11 @@ class Scheduler:
 
     def PowerOn(self, RoomId: int, CurrentRoomTemp: float | None) -> str:
         with self._lock:
+            from ..extensions import db
             room = self.room_service.getRoomById(RoomId)
             if not room: return "错误"
+            # 强制刷新，确保读取数据库中的最新数据（避免缓存问题）
+            db.session.refresh(room)
             if room.ac_on: return "已开启"
             
             now = clock.now()
@@ -374,7 +377,6 @@ class Scheduler:
                     )
                     print(f"[Scheduler] Room {room.id} 开机: 收取房费 {fee} 元")
 
-            from ..extensions import db
             db.session.query(Room).filter(Room.id == room.id).update({
                 "ac_on": True, "current_temp": temp, "ac_session_start": now,
                 "last_temp_update": now, "cooling_paused": False
@@ -390,8 +392,12 @@ class Scheduler:
 
     def PowerOff(self, RoomId: int) -> str:
         with self._lock:
+            from ..extensions import db
             room = self.room_service.getRoomById(RoomId)
-            if not room or not room.ac_on: return "未开启"
+            if not room: return "未开启"
+            # 强制刷新，确保读取数据库中的最新数据
+            db.session.refresh(room)
+            if not room.ac_on: return "未开启"
             now = clock.now()
             
             # 1. 结算当前未完成的空调费
@@ -440,8 +446,12 @@ class Scheduler:
 
     def ChangeTemp(self, RoomId: int, TargetTemp: float) -> str:
         with self._lock:
+            from ..extensions import db
             room = self.room_service.getRoomById(RoomId)
-            if not room or not room.ac_on: return "错误"
+            if not room: return "错误"
+            # 强制刷新，确保读取数据库中的最新数据
+            db.session.refresh(room)
+            if not room.ac_on: return "错误"
             
             from ..extensions import db
             db.session.query(Room).filter(Room.id == room.id).update({"target_temp": TargetTemp})
@@ -456,8 +466,12 @@ class Scheduler:
 
     def ChangeSpeed(self, RoomId: int, FanSpeed: str) -> str:
         with self._lock:
+            from ..extensions import db
             room = self.room_service.getRoomById(RoomId)
-            if not room or not room.ac_on: return "错误"
+            if not room: return "错误"
+            # 强制刷新，确保读取数据库中的最新数据
+            db.session.refresh(room)
+            if not room.ac_on: return "错误"
             
             new_speed = FanSpeed.upper()
             if room.fan_speed == new_speed: return "未变"
@@ -477,8 +491,11 @@ class Scheduler:
 
     def ChangeMode(self, RoomId: int, Mode: str) -> str:
         with self._lock:
+            from ..extensions import db
             room = self.room_service.getRoomById(RoomId)
             if not room: return "错误"
+            # 强制刷新，确保读取数据库中的最新数据
+            db.session.refresh(room)
             new_mode = Mode.upper()
             if new_mode == room.ac_mode: return "未变"
             now = clock.now()
@@ -514,26 +531,32 @@ class Scheduler:
 
     def RequestState(self, RoomId: int) -> dict:
         """
-        状态查询: 动态计算费用
+        状态查询: 动态计算费用，返回房费、空调费分开的数据
         """
         room = self.room_service.getRoomById(RoomId)
         if not room: return {}
         
-        enable_cycle_fee = current_app.config.get("ENABLE_AC_CYCLE_DAILY_FEE", False)
-        
-        total_cost = 0.0
-        # 如果未开启循环计费，则需要手动加上静态房费（仅为了展示，逻辑上可能不严谨，但符合旧版逻辑）
-        if not enable_cycle_fee:
-            total_cost = float(room.daily_rate or 0.0)
-        
-        # 1. 历史账单 (包含历史空调费，以及按次收取的房费)
         from ..extensions import db
-        history = db.session.query(func.sum(DetailRecord.cost))\
-            .filter(DetailRecord.room_id == room.id).scalar()
-        if history:
-            total_cost += float(history)
-
-        # 2. 当前未结算 (Pending AC Fee)
+        
+        # 1. 计算房费（ROOM_FEE 类型的账单总和）
+        room_fee = db.session.query(func.sum(DetailRecord.cost))\
+            .filter(DetailRecord.room_id == room.id,
+                   DetailRecord.detail_type == "ROOM_FEE").scalar()
+        room_fee = float(room_fee) if room_fee else 0.0
+        
+        # 如果未开启循环计费，则需要手动加上静态房费
+        enable_cycle_fee = current_app.config.get("ENABLE_AC_CYCLE_DAILY_FEE", False)
+        if not enable_cycle_fee:
+            room_fee = float(room.daily_rate or 0.0)
+        
+        # 2. 计算历史空调费（AC 类型的账单总和）
+        ac_fee_history = db.session.query(func.sum(DetailRecord.cost))\
+            .filter(DetailRecord.room_id == room.id,
+                   DetailRecord.detail_type == "AC").scalar()
+        ac_fee_history = float(ac_fee_history) if ac_fee_history else 0.0
+        
+        # 3. 计算当前未结算的空调费 (Pending AC Fee)
+        ac_fee_pending = 0.0
         if room.ac_on and room.serving_start_time and room.billing_start_temp is not None:
             curr = float(room.current_temp or 25)
             start = float(room.billing_start_temp)
@@ -544,7 +567,16 @@ class Scheduler:
                 if curr > start: diff = curr - start
             
             if diff > 0:
-                total_cost += diff * 1.0 # 费率恒为1
+                ac_fee_pending = diff * 1.0  # 费率恒为1
+        
+        ac_fee_total = ac_fee_history + ac_fee_pending
+        total_cost = room_fee + ac_fee_total
+        
+        # 4. 计算调度次数（AC 类型的账单记录数，每次服务周期结算一次）
+        schedule_count = db.session.query(func.count(DetailRecord.id))\
+            .filter(DetailRecord.room_id == room.id,
+                   DetailRecord.detail_type == "AC").scalar()
+        schedule_count = int(schedule_count) if schedule_count else 0
 
         qs = "IDLE"
         if room.cooling_paused: qs = "PAUSED"
@@ -563,7 +595,10 @@ class Scheduler:
             "fan_speed": room.fan_speed,
             "fanSpeed": room.fan_speed,
             "state": qs, "queueState": qs, "queue_state": qs,
-            "total_cost": round(total_cost, 2)
+            "total_cost": round(total_cost, 2),
+            "room_fee": round(room_fee, 2),
+            "ac_fee": round(ac_fee_total, 2),
+            "schedule_count": schedule_count
         }
     
     def getScheduleStatus(self):

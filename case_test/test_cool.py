@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-制冷工况测试脚本 (test_case_cool.py)
+制冷工况测试脚本 (test_case_cool.py) - 修复版
 对应文件: 系统测试用例 冷 20251115.xlsx
+修复内容：
+1. 强制同步后端时间倍速 (x6.0)
+2. 使用物理时间锚点消除 sleep 误差
+3. 确保日志清晰
 """
 
 import time
@@ -11,30 +15,23 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 
 # === 配置 ===
-API_BASE = "http://127.0.0.1:8080"  # 请确认你的端口
-# 硬加速：限时1秒等于系统6秒
-# 1分钟系统时间 = 60秒系统时间 = 60/6 = 10秒物理时间
-TIME_FACTOR = 10  # 1分钟系统时间 = 10秒物理时间
+API_BASE = "http://127.0.0.1:8080"
+
+# === 核心时间控制参数 (与 test_heat.py 保持一致) ===
+SPEED_FACTOR = 6.0  # 6倍速：现实1秒 = 逻辑6秒
+LOGICAL_ONE_MINUTE = 60.0  # 逻辑上的1分钟
+# 物理上需要等待的时间 = 60 / 6 = 10秒
+PHYSICAL_INTERVAL = LOGICAL_ONE_MINUTE / SPEED_FACTOR 
+
 LOG_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "csv", "test_cool.txt")
-
-
-def log(line: str):
-    """同时打印到控制台并追加写入日志文件"""
-    print(line)
-    try:
-        with open(LOG_FILE, "a", encoding="utf-8") as f:
-            f.write(line + "\n")
-    except Exception:
-        # 写文件失败时不影响测试继续运行
-        pass
 
 # 房间配置 (制冷)
 ROOM_CONFIG = {
-    1: {"init_temp": 32.0, "rate": 100.0},
-    2: {"init_temp": 28.0, "rate": 125.0},
-    3: {"init_temp": 30.0, "rate": 150.0},
-    4: {"init_temp": 29.0, "rate": 200.0},
-    5: {"init_temp": 35.0, "rate": 100.0},
+    1: {"init_temp": 32.0, "default_temp": 32.0, "rate": 100.0},
+    2: {"init_temp": 28.0, "default_temp": 28.0, "rate": 125.0},
+    3: {"init_temp": 30.0, "default_temp": 30.0, "rate": 150.0},
+    4: {"init_temp": 29.0, "default_temp": 29.0, "rate": 200.0},
+    5: {"init_temp": 35.0, "default_temp": 35.0, "rate": 100.0},
 }
 
 # 动作序列 (分钟, 房间, 动作, 值)
@@ -75,31 +72,47 @@ ACTIONS = [
     (25, 2, "power_off", None),
 ]
 
+def log(line: str):
+    print(line)
+    try:
+        with open(LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(line + "\n")
+    except Exception:
+        pass
 
 def init_env():
-    print(">>> 初始化环境...")
+    log(f">>> 初始化环境 (Speed x{SPEED_FACTOR})...")
+    
+    # 1. 设置后端时间流速 (关键!)
+    try:
+        requests.post(f"{API_BASE}/test/time/set_speed", json={"speed": SPEED_FACTOR})
+    except Exception as e:
+        log(f"[Fatal] 无法设置时间倍速: {e}")
+        return
+
+    # 2. 初始化房间
     for rid, cfg in ROOM_CONFIG.items():
         try:
-            # 1. 强制切换模式 (保持不变)
-            requests.post(f"{API_BASE}/admin/control/mode", json={"roomId": rid, "mode": "COOLING"})  # 或 HEATING
-
-            # 2. 初始化温度 AND 房费 (修改这里!)
+            # 强制制冷模式
+            requests.post(f"{API_BASE}/admin/control/mode", json={"roomId": rid, "mode": "COOLING"})
+            
             requests.post(f"{API_BASE}/test/initRoom", json={
                 "roomId": rid,
                 "temperature": cfg["init_temp"],
-                "dailyRate": cfg["rate"]  # <--- 新增这行，把配置里的价格传过去
+                "defaultTemp": cfg["default_temp"],
+                "dailyRate": cfg["rate"]
             })
-
             print(f"  √ Room {rid}: Temp={cfg['init_temp']}°C, Rate={cfg['rate']}")
         except Exception as e:
             print(f"  × Room {rid} Error: {e}")
     print(">>> 初始化完成\n")
 
-
 def execute(rid, act, val):
     url = f"{API_BASE}/ac"
     try:
         if act == "power_on":
+            # 确保模式正确
+            requests.post(f"{API_BASE}/admin/control/mode", json={"roomId": rid, "mode": "COOLING"})
             res = requests.post(f"{url}/power", json={"roomId": rid})
         elif act == "power_off":
             res = requests.post(f"{url}/power/off", json={"roomId": rid})
@@ -107,87 +120,106 @@ def execute(rid, act, val):
             res = requests.post(f"{url}/temp", json={"roomId": rid, "targetTemp": val})
         elif act == "speed":
             res = requests.post(f"{url}/speed", json={"roomId": rid, "fanSpeed": val})
-
-        # 允许部分操作失败(如超出温度范围)，仅打印结果
-        msg = "成功" if res.status_code == 200 else f"失败({res.text})"
+        
+        msg = "OK" if res.status_code == 200 else res.json().get('error', 'Fail')
         return f"Room {rid} {act} {val if val else ''} -> {msg}"
     except Exception as e:
         return f"Room {rid} Error: {e}"
 
-
-def print_status():
+def print_dashboard(current_logical_minute):
     try:
-        res = requests.get(f"{API_BASE}/admin/rooms/status")
-        data = sorted(res.json(), key=lambda x: x['room_id'])
-        log("-" * 60)
-        log(f"{'Rm':<3} {'St':<4} {'Cur':<5} {'Tar':<5} {'Spd':<4} {'Fee':<8} {'Mode'}")
-        log("-" * 60)
-        for r in data:
+        # 1. 获取后端时间
+        t_res = requests.get(f"{API_BASE}/test/time/status").json()
+        l_time = t_res.get("logical_time", "")[11:19]
+        
+        # 2. 获取房间状态
+        r_res = requests.get(f"{API_BASE}/admin/rooms/status").json()
+        rooms = sorted(r_res, key=lambda x: x['room_id'])
+        
+        # 3. 获取队列状态
+        q_res = requests.get(f"{API_BASE}/monitor/status").json()
+        
+        log(f"\n[{l_time}] Logic Min: {current_logical_minute} (Speed x{SPEED_FACTOR})")
+        log("-" * 95)
+        log(f"{'Rm':<3} {'St':<4} {'Cur':<5} {'Tar':<5} {'Spd':<4} {'RoomFee':<8} {'ACFee':<8} {'Cnt':<4} {'Mode':<8} | {'Queue Status'}")
+        log("-" * 95)
+        
+        # 构建队列信息字典：{roomId: seconds}
+        serving_dict = {i['roomId']: int(i.get('servingSeconds', 0)) for i in q_res.get('servingQueue', [])}
+        waiting_dict = {i['roomId']: int(i.get('waitingSeconds', 0)) for i in q_res.get('waitingQueue', [])}
+        
+        serving_ids = list(serving_dict.keys())
+        waiting_ids = list(waiting_dict.keys())
+
+        for r in rooms:
+            rid = r['room_id']
             st = "ON" if r['ac_on'] else "OFF"
-            sp = (r['fan_speed'] or "-")[0]  # 取首字母
-            mode = r.get('mode') or r.get('ac_mode', '-')  # 兼容两种字段名
-            log(
-                f"{r['room_id']:<3} {st:<4} {r['current_temp']:<5} {r['target_temp']:<5} {sp:<4} {r['total_cost']:<8.2f} {mode}")
-        log("-" * 60 + "\n")
+            sp = (r['fan_speed'] or "-")[0]
+            mode = (r.get('ac_mode') or r.get('mode') or "-")[:4]
+            
+            q_status = ""
+            if rid in serving_ids: 
+                q_status = f"R{rid}({serving_dict[rid]})"
+            elif rid in waiting_ids: 
+                q_status = f"W{rid}({waiting_dict[rid]})"
+            elif r.get('cooling_paused'): 
+                q_status = "PAUSED"
+            elif st == "OFF": 
+                q_status = "OFF"
+            else: 
+                q_status = "IDLE"
+            
+            room_fee = r.get('room_fee', 0.0)
+            ac_fee = r.get('ac_fee', 0.0)
+            schedule_count = r.get('schedule_count', 0)
+            log(f"{rid:<3} {st:<4} {r['current_temp']:<5.1f} {r['target_temp']:<5} {sp:<4} {room_fee:<8.2f} {ac_fee:<8.2f} {schedule_count:<4} {mode:<8} | {q_status}")
+        log("-" * 75)
     except Exception as e:
-        log(f"[ERROR] 获取房间状态失败: {e}")
-
-
-def print_queue():
-    """打印当前调度队列（服务队列 + 等待队列）"""
-    try:
-        res = requests.get(f"{API_BASE}/monitor/status")
-        data = res.json()
-        log("=== Queue Status ===")
-        log(f"Capacity={data.get('capacity')}  TimeSlice={data.get('timeSlice')}s")
-
-        log("ServingQueue:")
-        for item in data.get("servingQueue", []):
-            # 新增显示 Total
-            log(f"  Room {item['roomId']}  "
-                f"Fan={item['fanSpeed']}  "
-                f"Slice={item['servingSeconds']:.1f}s  "
-                f"Total={item.get('totalSeconds', item['servingSeconds']):.0f}s")
-
-        log("WaitingQueue:")
-        for item in data.get("waitingQueue", []):
-            log(f"  Room {item['roomId']}  "
-                f"Fan={item['fanSpeed']}  "
-                f"Wait={item['waitingSeconds']:.1f}s")
-        log("====================\n")
-    except Exception as e:
-        print(f"[WARN] 获取队列状态失败: {e}")
-
+        log(f"[Dashboard Error] {e}")
 
 def main():
-    # 启动前清空旧日志
     try:
         with open(LOG_FILE, "w", encoding="utf-8") as f:
-            f.write("=== test_cool start ===\n")
-    except Exception:
-        pass
+            f.write(f"=== Cool Test Started at {time.strftime('%H:%M:%S')} ===\n")
+    except: pass
 
     init_env()
+    
     actions_map = {}
     for t, r, a, v in ACTIONS:
         if t not in actions_map: actions_map[t] = []
         actions_map[t].append((r, a, v))
-
-    max_t = max(actions_map.keys())
-    for t in range(max_t + 2):
-        log(f"🕒 [Min {t}]")
-        if t in actions_map:
+    
+    max_minute = 30
+    
+    # === 关键: 物理锚点同步 ===
+    start_time_physical = time.time()
+    
+    for minute in range(max_minute + 1):
+        # A. 执行动作
+        if minute in actions_map:
+            log(f"⚡ Action Trigger (Min {minute})")
             with ThreadPoolExecutor() as ex:
-                futures = [ex.submit(execute, r, a, v) for r, a, v in actions_map[t]]
+                futures = [ex.submit(execute, r, a, v) for r, a, v in actions_map[minute]]
                 for f in as_completed(futures):
                     log(f"  {f.result()}")
+        
+        # B. 打印
+        time.sleep(0.2)
+        print_dashboard(minute)
+        
+        # C. 精确等待
+        if minute < max_minute:
+            target = start_time_physical + ((minute + 1) * PHYSICAL_INTERVAL)
+            curr = time.time()
+            sleep_sec = target - curr
+            if sleep_sec > 0:
+                print(f"   ... flowing ({sleep_sec:.2f}s) ...", end="\r")
+                time.sleep(sleep_sec)
+            else:
+                log(f"⚠️ Lagging {abs(sleep_sec):.2f}s")
 
-        time.sleep(0.5)
-        print_status()
-        print_queue()
-        if t < max_t + 1:
-            time.sleep(TIME_FACTOR)
-
+    log("\n=== Test Completed ===")
 
 if __name__ == "__main__":
     main()

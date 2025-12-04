@@ -39,13 +39,13 @@ ACTIONS = [
     (4, 2, "temp", 25.0),
     (4, 4, "power_on", None),
     (4, 5, "power_on", None),
-    (5, 3, "temp", 27.0),
+    (5, 3, "temp", 28.0),
     (5, 5, "speed", "HIGH"),
     (6, 1, "speed", "HIGH"),
     (8, 5, "temp", 24.0),
-    (10, 1, "temp", 28.0),
-    (10, 4, "temp", 28.0),
-    (10, 4, "speed", "HIGH"),
+    (10, 1, "temp", 22.0),
+    (10, 4, "temp", 21.0),
+    (10, 4, "speed","HIGH"),
     (12, 5, "speed", "MEDIUM"),
     (13, 2, "speed", "HIGH"),
     (15, 1, "power_off", None),
@@ -55,7 +55,7 @@ ACTIONS = [
     (19, 1, "power_on", None),
     (19, 4, "temp", 25.0),
     (19, 4, "speed", "MEDIUM"),
-    (21, 2, "temp", 27.0),
+    (21, 2, "temp", 26.0),
     (21, 2, "speed", "MEDIUM"),
     (21, 5, "power_on", None),
     (25, 1, "power_off", None),
@@ -141,9 +141,9 @@ def print_dashboard(current_logical_minute):
         q_res = requests.get(f"{API_BASE}/monitor/status").json()
         
         log(f"\n[{l_time}] Logic Min: {current_logical_minute} (Speed x{SPEED_FACTOR})")
-        log("-" * 75)
-        log(f"{'Rm':<3} {'St':<4} {'Cur':<5} {'Tar':<5} {'Spd':<4} {'Fee':<8} {'Mode':<8} | {'Queue Status'}")
-        log("-" * 75)
+        log("-" * 95)
+        log(f"{'Rm':<3} {'St':<4} {'Cur':<5} {'Tar':<5} {'Spd':<4} {'RoomFee':<8} {'ACFee':<8} {'Cnt':<4} {'Mode':<8} | {'Queue Status'}")
+        log("-" * 95)
         
         # 构建队列信息字典：{roomId: seconds}
         serving_dict = {i['roomId']: int(i.get('servingSeconds', 0)) for i in q_res.get('servingQueue', [])}
@@ -175,7 +175,10 @@ def print_dashboard(current_logical_minute):
             else:
                 q_status = "IDLE"
             
-            log(f"{rid:<3} {st:<4} {r['current_temp']:<5.1f} {r['target_temp']:<5} {sp:<4} {r['total_cost']:<8.2f} {mode:<8} | {q_status}")
+            room_fee = r.get('room_fee', 0.0)
+            ac_fee = r.get('ac_fee', 0.0)
+            schedule_count = r.get('schedule_count', 0)
+            log(f"{rid:<3} {st:<4} {r['current_temp']:<5.1f} {r['target_temp']:<5} {sp:<4} {room_fee:<8.2f} {ac_fee:<8.2f} {schedule_count:<4} {mode:<8} | {q_status}")
             
         log("-" * 75)
 
