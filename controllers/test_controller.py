@@ -1,5 +1,7 @@
 from flask import Blueprint, jsonify, request
+from datetime import datetime, timedelta
 from ..services import room_service
+from ..utils.time_master import clock
 
 test_bp = Blueprint("test", __name__, url_prefix="/test")
 
@@ -42,9 +44,8 @@ def init_room_state():
                 # === 关键修复：如果房间已开机，需要同时重置 ac_session_start，避免时间计算错误 ===
                 # 如果房间未开机，只清除 last_temp_update 即可
                 if room.ac_on:
-                    # 房间已开机，需要重置时间基准，使用当前时间
-                    from datetime import datetime
-                    now = datetime.utcnow()
+                    # 房间已开机，需要重置时间基准，使用当前逻辑时间
+                    now = clock.now()
                     update_dict["last_temp_update"] = now
                     update_dict["ac_session_start"] = now
                     room.last_temp_update = now
@@ -100,3 +101,49 @@ def init_room_state():
         return jsonify({"error": "Room not found"}), 404
     except Exception as exc:
         return jsonify({"error": str(exc)}), 400
+
+
+@test_bp.route('/time/set_speed', methods=['POST'])
+def set_speed():
+    """设置时间流速"""
+    data = request.json or {}
+    speed = data.get('speed', 1.0)
+    clock.set_speed(float(speed))
+    return jsonify({"msg": "ok", "current_logical_time": clock.now().isoformat()})
+
+
+@test_bp.route('/time/jump', methods=['POST'])
+def jump_time():
+    """时间穿越（例如直接跳到明天）"""
+    data = request.json or {}
+    minutes = data.get('add_minutes', 0)
+    
+    new_time = clock.now() + timedelta(minutes=minutes)
+    clock.jump_to(new_time)
+    
+    return jsonify({"msg": "ok", "new_time": new_time.isoformat()})
+
+
+@test_bp.route('/time/status', methods=['GET'])
+def get_time_status():
+    """获取当前双重时间状态"""
+    return jsonify({
+        "real_time": datetime.utcnow().isoformat(),
+        "logical_time": clock.now().isoformat(),
+        "speed": clock.speed,
+        "is_paused": clock.paused
+    })
+
+
+@test_bp.route('/time/pause', methods=['POST'])
+def pause_time():
+    """暂停时间"""
+    clock.pause()
+    return jsonify({"msg": "ok", "is_paused": clock.paused})
+
+
+@test_bp.route('/time/resume', methods=['POST'])
+def resume_time():
+    """恢复时间"""
+    clock.resume()
+    return jsonify({"msg": "ok", "is_paused": clock.paused})

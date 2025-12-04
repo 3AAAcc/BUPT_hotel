@@ -10,6 +10,7 @@ from .database import (
 )
 from .extensions import db
 from .services import room_service, temperature_scheduler
+from .utils.time_master import clock
 
 
 def create_app(
@@ -18,6 +19,11 @@ def create_app(
     app = Flask(__name__, template_folder="templates", static_folder="static")
     app.config.from_object(config_class)
     db.init_app(app)
+    
+    # 初始化时间倍速
+    speed = app.config.get("TIME_ACCELERATION_FACTOR", 1.0)
+    clock.set_speed(speed)
+    print(f"=== 系统启动: 逻辑时钟倍速 x{speed} ===")
 
     if setup_database:
         with app.app_context():

@@ -1,5 +1,5 @@
 /**
- * Manager Logic (全能指挥舱)
+ * Manager Logic (管理端)
  * 同时负责：
  * 1. 监控调度队列 (/monitor/status)
  * 2. 房间状态与控制 (/admin/rooms/status)

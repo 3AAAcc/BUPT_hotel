@@ -1,0 +1,39 @@
+=== test_room1_speed_change start ===
+======================================================================
+Room 1 ChangeSpeed 回温问题复现脚本
+复现 test_heat.py 中 Min 5、6 的场景
+======================================================================
+
+>>> 步骤 1: 初始化所有房间（模拟 test_heat.py 的配置）
+   Room 1: init_temp=10.0°C, default_temp=10.0°C
+   其他房间用于占满服务队列
+  √ Room 1: Mode=HEATING, Temp=10.0°C, DefaultTemp=10.0°C, Rate=100.0
+  √ Room 2: Mode=HEATING, Temp=15.0°C, DefaultTemp=15.0°C, Rate=125.0
+  √ Room 3: Mode=HEATING, Temp=18.0°C, DefaultTemp=18.0°C, Rate=150.0
+  √ Room 4: Mode=HEATING, Temp=12.0°C, DefaultTemp=12.0°C, Rate=200.0
+  √ Room 5: Mode=HEATING, Temp=14.0°C, DefaultTemp=14.0°C, Rate=100.0
+
+>>> 步骤 2: 让 Room 1 先进入服务队列并升温
+   先只开启 Room 1，让它进入服务队列并升温到 12.0°C 左右
+  [Min 0]
+---------------------------------------------------------------------------
+Rm  St   Cur    Tar   Spd  Fee      Mode     Default
+---------------------------------------------------------------------------
+1   ON   10.00  24.0  M    100.00   HEATING  10.0
+2   OFF  15.00  22.0  M    125.00   HEATING  15.0
+3   OFF  18.00  22.0  M    150.00   HEATING  18.0
+4   OFF  12.00  22.0  M    200.00   HEATING  12.0
+5   OFF  14.00  22.0  M    100.00   HEATING  14.0
+---------------------------------------------------------------------------
+
+=== Queue Status ===
+Capacity=3  TimeSlice=120s
+ServingQueue:
+  Room 1  Fan=MEDIUM  Slice=0.6s  Total=1s
+WaitingQueue:
+====================
+
+
+>>> 步骤 3: 等待 Room 1 在服务队列中升温
+   等待 2 分钟，让 Room 1 从 10.0°C 升温到 12.0°C 左右...
+

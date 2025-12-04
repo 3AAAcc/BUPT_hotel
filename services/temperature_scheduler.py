@@ -10,6 +10,7 @@ from datetime import datetime
 
 from flask import current_app
 from ..extensions import db
+from ..utils.time_master import clock
 
 
 class TemperatureScheduler:
