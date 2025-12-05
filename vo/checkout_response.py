@@ -9,7 +9,9 @@ class DetailBill:
     endTime: str
     duration: int
     fanSpeed: str
-    currentFee: float
+    rate: float
+    acFee: float
+    roomFee: float
     fee: float
 
 

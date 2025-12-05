@@ -8,6 +8,7 @@ from typing import Dict, List, Optional
 
 from flask import current_app
 from ..models import (
+    AccommodationFeeBill,
     AccommodationOrder,
     Customer,
     DepositReceipt,
@@ -194,7 +195,7 @@ class FrontDesk:
         _ = DepositReceipt(customer_id=customer.id, room_id=room_id, amount=0.0)
 
         from ..vo.checkout_response import CustomerInfo
-        
+
         checkout_response = CheckoutResponse()
         checkout_response.customer = CustomerInfo(
             name=customer.name,
@@ -208,8 +209,10 @@ class FrontDesk:
                 endTime=detail.end_time.isoformat(),
                 duration=detail.duration,
                 fanSpeed=detail.fan_speed,
-                currentFee=detail.cost,
-                fee=detail.cost,
+                rate=detail.rate,
+                acFee=detail.cost,
+                roomFee=0.0,  # 暂时设为0，后续统一计算房费分配
+                fee=detail.cost,  # 暂时等于空调费，后续统一计算
             )
             for detail in details
         ]
@@ -221,6 +224,21 @@ class FrontDesk:
             roomFee=bill.room_fee,
             acFee=bill.ac_total_fee,
         )
+
+        # 重新计算房费分配（与报告页面完全一致）
+        # 获取该房间的所有账单（包括刚创建的），计算总房费和总空调费
+        all_bills = AccommodationFeeBill.query.filter_by(room_id=room_id).all()
+        total_room_fee = sum(bill.room_fee for bill in all_bills)
+        total_ac_fee = sum(bill.ac_total_fee for bill in all_bills)
+
+        # 按比例重新分配房费给每个详单
+        for detail_bill in checkout_response.detailBill:
+            room_fee_portion = 0.0
+            if total_ac_fee > 0:
+                room_fee_portion = (detail_bill.acFee / total_ac_fee) * total_room_fee
+
+            detail_bill.roomFee = round(room_fee_portion, 2)
+            detail_bill.fee = round(detail_bill.acFee + room_fee_portion, 2)
         
         # === 自动保存详单到本地 csv 文件夹 ===
         try:
@@ -259,7 +277,12 @@ class FrontDesk:
                 
                 # 处理记录类型显示
                 d_type = getattr(detail, 'detail_type', 'AC')
-                type_str = "关机结算(房费周期)" if d_type == 'POWER_OFF_CYCLE' else "空调运行"
+                if d_type == 'POWER_OFF_CYCLE':
+                    type_str = "关机结算(房费周期)"
+                elif d_type == 'ROOM_FEE':
+                    type_str = "房费"
+                else:
+                    type_str = "空调运行"
                 
                 writer.writerow([
                     detail.room_id,

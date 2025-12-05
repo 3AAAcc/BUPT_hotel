@@ -55,25 +55,22 @@ function renderInvoice(data) {
 
   if (details && details.length > 0) {
       details.forEach(item => {
-          // 根据费用是否为0判断类型（如果是关机周期结算，费用通常是0或者有特殊标记）
-          // 这里我们简单逻辑：费率0 -> 关机结算
-          // 或者我们可以修改后端传 detailType，这里先简单判断
-          let typeStr = "空调运行";
-          // 这里假设 item.fee == 0 且 duration == 0 是关机标记，或者你可以根据后端返回字段
-          // 目前后端返回字段可能没有 type，先显示默认
-          
           const tr = document.createElement('tr');
           tr.innerHTML = `
+              <td>${item.roomId}</td>
               <td>${formatTime(item.startTime)}</td>
-              <td>${typeStr}</td>
-              <td>${item.fanSpeed || '-'}</td>
-              <td>${item.duration} 分</td>
-              <td>¥ ${item.fee.toFixed(2)}</td>
+              <td>${formatTime(item.endTime)}</td>
+              <td>${item.duration}</td>
+              <td>${item.fanSpeed}</td>
+              <td>${item.rate}</td>
+              <td>¥ ${(item.acFee || 0).toFixed(2)}</td>
+              <td>¥ ${(item.roomFee || 0).toFixed(2)}</td>
+              <td class="fw-bold text-primary">¥ ${(item.fee || 0).toFixed(2)}</td>
           `;
           tbody.appendChild(tr);
       });
   } else {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">无详细消费记录</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999">无详细消费记录</td></tr>';
   }
 }
 

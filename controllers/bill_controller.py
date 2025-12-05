@@ -29,7 +29,12 @@ def export_bill_details():
     for detail in details:
         # 处理记录类型显示
         d_type = getattr(detail, 'detail_type', 'AC')
-        type_str = "关机结算(房费周期)" if d_type == 'POWER_OFF_CYCLE' else "空调运行"
+        if d_type == 'POWER_OFF_CYCLE':
+            type_str = "关机结算(房费周期)"
+        elif d_type == 'ROOM_FEE':
+            type_str = "房费"
+        else:
+            type_str = "空调运行"
         
         writer.writerow(
             [
