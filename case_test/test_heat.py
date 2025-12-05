@@ -85,23 +85,48 @@ def init_env():
         log(f"[Fatal] 无法设置时间倍速: {e}")
         return
 
-    # 2. 初始化房间状态
+    # 2. 初始化房间
     for rid, cfg in ROOM_CONFIG.items():
         try:
-            # 强制设为制热模式
+            # 强制制热模式
             requests.post(f"{API_BASE}/admin/control/mode", json={"roomId": rid, "mode": "HEATING"})
-            
-            # 初始化状态
+
             requests.post(f"{API_BASE}/test/initRoom", json={
                 "roomId": rid,
                 "temperature": cfg["init_temp"],
                 "defaultTemp": cfg["default_temp"],
                 "dailyRate": cfg["rate"]
             })
+            print(f"  √ Room {rid}: Temp={cfg['init_temp']}°C, Rate={cfg['rate']}")
         except Exception as e:
-            log(f"  × Room {rid} Init Error: {e}")
-    
-    log(">>> 环境就绪，测试开始\n")
+            print(f"  × Room {rid} Error: {e}")
+
+    # 3. 为每个房间办理入住
+    checkin_config = {
+        1: {"name": "109c", "idCard": "123456", "phoneNumber": "123456"},
+        2: {"name": "109d", "idCard": "123456", "phoneNumber": "123456"},
+        3: {"name": "110e", "idCard": "123456", "phoneNumber": "123456"},
+        4: {"name": "room4", "idCard": "123456", "phoneNumber": "123456"},
+        5: {"name": "room5", "idCard": "123456", "phoneNumber": "123456"},
+    }
+
+    print("\n>>> 开始办理入住...")
+    for rid, customer_info in checkin_config.items():
+        try:
+            response = requests.post(f"{API_BASE}/hotel/checkin", json={
+                "roomId": rid,
+                "name": customer_info["name"],
+                "idCard": customer_info["idCard"],
+                "phoneNumber": customer_info["phoneNumber"]
+            })
+            if response.status_code == 200:
+                print(f"  √ Room {rid} 入住成功: {customer_info['name']}")
+            else:
+                print(f"  × Room {rid} 入住失败: {response.json().get('error', 'Unknown error')}")
+        except Exception as e:
+            print(f"  × Room {rid} 入住错误: {e}")
+
+    print(">>> 初始化完成\n")
 
 def execute(rid, act, val):
     """执行单个指令"""

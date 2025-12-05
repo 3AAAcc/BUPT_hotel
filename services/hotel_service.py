@@ -11,6 +11,7 @@ from ..models import (
     AccommodationFeeBill,
     AccommodationOrder,
     Customer,
+    DetailRecord,
     DepositReceipt,
     Room,
 )
@@ -173,24 +174,9 @@ class FrontDesk:
         room.last_temp_update = datetime.utcnow()
         self.room_service.updateRoom(room)
 
-        # 如果启用了 AC 周期计费，需要查询该房间在入住期间的所有详单（包括管理员开启的）
-        # 否则只查询该客户的详单
-        if current_app.config.get("ENABLE_AC_CYCLE_DAILY_FEE"):
-            # 查询该房间在入住期间的所有详单（包括管理员开启的）
-            details = self.bill_detail_service.getBillDetailsByRoomIdAndTimeRange(
-                room_id=room_id,
-                start=customer.check_in_time,
-                end=check_out_time,
-                customer_id=None,  # 不过滤customer_id，包含所有详单
-            )
-        else:
-            # 只计算该客户的账单详情，排除管理员开启的空调产生的账单
-            details = self.bill_detail_service.getBillDetailsByRoomIdAndTimeRange(
-                room_id=room_id,
-                start=customer.check_in_time,
-                end=check_out_time,
-                customer_id=customer.id,
-            )
+        # 与报告页面完全一致：查询该房间的所有详单
+        details = DetailRecord.query.filter_by(room_id=room_id)\
+            .order_by(DetailRecord.start_time.desc()).all()
         bill = self.accommodation_fee_bill_service.createAndSettleBill(details, customer, room)
         _ = DepositReceipt(customer_id=customer.id, room_id=room_id, amount=0.0)
 
@@ -216,29 +202,60 @@ class FrontDesk:
             )
             for detail in details
         ]
+        # 参照测试脚本的方式获取房费和空调费数据
+        from . import scheduler
+        state = scheduler.RequestState(room_id)
+
+        # 计算入住时长：房间总费 ÷ 该房间的每日费率
+        room_fee_total = state.get('room_fee', 0.0)
+        daily_rate = room.daily_rate if room.daily_rate and room.daily_rate > 0 else 100.0
+        stay_days = room_fee_total / daily_rate if daily_rate > 0 else 0
+
         checkout_response.bill = BillResponse(
             roomId=bill.room_id,
             checkinTime=bill.check_in_time.date().isoformat(),
             checkoutTime=bill.check_out_time.date().isoformat(),
-            duration=str(bill.stay_days),
-            roomFee=bill.room_fee,
-            acFee=bill.ac_total_fee,
+            duration=str(round(stay_days, 1)),
+            roomFee=room_fee_total,
+            acFee=state.get('ac_fee', 0.0),
         )
 
-        # 重新计算房费分配（与报告页面完全一致）
-        # 获取该房间的所有账单（包括刚创建的），计算总房费和总空调费
+        # 完全复制报告页面的逻辑
+        # 获取时间加速因子，用于将加速时间转换为真实物理时间
+        factor = float(current_app.config.get("TIME_ACCELERATION_FACTOR", 1.0))
+        if factor <= 0:
+            factor = 1.0
+
+        # 获取该房间的所有账单，计算总房费和总空调费
         all_bills = AccommodationFeeBill.query.filter_by(room_id=room_id).all()
         total_room_fee = sum(bill.room_fee for bill in all_bills)
         total_ac_fee = sum(bill.ac_total_fee for bill in all_bills)
 
-        # 按比例重新分配房费给每个详单
-        for detail_bill in checkout_response.detailBill:
-            room_fee_portion = 0.0
-            if total_ac_fee > 0:
-                room_fee_portion = (detail_bill.acFee / total_ac_fee) * total_room_fee
+        # 参照测试脚本的方式：只显示空调费记录，房费在汇总中显示
+        checkout_response.detailBill = []
+        for detail in details:
+            d_type = getattr(detail, 'detail_type', 'AC')
 
-            detail_bill.roomFee = round(room_fee_portion, 2)
-            detail_bill.fee = round(detail_bill.acFee + room_fee_portion, 2)
+            # 只显示空调费记录，跳过房费记录
+            if d_type == 'ROOM_FEE':
+                continue
+
+            # 将加速时间转换为真实物理时间的分钟数
+            real_duration = round(detail.duration / factor, 1)
+
+            checkout_response.detailBill.append(
+                DetailBill(
+                    roomId=detail.room_id,
+                    startTime=detail.start_time.isoformat(),
+                    endTime=detail.end_time.isoformat(),
+                    duration=real_duration,
+                    fanSpeed=detail.fan_speed,
+                    rate=detail.rate,
+                    acFee=round(detail.cost, 2),
+                    roomFee=0.0,  # 空调记录的房费设为0，房费在汇总中显示
+                    fee=round(detail.cost, 2),  # 空调记录的总费用就是空调费
+                )
+            )
         
         # === 自动保存详单到本地 csv 文件夹 ===
         try:
