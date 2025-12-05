@@ -19,7 +19,7 @@ API_BASE = "http://127.0.0.1:8080"
 
 # === 核心时间控制参数 (与 test_heat.py 保持一致) ===
 SPEED_FACTOR = 6.0  # 6倍速：现实1秒 = 逻辑6秒
-LOGICAL_ONE_MINUTE = 60.0  # 逻辑上的1分钟
+LOGICAL_ONE_MINUTE = 60  # 逻辑上的1分钟
 # 物理上需要等待的时间 = 60 / 6 = 10秒
 PHYSICAL_INTERVAL = LOGICAL_ONE_MINUTE / SPEED_FACTOR 
 
@@ -95,7 +95,7 @@ def init_env():
         try:
             # 强制制冷模式
             requests.post(f"{API_BASE}/admin/control/mode", json={"roomId": rid, "mode": "COOLING"})
-            
+
             requests.post(f"{API_BASE}/test/initRoom", json={
                 "roomId": rid,
                 "temperature": cfg["init_temp"],
@@ -105,6 +105,32 @@ def init_env():
             print(f"  √ Room {rid}: Temp={cfg['init_temp']}°C, Rate={cfg['rate']}")
         except Exception as e:
             print(f"  × Room {rid} Error: {e}")
+
+    # 3. 为每个房间办理入住
+    checkin_config = {
+        1: {"name": "109c", "idCard": "123456", "phoneNumber": "123456"},
+        2: {"name": "109d", "idCard": "123456", "phoneNumber": "123456"},
+        3: {"name": "110e", "idCard": "123456", "phoneNumber": "123456"},
+        4: {"name": "room4", "idCard": "123456", "phoneNumber": "123456"},
+        5: {"name": "room5", "idCard": "123456", "phoneNumber": "123456"},
+    }
+
+    print("\n>>> 开始办理入住...")
+    for rid, customer_info in checkin_config.items():
+        try:
+            response = requests.post(f"{API_BASE}/hotel/checkin", json={
+                "roomId": rid,
+                "name": customer_info["name"],
+                "idCard": customer_info["idCard"],
+                "phoneNumber": customer_info["phoneNumber"]
+            })
+            if response.status_code == 200:
+                print(f"  √ Room {rid} 入住成功: {customer_info['name']}")
+            else:
+                print(f"  × Room {rid} 入住失败: {response.json().get('error', 'Unknown error')}")
+        except Exception as e:
+            print(f"  × Room {rid} 入住错误: {e}")
+
     print(">>> 初始化完成\n")
 
 def execute(rid, act, val):
@@ -141,7 +167,7 @@ def print_dashboard(current_logical_minute):
         
         log(f"\n[{l_time}] Logic Min: {current_logical_minute} (Speed x{SPEED_FACTOR})")
         log("-" * 95)
-        log(f"{'Rm':<3} {'St':<4} {'Cur':<5} {'Tar':<5} {'Spd':<4} {'RoomFee':<8} {'ACFee':<8} {'Cnt':<4} {'Mode':<8} | {'Queue Status'}")
+        log(f"{'Rm':<3} {'St':<4} {'Cur':<5} {'Tar':<5} {'Spd':<4} {'RoomFee':<8} {'ACFee':<8} {'Total':<8} {'Cnt':<4} {'Mode':<8} | {'Queue Status'}")
         log("-" * 95)
         
         # 构建队列信息字典：{roomId: seconds}
@@ -171,9 +197,10 @@ def print_dashboard(current_logical_minute):
             
             room_fee = r.get('room_fee', 0.0)
             ac_fee = r.get('ac_fee', 0.0)
+            total_cost = r.get('total_cost', 0.0)
             schedule_count = r.get('schedule_count', 0)
-            log(f"{rid:<3} {st:<4} {r['current_temp']:<5.1f} {r['target_temp']:<5} {sp:<4} {room_fee:<8.2f} {ac_fee:<8.2f} {schedule_count:<4} {mode:<8} | {q_status}")
-        log("-" * 75)
+            log(f"{rid:<3} {st:<4} {r['current_temp']:<5.1f} {r['target_temp']:<5} {sp:<4} {room_fee:<8.2f} {ac_fee:<8.2f} {total_cost:<8.2f} {schedule_count:<4} {mode:<8} | {q_status}")
+        log("-" * 83)
     except Exception as e:
         log(f"[Dashboard Error] {e}")
 

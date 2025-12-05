@@ -49,6 +49,11 @@ class Scheduler:
         mapping = {"HIGH": 3, "MEDIUM": 2, "LOW": 1}
         return mapping.get((request.fanSpeed or "MEDIUM").upper(), 2)
 
+    def _speed_val(self, speed_str: str) -> int:
+        """风速数值化，HIGH=3, MEDIUM=2, LOW=1"""
+        mapping = {"HIGH": 3, "MEDIUM": 2, "LOW": 1}
+        return mapping.get((speed_str or "MEDIUM").upper(), 2)
+
     def _remove_request(self, queue: List[RoomRequest], room_id: int) -> None:
         for i in range(len(queue) - 1, -1, -1):
             if queue[i].roomId == room_id:
@@ -137,6 +142,18 @@ class Scheduler:
         if not room.serving_start_time or room.billing_start_temp is None:
             return
 
+        # === 防重复结算：若已存在相同 start_time 的账单，则跳过 ===
+        from ..models import DetailRecord
+        from ..extensions import db
+        exists = db.session.query(DetailRecord.id).filter(
+            DetailRecord.room_id == room.id,
+            DetailRecord.detail_type == "AC",
+            DetailRecord.start_time == room.serving_start_time
+        ).first()
+        if exists:
+            print(f"[Skip Duplicate] Room {room.id}, start={room.serving_start_time}, reason={reason}")
+            return
+
         start_temp = float(room.billing_start_temp)
         end_temp = float(room.current_temp)
         mode = room.ac_mode or "COOLING"
@@ -149,8 +166,12 @@ class Scheduler:
 
         if temp_diff < 0.001: return
 
-        rate = self._get_rate(room.fan_speed)
-        cost = temp_diff * rate # 1度=1元
+        rate = 1.0  # 费率：1度=1元
+        cost = temp_diff * rate
+        
+        # 调试日志：记录结算详情
+        if reason == "POWER_OFF":
+            print(f"[Scheduler] PowerOff 结算 Room {room.id}: start_temp={start_temp:.2f}, end_temp={end_temp:.2f}, diff={temp_diff:.2f}, cost={cost:.2f}")
         
         customer_id = None
         if room.status == "OCCUPIED":
@@ -256,78 +277,81 @@ class Scheduler:
         room.cooling_paused = False
         self._add_request_to_queue(room)
 
-    # --- 调度策略 ---
+    # --- 调度策略（统一入口） ---
 
     def _schedule_queues(self, force: bool = False):
-        self._enforce_capacity()
-        self._check_preemption()
-        self._rotate_time_slice(force)
-        self._fill_slots()
-
-    def _enforce_capacity(self):
-        limit = self._capacity()
+        """
+        统一调度入口：容量填充 + 等待超时轮转。
+        """
+        capacity = self._capacity()
+        time_slice = self._time_slice()
         now = clock.now()
-        while len(self.serving_queue) > limit:
-            self.serving_queue.sort(key=lambda r: (
-                self._priority_score(r),
-                -self._get_simulated_duration(r.servingTime, now)
-            ))
-            self._demote_serving_room(self.serving_queue[0], "CAPACITY")
 
-    def _check_preemption(self):
-        if not self.waiting_queue or len(self.serving_queue) < self._capacity(): return
-        now = clock.now()
-        
-        weakest = min(self.serving_queue, key=lambda r: (
-            self._priority_score(r), -self._get_simulated_duration(r.servingTime, now)
-        ))
-        strongest = max(self.waiting_queue, key=lambda r: (
-            self._priority_score(r), self._get_simulated_duration(r.waitingTime, now)
-        ))
-        
-        if self._priority_score(strongest) > self._priority_score(weakest):
-            self._demote_serving_room(weakest, "PREEMPTED")
+        # 1) 未满载：用等待队列填充（高风速优先，等待时间靠前优先）
+        while len(self.serving_queue) < capacity and self.waiting_queue:
+            self.waiting_queue.sort(key=lambda r: (-self._speed_val(r.fanSpeed), r.waitingTime))
+            candidate = self.waiting_queue[0]
+            self._promote_waiting_room(candidate)
 
-    def _rotate_time_slice(self, force: bool):
-        if not self.serving_queue: return
-        if len(self.serving_queue) < self._capacity() and not self.waiting_queue: return
-        
-        limit = self._time_slice()
-        now = clock.now()
-        
-        # 找出超时者，按时间倒序
-        candidates = [r for r in self.serving_queue if self._get_simulated_duration(r.servingTime, now) >= limit]
-        candidates.sort(key=lambda r: self._get_simulated_duration(r.servingTime, now), reverse=True)
-        
-        for req in candidates:
-            if req in self.serving_queue:
-                self._demote_serving_room(req, "ROTATED")
+        # 2) 时间片轮转：等待超时的请求尝试踢掉服务时间最长且风速不高于自己的服务者
+        if self.waiting_queue and len(self.serving_queue) >= capacity:
+            timeout_candidates = []
+            for req in self.waiting_queue:
+                wait_duration = self._get_simulated_duration(req.waitingTime, now)
+                if wait_duration >= time_slice:
+                    timeout_candidates.append(req)
 
-    def _fill_slots(self):
-        limit = self._capacity()
-        now = clock.now()
-        if not self.waiting_queue: return
-        self.waiting_queue.sort(key=lambda r: (-self._priority_score(r), r.waitingTime or now))
-        while len(self.serving_queue) < limit and self.waiting_queue:
-            self._promote_waiting_room(self.waiting_queue[0])
+            if timeout_candidates:
+                timeout_candidates.sort(key=lambda r: -self._speed_val(r.fanSpeed))
+                challenger = timeout_candidates[0]
+
+                targets = [r for r in self.serving_queue if self._speed_val(r.fanSpeed) <= self._speed_val(challenger.fanSpeed)]
+                if targets:
+                    targets.sort(key=lambda r: -self._get_simulated_duration(r.servingTime, now))
+                    victim = targets[0]
+                    print(f"[Schedule] 触发时间片轮转: Room {challenger.roomId} 替换 Room {victim.roomId}")
+                    self._demote_serving_room(victim, "TIME_SLICE_ROTATION")
+                    self._promote_waiting_room(challenger)
 
     # --- API ---
 
     def _add_request_to_queue(self, room: Room):
+        """新增请求入口：包含优先级抢占与等待策略"""
         req = RoomRequest(roomId=room.id, fanSpeed=room.fan_speed, mode=room.ac_mode, targetTemp=room.target_temp)
         now = clock.now()
         self._remove_request(self.serving_queue, room.id)
         self._remove_request(self.waiting_queue, room.id)
         
-        if len(self.serving_queue) < self._capacity():
+        capacity = self._capacity()
+
+        # 未满载：直接服务
+        if len(self.serving_queue) < capacity:
+            req.servingTime = now
+            self.serving_queue.append(req)
+            self._mark_serving_db(room.id, now, room.current_temp)
+            return
+
+        # 已满载：按风速比较
+        req_speed = self._speed_val(req.fanSpeed)
+        serving_speeds = [self._speed_val(r.fanSpeed) for r in self.serving_queue]
+        min_serving_speed = min(serving_speeds)
+
+        if req_speed > min_serving_speed:
+            # 优先级抢占：踢掉最低风速中服务时间最长的
+            candidates = [r for r in self.serving_queue if self._speed_val(r.fanSpeed) == min_serving_speed]
+            candidates.sort(key=lambda r: -self._get_simulated_duration(r.servingTime, now))
+            victim = candidates[0]
+            print(f"[Schedule] 触发优先级抢占: Room {req.roomId} 抢占 Room {victim.roomId}")
+            self._demote_serving_room(victim, "PRIORITY_PREEMPTION")
             req.servingTime = now
             self.serving_queue.append(req)
             self._mark_serving_db(room.id, now, room.current_temp)
         else:
+            # 风速相等或更低：进入等待队列，后续由 _schedule_queues 处理时间片轮转
             req.waitingTime = now
             self.waiting_queue.append(req)
             self._mark_waiting_db(room.id, now)
-        self._schedule_queues(force=True)
+            print(f"[Schedule] Room {req.roomId} 进入等待队列 (风速<=最小服务风速)")
 
     def _mark_serving_db(self, rid, time, temp):
         from ..extensions import db
@@ -401,6 +425,8 @@ class Scheduler:
             now = clock.now()
             
             # 1. 结算当前未完成的空调费
+            # 先更新温度到最新状态，然后使用更新后的温度进行结算
+            # 注意：必须在重置温度之前完成结算，确保使用实际服务结束时的温度
             self._updateRoomTemperature(room, force_update=True)
             self._settle_current_service_period(room, now, "POWER_OFF")
             
@@ -453,10 +479,28 @@ class Scheduler:
             db.session.refresh(room)
             if not room.ac_on: return "错误"
             
-            from ..extensions import db
-            db.session.query(Room).filter(Room.id == room.id).update({"target_temp": TargetTemp})
+            # 校验目标温度是否在模式对应的范围内
+            if TargetTemp is None:
+                return "错误"
+            try:
+                target_val = float(TargetTemp)
+            except (TypeError, ValueError):
+                return "错误"
+            
+            mode = (room.ac_mode or "COOLING").upper()
+            if mode == "HEATING":
+                min_t = current_app.config.get("HEATING_MIN_TEMP", 18.0)
+                max_t = current_app.config.get("HEATING_MAX_TEMP", 25.0)
+            else:
+                min_t = current_app.config.get("COOLING_MIN_TEMP", 18.0)
+                max_t = current_app.config.get("COOLING_MAX_TEMP", 28.0)
+            
+            if not (min_t <= target_val <= max_t):
+                return f"温度超限 ({min_t}-{max_t})"
+            
+            db.session.query(Room).filter(Room.id == room.id).update({"target_temp": target_val})
             db.session.commit()
-            room.target_temp = TargetTemp
+            room.target_temp = target_val
             
             if room.cooling_paused:
                 db.session.query(Room).filter(Room.id == room.id).update({"cooling_paused": False, "pause_start_temp": None})
@@ -565,7 +609,7 @@ class Scheduler:
                 if curr < start: diff = start - curr
             else:
                 if curr > start: diff = curr - start
-            
+
             if diff > 0:
                 ac_fee_pending = diff * 1.0  # 费率恒为1
         
@@ -578,10 +622,30 @@ class Scheduler:
                    DetailRecord.detail_type == "AC").scalar()
         schedule_count = int(schedule_count) if schedule_count else 0
 
+        # 5. 获取客户ID
+        customer_id = None
+        if room.status == "OCCUPIED":
+            from ..services import customer_service
+            customer = customer_service.getCustomerByRoomId(room.id)
+            if customer:
+                customer_id = customer.id
+
+        # 队列状态判定（增强版）
         qs = "IDLE"
-        if room.cooling_paused: qs = "PAUSED"
-        elif any(r.roomId == room.id for r in self.serving_queue): qs = "SERVING"
-        elif any(r.roomId == room.id for r in self.waiting_queue): qs = "WAITING"
+        if room.cooling_paused:
+            qs = "PAUSED"
+        elif any(r.roomId == room.id for r in self.serving_queue):
+            qs = "SERVING"
+        elif any(r.roomId == room.id for r in self.waiting_queue):
+            qs = "WAITING"
+        else:
+            # 不在任何队列，但空调开着，可能刚达目标温度未设置 cooling_paused
+            # 如果当前温度已接近目标温度，则标记为 PAUSED
+            try:
+                if room.ac_on and abs(float(room.current_temp or 0) - float(room.target_temp or 0)) < 0.1:
+                    qs = "PAUSED"
+            except Exception:
+                pass
 
         return {
             "room_id": room.id,
@@ -598,7 +662,8 @@ class Scheduler:
             "total_cost": round(total_cost, 2),
             "room_fee": round(room_fee, 2),
             "ac_fee": round(ac_fee_total, 2),
-            "schedule_count": schedule_count
+            "schedule_count": schedule_count,
+            "customer_id": customer_id
         }
     
     def getScheduleStatus(self):

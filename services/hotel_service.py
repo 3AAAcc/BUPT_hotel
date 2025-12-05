@@ -140,7 +140,6 @@ class FrontDesk:
         customer.current_room_id = None
         self.customer_service.updateCustomer(customer)
 
-        # === 新增代码开始: 强制通过调度器关机 ===
         room = self.room_service.getRoomById(room_id)
         if room.ac_on:
             from ..services import scheduler
@@ -152,7 +151,6 @@ class FrontDesk:
                 print(f"Error powering off AC during checkout: {e}")
                 import traceback
                 traceback.print_exc()
-        # === 新增代码结束 ===
         
         # 重新获取房间对象（因为 PowerOff 可能已经更新了状态）
         room = self.room_service.getRoomById(room_id)

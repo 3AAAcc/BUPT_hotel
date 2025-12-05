@@ -54,6 +54,7 @@ def create_app(
     from .controllers.bill_controller import bill_bp
     from .controllers.hotel_controller import hotel_bp
     from .controllers.monitor_controller import monitor_bp
+    from .controllers.monitoring_controller import monitoring_bp
     from .controllers.report_controller import report_bp
     from .controllers.test_controller import test_bp
 
@@ -62,6 +63,7 @@ def create_app(
     app.register_blueprint(bill_bp)
     app.register_blueprint(hotel_bp)
     app.register_blueprint(monitor_bp)
+    app.register_blueprint(monitoring_bp)
     app.register_blueprint(report_bp)
     app.register_blueprint(test_bp)
 

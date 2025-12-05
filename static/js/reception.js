@@ -48,10 +48,10 @@ function loadRoomStatus() {
                      </div>` 
                   : `<div class="status-text"><i class="fa-regular fa-circle-check"></i> 当前空闲</div>`;
 
-              // 4. 处理温度显示 (如果为 null 显示 --)
+              // 4. 处理温度显示 (如果为 null 显示 --，保留一位小数)
               // 注意：Room.to_dict() 返回的是 currentTemp (驼峰命名)，不是 current_temp
-              const currentTemp = (room.currentTemp !== null && room.currentTemp !== undefined) 
-                                  ? room.currentTemp 
+              const currentTemp = (room.currentTemp !== null && room.currentTemp !== undefined)
+                                  ? parseFloat(room.currentTemp).toFixed(1)
                                   : '--';
 
               // 5. 拼接卡片 HTML (严格匹配 reception.css 的类名)
