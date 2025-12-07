@@ -41,3 +41,7 @@ class Config:
     HEATING_MAX_TEMP = 25.0
     HEATING_DEFAULT_TARGET = 23.0
 
+    # === 服务器配置 ===
+    SERVER_HOST = os.getenv("SERVER_HOST", "0.0.0.0")
+    SERVER_PORT = int(os.getenv("SERVER_PORT", 8000))
+

@@ -64,7 +64,7 @@ python -m hotel.database.init_db
 python -m hotel.app
 ```
 
-服务启动后访问：`http://localhost:8080`
+服务启动后访问：`http://localhost:8000`
 
 ---
 
@@ -177,7 +177,7 @@ hotel/
 
 ### 主入口页面
 
-访问 `http://localhost:8080/` 进入系统首页，系统提供四个角色入口：
+访问 `http://localhost:8000/` 进入系统首页，系统提供四个角色入口：
 
 1. **客户** - 使用客房空调服务
 2. **前台营业员** - 办理入住、退房业务
@@ -188,7 +188,7 @@ hotel/
 
 ### 一、客户使用指南
 
-**访问路径**：`http://localhost:8080/customer`
+**访问路径**：`http://localhost:8000/customer`
 
 #### 功能说明
 
@@ -225,7 +225,7 @@ hotel/
 
 ### 二、前台营业员使用指南
 
-**访问路径**：`http://localhost:8080/reception`
+**访问路径**：`http://localhost:8000/reception`
 
 #### 办理入住
 
@@ -269,7 +269,7 @@ hotel/
 
 ### 三、系统管理员使用指南
 
-**访问路径**：`http://localhost:8080/admin`
+**访问路径**：`http://localhost:8000/admin`
 
 #### 房间状态监控
 
@@ -322,7 +322,7 @@ hotel/
 
 ### 四、酒店经理使用指南
 
-**访问路径**：`http://localhost:8080/manager`
+**访问路径**：`http://localhost:8000/manager`
 
 #### 房间报表
 

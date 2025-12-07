@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+from flask_cors import CORS
 
 from .config import Config
 from .database import (
@@ -18,6 +19,10 @@ def create_app(
 ) -> Flask:
     app = Flask(__name__, template_folder="templates", static_folder="static")
     app.config.from_object(config_class)
+    
+    # 添加CORS支持，允许跨域访问
+    CORS(app, resources={r"/*": {"origins": "*"}})
+    
     db.init_app(app)
     
     # 初始化时间倍速

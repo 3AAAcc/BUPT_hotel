@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 
 # === 配置 ===
-API_BASE = "http://127.0.0.1:8080"
+API_BASE = "http://127.0.0.1:8000"
 
 # === 核心时间控制参数 (与 test_heat.py 保持一致) ===
 SPEED_FACTOR = 6.0  # 6倍速：现实1秒 = 逻辑6秒
