@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from flask import current_app
+from ..utils.time_master import clock
 from ..models import (
     AccommodationFeeBill,
     AccommodationOrder,
@@ -60,7 +61,7 @@ class FrontDesk:
             name=Cust_name,
             id_card=Cust_id,
             phone_number=number,
-            check_in_time=date or datetime.utcnow(),
+            check_in_time=date or clock.now(),
             status="REGISTERED",
         )
         return self.customer_service.saveCustomer(customer)
@@ -92,7 +93,7 @@ class FrontDesk:
         room = self._prepare_room_for_checkin(Room_id)
         customer.current_room_id = room.id
         customer.status = "CHECKED_IN"
-        customer.check_in_time = customer.check_in_time or datetime.utcnow()
+        customer.check_in_time = customer.check_in_time or clock.now()
         self.customer_service.updateCustomer(customer)
         room.updateState("OCCUPIED")
         room.associateCustomer(customer)
@@ -112,7 +113,7 @@ class FrontDesk:
             Cust_id=payload.get("idCard"),
             Cust_name=payload.get("name"),
             number=payload.get("phoneNumber"),
-            date=datetime.utcnow(),
+            date=clock.now(),
         )
         return self.Create_Accommodation_Order(customer.id, room_id)
 
@@ -136,7 +137,7 @@ class FrontDesk:
                 self.room_service.updateRoom(room)
             raise ValueError("房间没有入住记录，无法办理退房")
 
-        check_out_time = datetime.utcnow()
+        check_out_time = clock.now()
         customer.check_out_time = check_out_time
         customer.status = "CHECKED_OUT"
         customer.current_room_id = None
@@ -178,7 +179,7 @@ class FrontDesk:
         room.current_temp = default_temp
         room.target_temp = None
         room.fan_speed = "MEDIUM"  # 重置为默认风速
-        room.last_temp_update = datetime.utcnow()
+        room.last_temp_update = clock.now()
         
         # 清除分配的空调编号（如果有）
         room.assigned_ac_number = None

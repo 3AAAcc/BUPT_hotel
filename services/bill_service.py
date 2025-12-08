@@ -3,6 +3,8 @@ from typing import Dict, List, Optional
 
 from flask import current_app
 
+from ..utils.time_master import clock  # 或你的 clock 单例
+
 from ..extensions import db
 from ..models import ACFeeBill, AccommodationFeeBill, Customer, DetailRecord, Room
 
@@ -13,9 +15,9 @@ class AccommodationFeeBillService:
         self, bill_details: List[DetailRecord], customer: Customer, room: Room
     ) -> AccommodationFeeBill:
         if not customer.check_in_time:
-            customer.check_in_time = datetime.utcnow()
+            customer.check_in_time = clock.now()
         if not customer.check_out_time:
-            customer.check_out_time = datetime.utcnow()
+            customer.check_out_time = clock.now()
 
         stay_days = max(
             1, (customer.check_out_time.date() - customer.check_in_time.date()).days or 1
@@ -72,14 +74,18 @@ class AccommodationFeeBillService:
         # expire_all() 会清除所有对象的缓存，强制从数据库重新加载
         db.session.expire_all()
         # 使用稍微延后的时间，确保查询到所有已结算的费用（包括刚提交的）
-        query_end = datetime.utcnow()
+        query_end = clock.now()
         details = bill_detail_service.getBillDetailsByRoomIdAndTimeRange(
             room_id=room.id,
             start=datetime.min,
             end=query_end,
             customer_id=None,
         )
-        ac_fee = sum(detail.cost for detail in details)
+        ac_fee = sum(
+            detail.cost
+            for detail in details
+            if getattr(detail, "detail_type", "AC") in ("AC", "POWER_OFF_CYCLE")
+        )
         
         # 2. 计算当前正在进行的片段 (Pending Cost)
         # === 核心修改：基于温度变化计算费用，1度=1元 ===
@@ -160,19 +166,19 @@ class AccommodationFeeBillService:
     def markBillPaid(self, bill_id: int) -> AccommodationFeeBill:
         bill = self.getBillById(bill_id)
         if bill and bill.status != "CANCELLED" and bill.status != "PAID":
-            bill.status = "PAID"; bill.paid_time = datetime.utcnow(); db.session.add(bill); db.session.commit()
+            bill.status = "PAID"; bill.paid_time = clock.now(); db.session.add(bill); db.session.commit()
         return bill
 
     def cancelBill(self, bill_id: int) -> AccommodationFeeBill:
         bill = self.getBillById(bill_id)
         if bill and bill.status != "PAID" and bill.status != "CANCELLED":
-            bill.status = "CANCELLED"; bill.cancelled_time = datetime.utcnow(); db.session.add(bill); db.session.commit()
+            bill.status = "CANCELLED"; bill.cancelled_time = clock.now(); db.session.add(bill); db.session.commit()
         return bill
 
     def markBillPrinted(self, bill_id: int) -> AccommodationFeeBill:
         bill = self.getBillById(bill_id)
         if bill:
-            bill.print_status = "PRINTED"; bill.print_time = datetime.utcnow(); db.session.add(bill); db.session.commit()
+            bill.print_status = "PRINTED"; bill.print_time = clock.now(); db.session.add(bill); db.session.commit()
         return bill
 
     def buildPrintablePayload(self, bill: AccommodationFeeBill, details: List[DetailRecord]) -> Dict[str, object]:
