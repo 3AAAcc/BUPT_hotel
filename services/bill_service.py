@@ -93,7 +93,9 @@ class AccommodationFeeBillService:
         
         # 只有 serving_start_time 和 billing_start_temp 都存在时，说明正在服务，才计算实时费用
         # 如果是 PAUSED 或 WAITING，serving_start_time 是 None，这里就不会进，费用就不会涨
-        if room.ac_on and room.serving_start_time and room.billing_start_temp is not None and room.current_temp is not None:
+        # === 需求变更：计费仅绑定温度变化，不再依赖队列状态 ===
+        # 只要空调开启且有基准温度，就根据温度变化计费（制热升温、制冷降温）
+        if room.ac_on and room.billing_start_temp is not None and room.current_temp is not None:
             # 计算温度变化量
             start_temp = float(room.billing_start_temp)
             end_temp = float(room.current_temp)

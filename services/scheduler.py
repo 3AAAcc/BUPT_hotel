@@ -378,14 +378,16 @@ class Scheduler:
         
         # 立即清除计费字段，防止重复结算
         from ..extensions import db
+        # 需求变更：不再把计费起点清零，改为重置为当前温度
+        # 这样即便房间在等待队列，只要空调开启且温度变化，仍会产生计费
         db.session.query(Room).filter(Room.id == room.id).update({
             "serving_start_time": None,
-            "billing_start_temp": None,
+            "billing_start_temp": room.current_temp,
         })
         db.session.commit()
         # 同步内存
         room.serving_start_time = None
-        room.billing_start_temp = None
+        room.billing_start_temp = room.current_temp
 
         self._remove_request(self.serving_queue, request.roomId)
         self._remove_request(self.waiting_queue, request.roomId)
